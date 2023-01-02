@@ -10,8 +10,9 @@ repositories {
 }
 
 dependencies {
-	implementation(group = "org.freenetproject", name = "fred", version = "build01491")
+	compileOnly(group = "org.freenetproject", name = "fred", version = "build01491")
 
+	testImplementation(group = "org.freenetproject", name = "fred", version = "build01491")
 	testImplementation(group = "org.jetbrains.kotlin", name = "kotlin-test-junit5")
 	testImplementation(group = "org.hamcrest", name = "hamcrest", version = "2.2")
 	testImplementation(group = "org.mockito", name = "mockito-junit-jupiter", version = "4.11.0")
@@ -22,8 +23,12 @@ tasks.named<Test>("test") {
 	useJUnitPlatform()
 }
 
-tasks.named<Jar>("jar") {
+tasks.create("fatJar", Jar::class) {
+	archiveFileName.set(project.name.toLowerCase() + "-jar-with-dependencies.jar")
+	from((configurations.runtimeClasspath.get()).map { if (it.isDirectory) it else zipTree(it) })
+	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 	manifest {
 		attributes("Plugin-Main-Class" to "net.pterodactylus.frimgur.plugin.Frimgur")
 	}
+	with(tasks.named<Jar>("jar").get())
 }

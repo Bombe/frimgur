@@ -3,6 +3,7 @@ package net.pterodactylus.frimgur.plugin
 import freenet.l10n.BaseL10n
 import freenet.pluginmanager.FredPlugin
 import freenet.pluginmanager.FredPluginL10n
+import freenet.pluginmanager.FredPluginThreadless
 import freenet.pluginmanager.PluginRespirator
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
@@ -46,6 +47,11 @@ class FrimgurTest {
 	@Test
 	fun `Frimgur implements FredPluginL10n`() {
 		assertThat(frimgur, instanceOf(FredPluginL10n::class.java))
+	}
+
+	@Test
+	fun `Frimgur implements FredPluginThreadless`() {
+		assertThat(frimgur, instanceOf(FredPluginThreadless::class.java))
 	}
 
 	private val frimgur = Frimgur()

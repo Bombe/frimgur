@@ -3,6 +3,7 @@ package net.pterodactylus.frimgur.plugin
 import freenet.l10n.BaseL10n.LANGUAGE
 import freenet.pluginmanager.FredPlugin
 import freenet.pluginmanager.FredPluginL10n
+import freenet.pluginmanager.FredPluginThreadless
 import freenet.pluginmanager.PluginRespirator
 import java.util.Locale
 import java.util.ResourceBundle
@@ -10,7 +11,7 @@ import java.util.ResourceBundle
 /**
  * Frimgur main plugin class.
  */
-class Frimgur : FredPlugin, FredPluginL10n {
+class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless {
 
 	override fun runPlugin(pluginRespirator: PluginRespirator) = Unit
 

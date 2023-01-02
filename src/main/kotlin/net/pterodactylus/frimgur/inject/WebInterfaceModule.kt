@@ -4,6 +4,7 @@ import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import freenet.clients.http.PageMaker
 import freenet.pluginmanager.FredPluginL10n
+import net.pterodactylus.frimgur.web.FredWebInterface
 import net.pterodactylus.frimgur.web.WebInterface
 
 /**
@@ -13,6 +14,6 @@ class WebInterfaceModule : AbstractModule() {
 
 	@Provides
 	fun getWebInterface(pageMaker: PageMaker, pluginL10n: FredPluginL10n): WebInterface =
-		WebInterface(pageMaker, pluginL10n)
+		FredWebInterface(pageMaker, pluginL10n)
 
 }

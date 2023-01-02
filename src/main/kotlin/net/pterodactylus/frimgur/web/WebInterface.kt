@@ -6,9 +6,18 @@ import freenet.pluginmanager.FredPluginL10n
 /**
  * Frimgur web interface.
  */
-class WebInterface(private val pageMaker: PageMaker, private val pluginL10n: FredPluginL10n) {
+interface WebInterface {
 
-	fun start() {
+	fun start()
+
+}
+
+/**
+ * Fred-based [WebInterface] implementation.
+ */
+class FredWebInterface(private val pageMaker: PageMaker, private val pluginL10n: FredPluginL10n) : WebInterface {
+
+	override fun start() {
 		pageMaker.addNavigationCategory("/frimgur/", "Navigation.Menu.Title", "Navigation.Menu.Title.Tooltip", pluginL10n)
 	}
 

@@ -7,7 +7,7 @@ import org.mockito.kotlin.verify
 import kotlin.test.Test
 
 /**
- * Unit test for [WebInterface].
+ * Unit test for [FredWebInterface].
  */
 class WebInterfaceTest {
 
@@ -15,7 +15,7 @@ class WebInterfaceTest {
 	fun `web interface registers menu category on page maker`() {
 		val pageMaker = mock<PageMaker>()
 		val pluginL10n = mock<FredPluginL10n>()
-		val webInterface = WebInterface(pageMaker, pluginL10n)
+		val webInterface = FredWebInterface(pageMaker, pluginL10n)
 		webInterface.start()
 		verify(pageMaker).addNavigationCategory("/frimgur/", "Navigation.Menu.Title", "Navigation.Menu.Title.Tooltip", pluginL10n);
 	}

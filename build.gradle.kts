@@ -5,12 +5,12 @@ plugins {
 repositories {
 	mavenCentral()
 	maven {
-		setUrl("https://maven.pterodactylus.net/")
+		setUrl("https://mvn.freenetproject.org/")
 	}
 }
 
 dependencies {
-	implementation(group = "org.freenetproject", name = "fred", version = "0.7.5.1475")
+	implementation(group = "org.freenetproject", name = "fred", version = "build01491")
 
 	testImplementation(group = "org.jetbrains.kotlin", name = "kotlin-test-junit5")
 	testImplementation(group = "org.hamcrest", name = "hamcrest", version = "2.2")

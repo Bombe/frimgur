@@ -8,6 +8,7 @@ import freenet.pluginmanager.PluginRespirator
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.instanceOf
+import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import org.mockito.kotlin.mock
 import kotlin.test.Test
 
@@ -18,7 +19,6 @@ class FrimgurTest {
 
 	@Test
 	fun `Frimgur instance can be run`() {
-		val pluginRespirator = mock<PluginRespirator>()
 		frimgur.runPlugin(pluginRespirator)
 	}
 
@@ -55,5 +55,6 @@ class FrimgurTest {
 	}
 
 	private val frimgur = Frimgur()
+	private val pluginRespirator = mock<PluginRespirator>(defaultAnswer = RETURNS_DEEP_STUBS)
 
 }

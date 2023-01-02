@@ -1,13 +1,12 @@
 package net.pterodactylus.frimgur.plugin
 
-import com.google.inject.Binder
 import com.google.inject.Guice
-import com.google.inject.Module
 import freenet.l10n.BaseL10n
 import freenet.pluginmanager.FredPlugin
 import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.FredPluginThreadless
 import freenet.pluginmanager.PluginRespirator
+import net.pterodactylus.frimgur.test.bind
 import net.pterodactylus.frimgur.web.WebInterface
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
@@ -68,11 +67,7 @@ class FrimgurTest {
 		}
 		val frimgur = object : Frimgur() {
 			override fun createInjector() = Guice.createInjector(
-				object : Module {
-					override fun configure(binder: Binder) {
-						binder.bind(WebInterface::class.java).toInstance(webInterface);
-					}
-				}
+				bind<WebInterface>().toInstance(webInterface)
 			)
 		}
 		frimgur.runPlugin(pluginRespirator)

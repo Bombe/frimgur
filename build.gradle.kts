@@ -21,3 +21,9 @@ dependencies {
 tasks.named<Test>("test") {
 	useJUnitPlatform()
 }
+
+tasks.named<Jar>("jar") {
+	manifest {
+		attributes("Plugin-Main-Class" to "net.pterodactylus.frimgur.plugin.Frimgur")
+	}
+}

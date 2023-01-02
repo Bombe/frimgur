@@ -16,11 +16,6 @@ import kotlin.test.Test
 class FrimgurTest {
 
 	@Test
-	fun `can create Frimgur instance`() {
-		Frimgur()
-	}
-
-	@Test
 	fun `Frimgur instance can be run`() {
 		val pluginRespirator = mock<PluginRespirator>()
 		frimgur.runPlugin(pluginRespirator)

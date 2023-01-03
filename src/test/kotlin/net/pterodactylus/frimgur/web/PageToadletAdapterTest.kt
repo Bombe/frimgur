@@ -47,6 +47,16 @@ class PageToadletAdapterTest {
 		verify(toadletContext).sendReplyHeaders(eq(123), any(), any(), any(), anyLong())
 	}
 
+	@Test
+	fun `return code 500 has correct reason phrase`() {
+		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
+			override fun handleGet() = Response(500)
+		})
+		val toadletContext = mock<ToadletContext>()
+		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
+		verify(toadletContext).sendReplyHeaders(eq(500), eq("Internal Server Error"), any(), any(), anyLong())
+	}
+
 	private val highLevelSimpleClient = mock<HighLevelSimpleClient>()
 	private val pageToadletAdapter = PageToadletAdapter(highLevelSimpleClient)
 

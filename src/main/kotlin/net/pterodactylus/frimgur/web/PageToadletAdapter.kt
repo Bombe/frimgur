@@ -16,7 +16,7 @@ class PageToadletAdapter(private val highLevelSimpleClient: HighLevelSimpleClien
 
 		override fun handleMethodGET(path: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
 			val response = page.handleGet()
-			toadletContext.sendReplyHeaders(response.code, "OK", MultiValueTable(), "text/html", 0)
+			toadletContext.sendReplyHeaders(response.code, getReasonForStatus(response.code), MultiValueTable(), "text/html", 0)
 		}
 
 		override fun path() = path

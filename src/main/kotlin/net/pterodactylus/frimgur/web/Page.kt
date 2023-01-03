@@ -24,3 +24,15 @@ data class Response(
 	val code: Int = 500
 
 )
+
+/**
+ * Returns the reason phrase for the given status code, or “Unknown” if no mapping exists.
+ *
+ * @param code The HTTP status code
+ * @return The reason phrase, or “Unknown”
+ */
+fun getReasonForStatus(code: Int): String = when (code) {
+	200 -> "OK"
+	500 -> "Internal Server Error"
+	else -> "Unknown"
+}

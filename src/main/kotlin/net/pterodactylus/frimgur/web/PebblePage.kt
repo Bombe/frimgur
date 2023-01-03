@@ -6,7 +6,7 @@ import java.io.StringWriter
 /**
  * [Page] implementation based on a Pebble template.
  */
-class PebblePage(template: String) : Page {
+open class PebblePage(template: String) : Page {
 
 	override fun handleGet(): Response {
 		val output = StringWriter().also(compiledTemplate::evaluate).toString()

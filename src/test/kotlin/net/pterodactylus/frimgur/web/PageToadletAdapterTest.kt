@@ -42,7 +42,6 @@ class PageToadletAdapterTest {
 		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
 			override fun handleGet() = Response(123)
 		})
-		val toadletContext = mock<ToadletContext>()
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(123), any(), any(), any(), anyLong())
 	}
@@ -52,7 +51,6 @@ class PageToadletAdapterTest {
 		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
 			override fun handleGet() = Response(500)
 		})
-		val toadletContext = mock<ToadletContext>()
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(500), eq("Internal Server Error"), any(), any(), anyLong())
 	}
@@ -62,12 +60,12 @@ class PageToadletAdapterTest {
 		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
 			override fun handleGet() = Response(123, reason = "Test Reason")
 		})
-		val toadletContext = mock<ToadletContext>()
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(123), eq("Test Reason"), any(), any(), anyLong())
 	}
 
 	private val highLevelSimpleClient = mock<HighLevelSimpleClient>()
 	private val pageToadletAdapter = PageToadletAdapter(highLevelSimpleClient)
+	private val toadletContext = mock<ToadletContext>()
 
 }

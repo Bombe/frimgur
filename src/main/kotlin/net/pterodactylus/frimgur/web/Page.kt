@@ -44,6 +44,12 @@ data class Response(
 interface Content {
 
 	/**
+	 * The MIME type of the content. Can be `null` if the content type is unknown.
+	 */
+	val contentType: String?
+		get() = null
+
+	/**
 	 * The length of the content. May be `null` to signify unknown length.
 	 *
 	 * @return The length of the content, or `null` if the length is unknown
@@ -56,6 +62,17 @@ interface Content {
 	 * @return The input stream containing the data that should be delivered to the client
 	 */
 	fun toInputStream(): InputStream
+
+	/**
+	 * Returns a [Content] implementation that returns the same values as this `Content` for
+	 * [length] and [toInputStream] but returns the given content type for [contentType].
+	 *
+	 * @param contentType The new content type
+	 * @return A [Content] implementation with a changed content type
+	 */
+	fun typed(contentType: String): Content = object : Content by this {
+		override val contentType = contentType
+	}
 
 }
 

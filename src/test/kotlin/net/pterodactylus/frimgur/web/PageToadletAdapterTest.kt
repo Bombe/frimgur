@@ -9,6 +9,7 @@ import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import java.io.ByteArrayInputStream
@@ -45,7 +46,7 @@ class PageToadletAdapterTest {
 			override fun handleGet() = Response(123)
 		})
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
-		verify(toadletContext).sendReplyHeaders(eq(123), any(), any(), any(), anyLong())
+		verify(toadletContext).sendReplyHeaders(eq(123), any(), any(), isNull(), anyLong())
 	}
 
 	@Test
@@ -54,7 +55,7 @@ class PageToadletAdapterTest {
 			override fun handleGet() = Response(500)
 		})
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
-		verify(toadletContext).sendReplyHeaders(eq(500), eq("Internal Server Error"), any(), any(), anyLong())
+		verify(toadletContext).sendReplyHeaders(eq(500), eq("Internal Server Error"), any(), isNull(), anyLong())
 	}
 
 	@Test
@@ -63,7 +64,7 @@ class PageToadletAdapterTest {
 			override fun handleGet() = Response(123, reason = "Test Reason")
 		})
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
-		verify(toadletContext).sendReplyHeaders(eq(123), eq("Test Reason"), any(), any(), anyLong())
+		verify(toadletContext).sendReplyHeaders(eq(123), eq("Test Reason"), any(), isNull(), anyLong())
 	}
 
 	@Test
@@ -72,7 +73,7 @@ class PageToadletAdapterTest {
 			override fun handleGet() = Response(200)
 		})
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
-		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), any(), eq(0L))
+		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), isNull(), eq(0L))
 		verify(toadletContext).writeData(bucket.capture())
 		verifyBucketContent(bucket.firstValue, byteArrayOf())
 	}
@@ -83,7 +84,7 @@ class PageToadletAdapterTest {
 			override fun handleGet() = Response(200, content = from(byteArrayOf(0, 1, 2, 3, 4)))
 		})
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
-		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), any(), eq(5L))
+		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), isNull(), eq(5L))
 		verify(toadletContext).writeData(bucket.capture())
 		verifyBucketContent(bucket.firstValue, byteArrayOf(0, 1, 2, 3, 4))
 	}
@@ -94,7 +95,7 @@ class PageToadletAdapterTest {
 			override fun handleGet() = Response(200, content = from(byteArrayOf(0, 1, 2, 3, 4), 1, 3))
 		})
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
-		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), any(), eq(3L))
+		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), isNull(), eq(3L))
 		verify(toadletContext).writeData(bucket.capture())
 		verifyBucketContent(bucket.firstValue, byteArrayOf(1, 2, 3))
 	}
@@ -105,9 +106,27 @@ class PageToadletAdapterTest {
 			override fun handleGet() = Response(200, content = from(ByteArrayInputStream(byteArrayOf(0, 1, 2, 3, 4)), 5))
 		})
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
-		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), any(), eq(5L))
+		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), isNull(), eq(5L))
 		verify(toadletContext).writeData(bucket.capture())
 		verifyBucketContent(bucket.firstValue, byteArrayOf(0, 1, 2, 3, 4))
+	}
+
+	@Test
+	fun `content without content type is sent without content type`() {
+		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
+			override fun handleGet() = Response(200)
+		})
+		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
+		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), isNull(), eq(0L))
+	}
+
+	@Test
+	fun `content with content type is sent as the given content type`() {
+		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
+			override fun handleGet() = Response(200, content = from(ByteArrayInputStream(byteArrayOf(0, 1, 2, 3, 4)), 5).typed("application/octet-stream"))
+		})
+		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
+		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), eq("application/octet-stream"), eq(5L))
 	}
 
 	private fun verifyBucketContent(bucket: Bucket, content: ByteArray) {

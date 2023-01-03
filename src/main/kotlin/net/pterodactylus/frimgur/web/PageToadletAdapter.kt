@@ -20,7 +20,7 @@ class PageToadletAdapter(private val highLevelSimpleClient: HighLevelSimpleClien
 
 		override fun handleMethodGET(path: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
 			val response = page.handleGet()
-			toadletContext.sendReplyHeaders(response.code, response.reason ?: getReasonForStatus(response.code), MultiValueTable(), "text/html", response.content.length() ?: -1)
+			toadletContext.sendReplyHeaders(response.code, response.reason ?: getReasonForStatus(response.code), MultiValueTable(), response.content.contentType, response.content.length() ?: -1)
 			toadletContext.writeData(response.content.toBucket())
 		}
 

@@ -1,6 +1,7 @@
 package net.pterodactylus.frimgur.inject
 
 import com.google.inject.Guice.createInjector
+import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.PageMaker
 import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
@@ -28,6 +29,11 @@ class FreenetModuleTest {
 	@Test
 	fun `freenet module can provide toadlet container`() {
 		assertThat(injector.getInstance(ToadletContainer::class.java), notNullValue())
+	}
+
+	@Test
+	fun `freenet module can provide high-level simple client`() {
+		assertThat(injector.getInstance(HighLevelSimpleClient::class.java), notNullValue())
 	}
 
 	private val module = FreenetModule(mock(), mock(defaultAnswer = RETURNS_DEEP_STUBS))

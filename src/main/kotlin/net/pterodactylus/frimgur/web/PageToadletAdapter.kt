@@ -3,6 +3,7 @@ package net.pterodactylus.frimgur.web
 import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.Toadlet
 import freenet.clients.http.ToadletContext
+import freenet.support.MultiValueTable
 import freenet.support.api.HTTPRequest
 import java.net.URI
 
@@ -14,7 +15,8 @@ class PageToadletAdapter(private val highLevelSimpleClient: HighLevelSimpleClien
 	fun adapt(path: String, page: Page) = object : Toadlet(highLevelSimpleClient) {
 
 		override fun handleMethodGET(path: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
-			page.handleGet()
+			val response = page.handleGet()
+			toadletContext.sendReplyHeaders(response.code, "OK", MultiValueTable(), "text/html", 0)
 		}
 
 		override fun path() = path

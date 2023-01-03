@@ -24,54 +24,42 @@ class PageToadletAdapterTest {
 
 	@Test
 	fun `returned toadlet returns given path`() {
-		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
-			override fun handleGet() = Response()
-		})
+		val toadlet = createToadletWithResponse(::Response)
 		assertThat(toadlet.path(), equalTo("test.html"))
 	}
 
 	@Test
 	fun `returned toadlet forwards request to page`() {
 		val handleGetCalled = AtomicReference(false)
-		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
-			override fun handleGet() = Response().also { handleGetCalled.set(true) }
-		})
+		val toadlet = createToadletWithResponse { Response().also { handleGetCalled.set(true) } }
 		toadlet.handleMethodGET(URI("test.html"), mock(), mock())
 		assertThat(handleGetCalled.get(), equalTo(true))
 	}
 
 	@Test
 	fun `returned response is handed back to toadlet container`() {
-		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
-			override fun handleGet() = Response(123)
-		})
+		val toadlet = createToadletWithResponse { Response(123) }
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(123), any(), any(), isNull(), anyLong())
 	}
 
 	@Test
 	fun `return code 500 has correct reason phrase`() {
-		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
-			override fun handleGet() = Response(500)
-		})
+		val toadlet = createToadletWithResponse { Response(500) }
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(500), eq("Internal Server Error"), any(), isNull(), anyLong())
 	}
 
 	@Test
 	fun `reason phrase can be overwritten`() {
-		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
-			override fun handleGet() = Response(123, reason = "Test Reason")
-		})
+		val toadlet = createToadletWithResponse { Response(123, reason = "Test Reason") }
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(123), eq("Test Reason"), any(), isNull(), anyLong())
 	}
 
 	@Test
 	fun `no content is written correctly`() {
-		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
-			override fun handleGet() = Response(200)
-		})
+		val toadlet = createToadletWithResponse { Response(200) }
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), isNull(), eq(0L))
 		verify(toadletContext).writeData(bucket.capture())
@@ -80,9 +68,7 @@ class PageToadletAdapterTest {
 
 	@Test
 	fun `content can be sent as byte array`() {
-		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
-			override fun handleGet() = Response(200, content = from(byteArrayOf(0, 1, 2, 3, 4)))
-		})
+		val toadlet = createToadletWithResponse { Response(200, content = from(byteArrayOf(0, 1, 2, 3, 4))) }
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), isNull(), eq(5L))
 		verify(toadletContext).writeData(bucket.capture())
@@ -91,9 +77,7 @@ class PageToadletAdapterTest {
 
 	@Test
 	fun `content can be sent as part of byte array`() {
-		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
-			override fun handleGet() = Response(200, content = from(byteArrayOf(0, 1, 2, 3, 4), 1, 3))
-		})
+		val toadlet = createToadletWithResponse { Response(200, content = from(byteArrayOf(0, 1, 2, 3, 4), 1, 3)) }
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), isNull(), eq(3L))
 		verify(toadletContext).writeData(bucket.capture())
@@ -102,9 +86,7 @@ class PageToadletAdapterTest {
 
 	@Test
 	fun `content can be sent as input stream`() {
-		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
-			override fun handleGet() = Response(200, content = from(ByteArrayInputStream(byteArrayOf(0, 1, 2, 3, 4)), 5))
-		})
+		val toadlet = createToadletWithResponse { Response(200, content = from(ByteArrayInputStream(byteArrayOf(0, 1, 2, 3, 4)), 5)) }
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), isNull(), eq(5L))
 		verify(toadletContext).writeData(bucket.capture())
@@ -113,21 +95,22 @@ class PageToadletAdapterTest {
 
 	@Test
 	fun `content without content type is sent without content type`() {
-		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
-			override fun handleGet() = Response(200)
-		})
+		val toadlet = createToadletWithResponse { Response(200) }
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), isNull(), eq(0L))
 	}
 
 	@Test
 	fun `content with content type is sent as the given content type`() {
-		val toadlet = pageToadletAdapter.adapt("test.html", object : Page {
-			override fun handleGet() = Response(200, content = from(ByteArrayInputStream(byteArrayOf(0, 1, 2, 3, 4)), 5).typed("application/octet-stream"))
-		})
+		val toadlet = createToadletWithResponse { Response(200, content = from(ByteArrayInputStream(byteArrayOf(0, 1, 2, 3, 4)), 5).typed("application/octet-stream")) }
 		toadlet.handleMethodGET(URI("test.html"), mock(), toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), eq("application/octet-stream"), eq(5L))
 	}
+
+	private fun createToadletWithResponse(response: () -> Response) =
+		pageToadletAdapter.adapt("test.html", object : Page {
+			override fun handleGet() = response()
+		})
 
 	private fun verifyBucketContent(bucket: Bucket, content: ByteArray) {
 		content.forEach { byte: Byte ->

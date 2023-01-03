@@ -1,5 +1,8 @@
 package net.pterodactylus.frimgur.web
 
+import java.io.ByteArrayInputStream
+import java.io.InputStream
+
 /**
  * Interface for components that want to handle HTTP requests.
  */
@@ -26,9 +29,71 @@ data class Response(
 	/**
 	 * The reason phrase of the HTTP response. If unset, defaults to using [getReasonForStatus].
 	 */
-	val reason: String? = null
+	val reason: String? = null,
+
+	/**
+	 * The content to stream back to the client.
+	 */
+	val content: Content = NullContent
 
 )
+
+/**
+ * The content that should be delivered to the client.
+ */
+interface Content {
+
+	/**
+	 * The length of the content. May be `null` to signify unknown length.
+	 *
+	 * @return The length of the content, or `null` if the length is unknown
+	 */
+	fun length(): Long?
+
+	/**
+	 * An input stream delivering the data.
+	 *
+	 * @return The input stream containing the data that should be delivered to the client
+	 */
+	fun toInputStream(): InputStream
+
+}
+
+/**
+ * [Content] implementation that delivers 0 bytes of content back to the client.
+ */
+object NullContent : Content {
+	override fun length() = 0L
+	override fun toInputStream() = object : InputStream() {
+		override fun read() = -1
+	}
+}
+
+/**
+ * Returns a [Content] implementation that serves (a part of) the given byte array to the client.
+ *
+ * @param buffer The byte array containing the data to deliver to the client
+ * @param offset The offset of the content to deliver
+ * @param length The length of the content to deliver
+ * @return A [Content] implementation that delivers (a part of) the given byte array
+ */
+fun from(buffer: ByteArray, offset: Int = 0, length: Int = buffer.size) = object : Content {
+	private val inputStream = ByteArrayInputStream(buffer, offset, length)
+	override fun length() = length.toLong()
+	override fun toInputStream() = inputStream
+}
+
+/**
+ * Returns a [Content] implementation that delivers the given input stream to the client.
+ *
+ * @param inputStream The input stream containing the data to deliver to the client
+ * @param length The length of the data to deliver, or `null` if the length is unknown
+ * @return A [Content] implementation that delivers the input stream to the client
+ */
+fun from(inputStream: InputStream, length: Long? = null) = object : Content {
+	override fun length() = length
+	override fun toInputStream() = inputStream
+}
 
 /**
  * Returns the reason phrase for the given status code, or “Unknown” if no mapping exists.

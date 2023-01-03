@@ -21,7 +21,12 @@ data class Response(
 	 * The code of the HTTP response, as defined in
 	 * <a href="https://www.rfc-editor.org/rfc/rfc2616#section-6.1.1">6.1.1 of RFC 2616</a>.
 	 */
-	val code: Int = 500
+	val code: Int = 500,
+
+	/**
+	 * The reason phrase of the HTTP response. If unset, defaults to using [getReasonForStatus].
+	 */
+	val reason: String? = null
 
 )
 

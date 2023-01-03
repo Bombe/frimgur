@@ -7,7 +7,6 @@ import net.pterodactylus.frimgur.test.bind
 import net.pterodactylus.frimgur.web.WebInterface
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.notNullValue
-import org.mockito.kotlin.mock
 import kotlin.test.Test
 
 /**
@@ -22,8 +21,8 @@ class WebInterfaceModuleTest {
 
 	private val injector = createInjector(
 		WebInterfaceModule(),
-		bind<PageMaker>().toInstance(mock()),
-		bind<FredPluginL10n>().toInstance(mock()),
+		bind<PageMaker>().toMock(),
+		bind<FredPluginL10n>().toMock(),
 	)
 
 }

@@ -21,15 +21,17 @@ open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless {
 	override fun runPlugin(pluginRespirator: PluginRespirator) {
 		this.pluginRespirator = pluginRespirator
 		val injector = createInjector()
-		val webInterface = injector.getInstance(WebInterface::class.java)
-		webInterface.start()
+		webInterface = injector.getInstance(WebInterface::class.java)
+			.apply { start() }
 	}
 
 	protected open fun createInjector(): Injector {
 		return Guice.createInjector(FreenetModule(this, pluginRespirator), WebInterfaceModule())
 	}
 
-	override fun terminate() = Unit
+	override fun terminate() {
+		webInterface?.stop()
+	}
 
 	override fun setLanguage(newLanguage: LANGUAGE) {
 		this.language = newLanguage
@@ -41,5 +43,7 @@ open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless {
 
 	private var language = LANGUAGE.ENGLISH
 	private lateinit var pluginRespirator: PluginRespirator
+
+	private var webInterface: WebInterface? = null
 
 }

@@ -64,6 +64,7 @@ class FrimgurTest {
 		val webInterface = object : WebInterface {
 			override fun start() =
 				started.set(true)
+			override fun stop() = Unit
 		}
 		val frimgur = object : Frimgur() {
 			override fun createInjector() = Guice.createInjector(
@@ -72,6 +73,24 @@ class FrimgurTest {
 		}
 		frimgur.runPlugin(pluginRespirator)
 		assertThat(started.get(), equalTo(true))
+	}
+
+	@Test
+	fun `terminating Frimgur stops the web interface`() {
+		val stopped = AtomicBoolean(false)
+		val webInterface = object : WebInterface {
+			override fun start() = Unit
+			override fun stop() =
+				stopped.set(true)
+		}
+		val frimgur = object : Frimgur() {
+			override fun createInjector() = Guice.createInjector(
+				bind<WebInterface>().toInstance(webInterface)
+			)
+		}
+		frimgur.runPlugin(pluginRespirator)
+		frimgur.terminate()
+		assertThat(stopped.get(), equalTo(true))
 	}
 
 	private val frimgur = Frimgur()

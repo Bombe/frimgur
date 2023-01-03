@@ -2,9 +2,13 @@ package net.pterodactylus.frimgur.inject
 
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
+import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.PageMaker
+import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
-import net.pterodactylus.frimgur.web.FredWebInterface
+import net.pterodactylus.frimgur.web.DefaultPageToadletAdapter
+import net.pterodactylus.frimgur.web.DefaultWebInterface
+import net.pterodactylus.frimgur.web.PageToadletAdapter
 import net.pterodactylus.frimgur.web.WebInterface
 
 /**
@@ -13,7 +17,11 @@ import net.pterodactylus.frimgur.web.WebInterface
 class WebInterfaceModule : AbstractModule() {
 
 	@Provides
-	fun getWebInterface(pageMaker: PageMaker, pluginL10n: FredPluginL10n): WebInterface =
-		FredWebInterface(pageMaker, pluginL10n)
+	fun getPageToadletAdapter(highLevelSimpleClient: HighLevelSimpleClient): PageToadletAdapter =
+		DefaultPageToadletAdapter(highLevelSimpleClient)
+
+	@Provides
+	fun getWebInterface(pageMaker: PageMaker, pluginL10n: FredPluginL10n, toadletContainer: ToadletContainer, pageToadletAdapter: PageToadletAdapter): WebInterface =
+		DefaultWebInterface(pageMaker, pluginL10n, toadletContainer, pageToadletAdapter)
 
 }

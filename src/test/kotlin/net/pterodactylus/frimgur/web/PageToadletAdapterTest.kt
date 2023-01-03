@@ -120,7 +120,7 @@ class PageToadletAdapterTest {
 	}
 
 	private val highLevelSimpleClient = mock<HighLevelSimpleClient>()
-	private val pageToadletAdapter = PageToadletAdapter(highLevelSimpleClient)
+	private val pageToadletAdapter = DefaultPageToadletAdapter(highLevelSimpleClient)
 	private val toadletContext = mock<ToadletContext>()
 	private val bucket = argumentCaptor<Bucket>()
 

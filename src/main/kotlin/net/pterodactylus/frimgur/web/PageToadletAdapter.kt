@@ -11,12 +11,18 @@ import java.io.DataOutputStream
 import java.io.IOException
 import java.net.URI
 
+interface PageToadletAdapter {
+
+	fun adapt(path: String, page: Page): Toadlet
+
+}
+
 /**
  * Adapter from a [Page] to a [Toadlet][freenet.clients.http.Toadlet].
  */
-class PageToadletAdapter(private val highLevelSimpleClient: HighLevelSimpleClient) {
+class DefaultPageToadletAdapter(private val highLevelSimpleClient: HighLevelSimpleClient) : PageToadletAdapter {
 
-	fun adapt(path: String, page: Page) = object : Toadlet(highLevelSimpleClient) {
+	override fun adapt(path: String, page: Page) = object : Toadlet(highLevelSimpleClient) {
 
 		override fun handleMethodGET(path: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
 			val response = page.handleGet()

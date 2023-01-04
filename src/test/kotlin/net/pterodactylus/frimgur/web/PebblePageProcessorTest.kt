@@ -15,6 +15,11 @@ class PebblePageProcessorTest {
 	}
 
 	@Test
+	fun `default title is empty string`() {
+		assertThat(PebblePageProcessor("").processPage(PageRequest()).title, equalTo(""))
+	}
+
+	@Test
 	fun `page processor uses title from object instance`() {
 		assertThat(pebblePageProcessor.processPage(PageRequest()).title, equalTo("Test Title"))
 	}

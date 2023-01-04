@@ -1,13 +1,14 @@
 package net.pterodactylus.frimgur.web
 
 import freenet.clients.http.PageMaker
-import freenet.clients.http.Toadlet
 import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
 import org.mockito.Mockito.isNull
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isA
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import kotlin.test.Test
 
 /**
@@ -23,11 +24,9 @@ class WebInterfaceTest {
 
 	@Test
 	fun `web interface registers toadlet on toadlet container`() {
-		val wantedToadlet = mock<Toadlet>()
-		val pageToadletAdapter = object : PageToadletAdapter {
-			override fun adapt(path: String, page: Page) = if ((path == "") && (page is MainPage)) wantedToadlet else mock()
-		}
-		val webInterface = DefaultWebInterface(pageMaker, pluginL10n, toadletContainer, pageToadletAdapter)
+		val wantedToadlet = mock<FreenetToadlet>()
+		whenever(freenetToadletFactory.createFreenetToadlet(isA<MainPageProcessor>())).thenReturn(wantedToadlet)
+		val webInterface = DefaultWebInterface(pageMaker, pluginL10n, toadletContainer, freenetToadletFactory)
 		webInterface.start()
 		verify(toadletContainer).register(eq(wantedToadlet), eq("Navigation.Menu.Title"), eq("/frimgur/"), eq(true), eq("Navigation.Main.Title"), eq("Navigation.Main.Tooltip"), eq(false), isNull(), eq(pluginL10n))
 	}
@@ -40,11 +39,9 @@ class WebInterfaceTest {
 
 	@Test
 	fun `stopping the web interface unregisters the toadlets`() {
-		val toadlet = mock<Toadlet>()
-		val pageToadletAdapter = object : PageToadletAdapter {
-			override fun adapt(path: String, page: Page) = toadlet
-		}
-		val webInterface = DefaultWebInterface(pageMaker, pluginL10n, toadletContainer, pageToadletAdapter)
+		val toadlet = mock<FreenetToadlet>()
+		whenever(freenetToadletFactory.createFreenetToadlet(isA<MainPageProcessor>())).thenReturn(toadlet)
+		val webInterface = DefaultWebInterface(pageMaker, pluginL10n, toadletContainer, freenetToadletFactory)
 		webInterface.start()
 		webInterface.stop()
 		verify(toadletContainer).unregister(eq(toadlet))
@@ -53,7 +50,7 @@ class WebInterfaceTest {
 	private val pageMaker = mock<PageMaker>()
 	private val pluginL10n = mock<FredPluginL10n>()
 	private val toadletContainer = mock<ToadletContainer>()
-	private val pageToadletAdapter = mock<PageToadletAdapter>()
-	private val webInterface = DefaultWebInterface(pageMaker, pluginL10n, toadletContainer, pageToadletAdapter)
+	private val freenetToadletFactory = mock<FreenetToadletFactory>()
+	private val webInterface = DefaultWebInterface(pageMaker, pluginL10n, toadletContainer, freenetToadletFactory)
 
 }

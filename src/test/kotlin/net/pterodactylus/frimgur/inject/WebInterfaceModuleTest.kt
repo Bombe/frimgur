@@ -6,6 +6,7 @@ import freenet.clients.http.PageMaker
 import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
 import net.pterodactylus.frimgur.test.bind
+import net.pterodactylus.frimgur.web.FreenetToadletFactory
 import net.pterodactylus.frimgur.web.PageToadletAdapter
 import net.pterodactylus.frimgur.web.WebInterface
 import org.hamcrest.MatcherAssert.assertThat
@@ -25,6 +26,11 @@ class WebInterfaceModuleTest {
 	@Test
 	fun `module can create a page toadlet adapter`() {
 		assertThat(injector.getInstance(PageToadletAdapter::class.java), notNullValue())
+	}
+
+	@Test
+	fun `module can create a freenet toadlet factory`() {
+		assertThat(injector.getInstance(FreenetToadletFactory::class.java), notNullValue())
 	}
 
 	private val injector = createInjector(

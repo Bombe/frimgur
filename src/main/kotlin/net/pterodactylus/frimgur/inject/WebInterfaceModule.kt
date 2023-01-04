@@ -6,20 +6,14 @@ import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.PageMaker
 import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
-import net.pterodactylus.frimgur.web.DefaultPageToadletAdapter
 import net.pterodactylus.frimgur.web.DefaultWebInterface
 import net.pterodactylus.frimgur.web.FreenetToadletFactory
-import net.pterodactylus.frimgur.web.PageToadletAdapter
 import net.pterodactylus.frimgur.web.WebInterface
 
 /**
  * Guice [module][com.google.inject.Module] for creating [WebInterface] instances.
  */
 class WebInterfaceModule : AbstractModule() {
-
-	@Provides
-	fun getPageToadletAdapter(highLevelSimpleClient: HighLevelSimpleClient): PageToadletAdapter =
-		DefaultPageToadletAdapter(highLevelSimpleClient)
 
 	@Provides
 	fun getFreenetToadletFactory(highLevelSimpleClient: HighLevelSimpleClient): FreenetToadletFactory =

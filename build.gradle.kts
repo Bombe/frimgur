@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
 	compileOnly(group = "org.freenetproject", name = "fred", version = "build01491")
+	implementation(kotlin("reflect"))
 	implementation(group = "com.google.inject", name = "guice", version = "5.1.0")
 	implementation(group = "io.pebbletemplates", name = "pebble", version = "3.1.6")
 

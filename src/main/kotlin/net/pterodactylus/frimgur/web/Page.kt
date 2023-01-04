@@ -6,6 +6,7 @@ import java.io.InputStream
 /**
  * Interface for components that want to handle HTTP requests.
  */
+@Deprecated("superseded by PageProcessor", replaceWith = ReplaceWith("PageProcessor"))
 interface Page {
 
 	/**

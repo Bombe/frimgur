@@ -14,7 +14,7 @@ class ClasspathFileToadlet(stripPrefix: String, private val addPrefix: String, h
 
 	private fun FileData.detectMimeType(filename: String) =
 		mimeTypeFilters
-			.firstOrNull { (filter, mimeType) -> filter(filename) }
+			.firstOrNull { (filter) -> filter(filename) }
 			?.let { this.copy(mimeType = it.second) }
 			?: this
 

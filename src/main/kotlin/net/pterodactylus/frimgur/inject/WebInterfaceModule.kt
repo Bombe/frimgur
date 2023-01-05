@@ -33,10 +33,12 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 		pluginL10n: FredPluginL10n,
 		@Named("Main") mainToadlet: Toadlet,
 		@Named("StaticJavascript") staticJavascriptToadlet: Toadlet,
+		@Named("StaticCss") staticCssToadlet: Toadlet,
 		@Named("Redirect") redirectToadlet: Toadlet,
 	): ToadletRegistry =
 		DefaultToadletRegistry(toadletContainer, menuCategoryKey, pluginL10n).apply {
 			addToadlet(ToadletSpec(staticJavascriptToadlet))
+			addToadlet(ToadletSpec(staticCssToadlet))
 			addToadlet(ToadletSpec(mainToadlet, "Navigation.Main.Title", "Navigation.Main.Tooltip"))
 			addToadlet(ToadletSpec(redirectToadlet))
 		}
@@ -55,6 +57,13 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 	fun getStaticJavascriptToadlet(highLevelSimpleClient: HighLevelSimpleClient): Toadlet =
 		ClasspathFileToadlet(prefix + "static/js/", "/static/js/", highLevelSimpleClient).apply {
 			addMimeType("application/javascript") { filename -> filename.endsWith(".js", ignoreCase = true) }
+		}
+
+	@Provides
+	@Named("StaticCss")
+	fun getStaticCssToadlet(highLevelSimpleClient: HighLevelSimpleClient): Toadlet =
+		ClasspathFileToadlet(prefix + "static/css/", "/static/css/", highLevelSimpleClient).apply {
+			addMimeType("text/css") { filename -> filename.endsWith(".css", ignoreCase = true) }
 		}
 
 	@Provides

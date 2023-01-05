@@ -1,6 +1,8 @@
 package net.pterodactylus.frimgur.web
 
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.emptyIterable
 import org.hamcrest.Matchers.equalTo
 import kotlin.test.Test
 
@@ -24,8 +26,22 @@ class PebblePageProcessorTest {
 		assertThat(pebblePageProcessor.processPage(PageRequest()).title, equalTo("Test Title"))
 	}
 
+	@Test
+	fun `page processor includes no script links`() {
+		assertThat(pebblePageProcessor.processPage(PageRequest()).javascriptLinks, emptyIterable())
+	}
+
+	@Test
+	fun `page processor includes script links`() {
+		scriptLinks += "static/test1.js"
+		scriptLinks += "static/test2.js"
+		assertThat(pebblePageProcessor.processPage(PageRequest()).javascriptLinks, contains("static/test1.js", "static/test2.js"))
+	}
+
+	private val scriptLinks = mutableListOf<String>()
 	private val pebblePageProcessor = object : PebblePageProcessor("html/test.html") {
 		override fun getTitle(pageRequest: PageRequest) = "Test Title"
+		override fun getScriptLinks(pageRequest: PageRequest) = scriptLinks
 	}
 
 }

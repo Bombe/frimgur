@@ -9,11 +9,13 @@ import java.io.StringWriter
  */
 open class PebblePageProcessor(templateName: String) : PageProcessor {
 
-	override fun processPage(pageRequest: PageRequest): PageResponse {
-		return PageResponse(getTitle(pageRequest), pebbleTemplate.render())
-	}
+	override fun processPage(pageRequest: PageRequest) =
+		PageResponse(getTitle(pageRequest), pebbleTemplate.render()).apply {
+			getScriptLinks(pageRequest).forEach(this::addJavascriptLink)
+		}
 
 	protected open fun getTitle(pageRequest: PageRequest) = ""
+	protected open fun getScriptLinks(pageRequest: PageRequest): List<String> = emptyList()
 
 	private val pebbleTemplate = pebbleEngine.getTemplate(templateName)
 

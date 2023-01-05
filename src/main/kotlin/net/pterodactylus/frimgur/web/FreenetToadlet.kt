@@ -16,6 +16,7 @@ class FreenetToadlet(highLevelSimpleClient: HighLevelSimpleClient, private val p
 	override fun handleMethodGET(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
 		val pageResponse = pageProcessor.processPage(PageRequest())
 		val pageNode = toadletContext.pageMaker.getPageNode(pageResponse.title, toadletContext)
+		pageResponse.javascriptLinks.forEach { url -> pageNode.headNode.addChild("script", "src", prefix + url) }
 		pageNode.content.addChild("%", pageResponse.content)
 		val renderedPage = pageNode.outer.generate().toByteArray()
 		toadletContext.sendReplyHeaders(200, "OK", MultiValueTable(), "text/html", renderedPage.size.toLong())

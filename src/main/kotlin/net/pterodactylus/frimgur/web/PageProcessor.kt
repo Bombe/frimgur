@@ -17,4 +17,15 @@ class PageRequest
 /**
  * The response of a [page processor][PageProcessor].
  */
-class PageResponse(val title: String, val content: String)
+class PageResponse(val title: String, val content: String) {
+
+	val javascriptLinks: List<String> = mutableListOf()
+
+	/**
+	 * Adds a `<script>` element to the page’s `<head>` element.
+	 */
+	fun addJavascriptLink(url: String) {
+		(javascriptLinks as MutableList<String>).add(url)
+	}
+
+}

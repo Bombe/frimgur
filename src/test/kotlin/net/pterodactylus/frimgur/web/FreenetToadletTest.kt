@@ -49,6 +49,21 @@ class FreenetToadletTest {
 	}
 
 	@Test
+	fun `toadlet adds link to page header`() {
+		val pageProcessor = object : PageProcessor {
+			override fun processPage(pageRequest: PageRequest) = PageResponse("", "").apply {
+				addJavascriptLink("static/test.js")
+			}
+		}
+		val toadlet = FreenetToadlet(highLevelSimpleClient, "/prefix/", pageProcessor)
+		toadlet.handleMethodGET(URI(""), mock(), toadletContext)
+		val expectedHeadNode = HTMLNode("head").apply {
+			addChild("script", "src", "/prefix/static/test.js")
+		}
+		assertThat(pageNode.headNode.generate(), equalTo(expectedHeadNode.generate()))
+	}
+
+	@Test
 	fun `toadlet returns the prefix plus the page processor's toadlet name`() {
 		assertThat(toadlet.path(), equalTo("/prefix/test.html"))
 	}
@@ -66,7 +81,7 @@ class FreenetToadletTest {
 	private val toadlet = FreenetToadlet(highLevelSimpleClient, "/prefix/", pageProcessor)
 
 	init {
-		whenever(pageMaker.getPageNode("Page Title", toadletContext)).thenReturn(pageNode)
+		whenever(pageMaker.getPageNode(any(), eq(toadletContext))).thenReturn(pageNode)
 		whenever(toadletContext.pageMaker).thenReturn(this@FreenetToadletTest.pageMaker)
 	}
 

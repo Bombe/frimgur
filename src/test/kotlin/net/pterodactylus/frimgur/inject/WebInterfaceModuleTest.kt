@@ -7,6 +7,7 @@ import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
 import net.pterodactylus.frimgur.test.bind
 import net.pterodactylus.frimgur.web.FreenetToadletFactory
+import net.pterodactylus.frimgur.web.ToadletRegistry
 import net.pterodactylus.frimgur.web.WebInterface
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.notNullValue
@@ -23,12 +24,17 @@ class WebInterfaceModuleTest {
 	}
 
 	@Test
+	fun `module can create a toadlet registry`() {
+		assertThat(injector.getInstance(ToadletRegistry::class.java), notNullValue())
+	}
+
+	@Test
 	fun `module can create a freenet toadlet factory`() {
 		assertThat(injector.getInstance(FreenetToadletFactory::class.java), notNullValue())
 	}
 
 	private val injector = createInjector(
-		WebInterfaceModule("/prefix"),
+		WebInterfaceModule("/prefix", "Menu.Test", "Menu.Tooltip"),
 		bind<PageMaker>().toMock(),
 		bind<FredPluginL10n>().toMock(),
 		bind<ToadletContainer>().toMock(),

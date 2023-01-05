@@ -27,7 +27,7 @@ open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless {
 
 	protected open fun createInjector(): Injector = Guice.createInjector(
 		FreenetModule(this, pluginRespirator),
-		WebInterfaceModule("/frimgur/")
+		WebInterfaceModule("/frimgur/", "Navigation.Menu.Title", "Navigation.Menu.Tooltip")
 	)
 
 	override fun terminate() {

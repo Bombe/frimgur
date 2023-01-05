@@ -9,5 +9,6 @@ import net.pterodactylus.frimgur.web.annotations.ToadletName
 class MainPageProcessor : PebblePageProcessor("html/main.html") {
 
 	override fun getTitle(pageRequest: PageRequest) = "Frimgur Main Page"
+	override fun getScriptLinks(pageRequest: PageRequest) = listOf("static/js/frimgur.js")
 
 }

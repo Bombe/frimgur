@@ -2,6 +2,7 @@ package net.pterodactylus.frimgur.web
 
 import net.pterodactylus.frimgur.web.annotations.toadletName
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
 import kotlin.test.Test
@@ -24,6 +25,11 @@ class MainPageProcessorTest {
 	@Test
 	fun `main page content contains the word 'Frimgur'`() {
 		assertThat(mainPageProcessor.processPage(PageRequest()).content, containsString("Frimgur"))
+	}
+
+	@Test
+	fun `main page adds a script link`() {
+		assertThat(mainPageProcessor.processPage(PageRequest()).javascriptLinks, contains("static/js/frimgur.js"))
 	}
 
 	private val mainPageProcessor = MainPageProcessor()

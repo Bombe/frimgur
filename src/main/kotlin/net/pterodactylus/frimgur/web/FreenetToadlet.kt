@@ -11,7 +11,7 @@ import java.net.URI
 /**
  * [Toadlet][freenet.clients.http.Toadlet] implementation that renders Freenet’s web interface around a [PageProcessor].
  */
-class FreenetToadlet(highLevelSimpleClient: HighLevelSimpleClient, private val pageProcessor: PageProcessor) : Toadlet(highLevelSimpleClient){
+class FreenetToadlet(highLevelSimpleClient: HighLevelSimpleClient, private val prefix: String, private val pageProcessor: PageProcessor) : Toadlet(highLevelSimpleClient){
 
 	override fun handleMethodGET(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
 		val pageResponse = pageProcessor.processPage(PageRequest())
@@ -22,6 +22,6 @@ class FreenetToadlet(highLevelSimpleClient: HighLevelSimpleClient, private val p
 		toadletContext.writeData(renderedPage)
 	}
 
-	override fun path() = pageProcessor.toadletName
+	override fun path() = prefix + pageProcessor.toadletName
 
 }

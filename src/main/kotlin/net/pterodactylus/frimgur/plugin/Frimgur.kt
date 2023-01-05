@@ -25,9 +25,10 @@ open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless {
 			.apply { start() }
 	}
 
-	protected open fun createInjector(): Injector {
-		return Guice.createInjector(FreenetModule(this, pluginRespirator), WebInterfaceModule())
-	}
+	protected open fun createInjector(): Injector = Guice.createInjector(
+		FreenetModule(this, pluginRespirator),
+		WebInterfaceModule("/frimgur/")
+	)
 
 	override fun terminate() {
 		webInterface?.stop()

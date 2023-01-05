@@ -17,7 +17,7 @@ class InjectionTest {
 	fun `web interface can be created`() {
 		val injector = createInjector(
 			FreenetModule(mock(), mock(defaultAnswer = Mockito.RETURNS_DEEP_STUBS)),
-			WebInterfaceModule()
+			WebInterfaceModule("/prefix/")
 		)
 		assertThat(injector.getInstance(WebInterface::class.java), notNullValue())
 	}

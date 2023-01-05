@@ -15,12 +15,12 @@ class FreenetToadletFactoryTest {
 	@Test
 	fun `freenet toadlet can be created`() {
 		val highLevelSimpleClient = mock<HighLevelSimpleClient>()
-		val freenetToadletFactory = FreenetToadletFactory(highLevelSimpleClient)
+		val freenetToadletFactory = FreenetToadletFactory("/prefix/", highLevelSimpleClient)
 		val pageProcessor = @ToadletName("test.html") object : PageProcessor {
 			override fun processPage(pageRequest: PageRequest): PageResponse = TODO("not used")
 		}
 		val freenetToadlet = freenetToadletFactory.createFreenetToadlet(pageProcessor)
-		assertThat(freenetToadlet.path(), equalTo("test.html"))
+		assertThat(freenetToadlet.path(), equalTo("/prefix/test.html"))
 	}
 
 }

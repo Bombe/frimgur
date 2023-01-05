@@ -5,7 +5,7 @@ import freenet.client.HighLevelSimpleClient
 /**
  * Factory for [FreenetToadlet] instances.
  */
-class FreenetToadletFactory(private val highLevelSimpleClient: HighLevelSimpleClient) {
+class FreenetToadletFactory(private val prefix: String, private val highLevelSimpleClient: HighLevelSimpleClient) {
 
 	/**
 	 * Creates a new [FreenetToadlet] that uses the given [PageProcessor].
@@ -13,6 +13,6 @@ class FreenetToadletFactory(private val highLevelSimpleClient: HighLevelSimpleCl
 	 * @param pageProcessor The page processor to wrap
 	 * @return A freenet toadlet that uses the given page processor
 	 */
-	fun createFreenetToadlet(pageProcessor: PageProcessor) = FreenetToadlet(highLevelSimpleClient, pageProcessor)
+	fun createFreenetToadlet(pageProcessor: PageProcessor) = FreenetToadlet(highLevelSimpleClient, prefix, pageProcessor)
 
 }

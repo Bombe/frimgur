@@ -49,8 +49,8 @@ class FreenetToadletTest {
 	}
 
 	@Test
-	fun `toadlet returns a page processor's toadlet name`() {
-		assertThat(toadlet.path(), equalTo("test.html"))
+	fun `toadlet returns the prefix plus the page processor's toadlet name`() {
+		assertThat(toadlet.path(), equalTo("/prefix/test.html"))
 	}
 
 	private val highLevelSimpleClient = mock<HighLevelSimpleClient>()
@@ -63,7 +63,7 @@ class FreenetToadletTest {
 	private val pageProcessor = @ToadletName("test.html") object : PageProcessor {
 		override fun processPage(pageRequest: PageRequest) = PageResponse("Page Title", "<Rendered.>")
 	}
-	private val toadlet = FreenetToadlet(highLevelSimpleClient, pageProcessor)
+	private val toadlet = FreenetToadlet(highLevelSimpleClient, "/prefix/", pageProcessor)
 
 	init {
 		whenever(pageMaker.getPageNode("Page Title", toadletContext)).thenReturn(pageNode)

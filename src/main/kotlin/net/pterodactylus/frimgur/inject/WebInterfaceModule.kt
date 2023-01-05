@@ -13,11 +13,11 @@ import net.pterodactylus.frimgur.web.WebInterface
 /**
  * Guice [module][com.google.inject.Module] for creating [WebInterface] instances.
  */
-class WebInterfaceModule : AbstractModule() {
+class WebInterfaceModule(private val prefix: String) : AbstractModule() {
 
 	@Provides
 	fun getFreenetToadletFactory(highLevelSimpleClient: HighLevelSimpleClient): FreenetToadletFactory =
-		FreenetToadletFactory(highLevelSimpleClient)
+		FreenetToadletFactory(prefix, highLevelSimpleClient)
 
 	@Provides
 	fun getWebInterface(pageMaker: PageMaker, pluginL10n: FredPluginL10n, toadletContainer: ToadletContainer, freenetToadletFactory: FreenetToadletFactory): WebInterface =

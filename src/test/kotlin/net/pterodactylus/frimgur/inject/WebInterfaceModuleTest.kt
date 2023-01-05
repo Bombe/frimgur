@@ -28,7 +28,7 @@ class WebInterfaceModuleTest {
 	}
 
 	private val injector = createInjector(
-		WebInterfaceModule(),
+		WebInterfaceModule("/prefix"),
 		bind<PageMaker>().toMock(),
 		bind<FredPluginL10n>().toMock(),
 		bind<ToadletContainer>().toMock(),

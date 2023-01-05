@@ -11,6 +11,7 @@ open class PebblePageProcessor(templateName: String) : PageProcessor {
 
 	override fun processPage(pageRequest: PageRequest) =
 		PageResponse(getTitle(pageRequest), pebbleTemplate.render()).apply {
+			addCssLink("static/css/frimgur.css")
 			getScriptLinks(pageRequest).forEach(this::addJavascriptLink)
 		}
 

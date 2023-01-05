@@ -17,6 +17,7 @@ class FreenetToadlet(highLevelSimpleClient: HighLevelSimpleClient, private val p
 		val pageResponse = pageProcessor.processPage(PageRequest())
 		val pageNode = toadletContext.pageMaker.getPageNode(pageResponse.title, toadletContext)
 		pageResponse.javascriptLinks.forEach { url -> pageNode.headNode.addChild("script", arrayOf("src", "language", "type"), arrayOf(prefix + url, "javascript", "application/javascript")) }
+		pageResponse.cssLinks.forEach { url -> pageNode.headNode.addChild("link", arrayOf("rel", "type", "href"), arrayOf("stylesheet", "text/css", prefix + url)) }
 		pageNode.content.addChild("%", pageResponse.content)
 		val renderedPage = pageNode.outer.generate().toByteArray()
 		toadletContext.sendReplyHeaders(200, "OK", MultiValueTable(), "text/html", renderedPage.size.toLong())

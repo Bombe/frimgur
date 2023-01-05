@@ -75,6 +75,29 @@ class FreenetToadletTest {
 	}
 
 	@Test
+	fun `toadlet adds css link to page header`() {
+		val pageProcessor = object : PageProcessor {
+			override fun processPage(pageRequest: PageRequest) = PageResponse("", "").apply {
+				addCssLink("static/test.css")
+			}
+		}
+		val toadlet = FreenetToadlet(highLevelSimpleClient, "/prefix/", pageProcessor)
+		toadlet.handleMethodGET(URI(""), mock(), toadletContext)
+		assertThat(
+			pageNode.headNode.children, hasItem(
+				isHtmlNode(
+					equalTo("link"),
+					allOf(
+						hasItem(equalTo("rel" to "stylesheet")),
+						hasItem(equalTo("type" to "text/css")),
+						hasItem(equalTo("href" to "/prefix/static/test.css")),
+					)
+				)
+			)
+		)
+	}
+
+	@Test
 	fun `toadlet returns the prefix plus the page processor's toadlet name`() {
 		assertThat(toadlet.path(), equalTo("/prefix/test.html"))
 	}

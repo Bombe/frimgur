@@ -13,7 +13,7 @@ class MainPageProcessorTest {
 
 	@Test
 	fun `main page has correct template name`() {
-		assertThat(mainPageProcessor.toadletName, equalTo("/frimgur/"))
+		assertThat(mainPageProcessor.toadletName, equalTo("index.html"))
 	}
 
 	@Test

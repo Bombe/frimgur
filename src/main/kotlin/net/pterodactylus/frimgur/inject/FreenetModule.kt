@@ -8,6 +8,7 @@ import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.PluginRespirator
 import net.pterodactylus.frimgur.plugin.Frimgur
+import javax.inject.Named
 
 /**
  * Guice [module][com.google.inject.Module] that can provide Freenet-related objects.
@@ -25,5 +26,9 @@ class FreenetModule(frimgur: Frimgur, pluginRespirator: PluginRespirator) : Abst
 
 	@get:Provides
 	val highLevelSimpleClient: HighLevelSimpleClient = pluginRespirator.hlSimpleClient
+
+	@get:Provides
+	@get:Named("FormPassword")
+	val formPassword: String = pluginRespirator.toadletContainer.formPassword
 
 }

@@ -13,6 +13,7 @@ import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.instanceOf
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.test.Test
 
@@ -23,6 +24,7 @@ class FrimgurTest {
 
 	@Test
 	fun `Frimgur instance can be run`() {
+		whenever(pluginRespirator.toadletContainer.formPassword).thenReturn("123")
 		frimgur.runPlugin(pluginRespirator)
 	}
 

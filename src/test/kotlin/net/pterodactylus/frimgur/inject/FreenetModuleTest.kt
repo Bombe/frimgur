@@ -5,10 +5,12 @@ import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.PageMaker
 import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
+import freenet.pluginmanager.PluginRespirator
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.notNullValue
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import kotlin.test.Test
 
 /**
@@ -36,7 +38,10 @@ class FreenetModuleTest {
 		assertThat(injector.getInstance(HighLevelSimpleClient::class.java), notNullValue())
 	}
 
-	private val module = FreenetModule(mock(), mock(defaultAnswer = RETURNS_DEEP_STUBS))
+	private val pluginRespirator = mock<PluginRespirator>(defaultAnswer = RETURNS_DEEP_STUBS).apply {
+		whenever(toadletContainer.formPassword).thenReturn("passwort")
+	}
+	private val module = FreenetModule(mock(), pluginRespirator)
 	private val injector = createInjector(module)
 
 }

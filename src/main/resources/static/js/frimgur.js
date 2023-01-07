@@ -1,2 +1,5 @@
-document.addEventListener('paste', function (event) {
-);
+let formPassword
+
+window.onload = () => {
+  formPassword = document.getElementById('form-password').textContent
+}

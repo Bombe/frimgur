@@ -38,7 +38,8 @@ class WebInterfaceModuleTest {
 		bind<PageMaker>().toMock(),
 		bind<FredPluginL10n>().toMock(),
 		bind<ToadletContainer>().toMock(),
-		bind<HighLevelSimpleClient>().toMock()
+		bind<HighLevelSimpleClient>().toMock(),
+		bind<String>().toNamedInstance("FormPassword", "secret")
 	)
 
 }

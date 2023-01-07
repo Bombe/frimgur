@@ -32,6 +32,6 @@ class MainPageProcessorTest {
 		assertThat(mainPageProcessor.processPage(PageRequest()).javascriptLinks, contains("static/js/frimgur.js"))
 	}
 
-	private val mainPageProcessor = MainPageProcessor()
+	private val mainPageProcessor = MainPageProcessor("")
 
 }

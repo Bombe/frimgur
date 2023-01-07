@@ -18,7 +18,7 @@ class PebblePageProcessorTest {
 
 	@Test
 	fun `default title is empty string`() {
-		assertThat(PebblePageProcessor("").processPage(PageRequest()).title, equalTo(""))
+		assertThat(PebblePageProcessor("", "").processPage(PageRequest()).title, equalTo(""))
 	}
 
 	@Test
@@ -39,7 +39,7 @@ class PebblePageProcessorTest {
 	}
 
 	private val scriptLinks = mutableListOf<String>()
-	private val pebblePageProcessor = object : PebblePageProcessor("html/test.html") {
+	private val pebblePageProcessor = object : PebblePageProcessor("html/test.html", "") {
 		override fun getTitle(pageRequest: PageRequest) = "Test Title"
 		override fun getScriptLinks(pageRequest: PageRequest) = scriptLinks
 	}

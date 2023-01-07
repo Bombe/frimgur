@@ -7,7 +7,7 @@ import java.io.StringWriter
 /**
  * Page processor that renders a Pebble template.
  */
-open class PebblePageProcessor(templateName: String) : PageProcessor {
+open class PebblePageProcessor(templateName: String, private val formPassword: String) : PageProcessor {
 
 	override fun processPage(pageRequest: PageRequest) =
 		PageResponse(getTitle(pageRequest), pebbleTemplate.render()).apply {
@@ -18,12 +18,12 @@ open class PebblePageProcessor(templateName: String) : PageProcessor {
 	protected open fun getTitle(pageRequest: PageRequest) = ""
 	protected open fun getScriptLinks(pageRequest: PageRequest): List<String> = emptyList()
 
+	private fun PebbleTemplate.render() = StringWriter()
+		.also { evaluate(it, mapOf("formPassword" to formPassword)) }
+		.toString()
+
 	private val pebbleTemplate = pebbleEngine.getTemplate(templateName)
 
 }
 
 private val pebbleEngine = PebbleEngine.Builder().build()
-
-private fun PebbleTemplate.render() = StringWriter()
-	.also { evaluate(it) }
-	.toString()

@@ -49,8 +49,8 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 
 	@Provides
 	@Named("Main")
-	fun getMainToadlet(freenetToadletFactory: FreenetToadletFactory): Toadlet =
-		freenetToadletFactory.createFreenetToadlet(MainPageProcessor())
+	fun getMainToadlet(freenetToadletFactory: FreenetToadletFactory, @Named("FormPassword") formPassword: String): Toadlet =
+		freenetToadletFactory.createFreenetToadlet(MainPageProcessor(formPassword))
 
 	@Provides
 	@Named("StaticJavascript")

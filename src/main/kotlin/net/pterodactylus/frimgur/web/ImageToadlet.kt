@@ -32,6 +32,10 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 			return
 		}
 		val imageMetadata = imageService.addImage(imageData)
+		if (imageMetadata == null) {
+			toadletContext.sendReplyHeaders(400, "Bad Request", MultiValueTable(), null, 0)
+			return
+		}
 		toadletContext.sendReplyHeaders(201, "Created", MultiValueTable<String, String>().apply { put("Location", imageMetadata.id) }, null, 0)
 	}
 

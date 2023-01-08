@@ -86,6 +86,15 @@ class ImageToadletTest {
 	}
 
 	@Test
+	fun `toadlet returns 400 if image data cannot be parsed in POST request`() {
+		val httpRequest = object : HTTPRequest by httpRequest {
+			override fun getPartAsBytesFailsafe(name: String, maxLength: Int) = byteArrayOf(0, 1, 2, 4)
+		}
+		toadlet.handleMethodPOST(URI(""), httpRequest, toadletContext)
+		verify(toadletContext).sendReplyHeaders(eq(400), any(), any(), isNull(), anyLong())
+	}
+
+	@Test
 	fun `toadlet returns redirect if all data is present in POST request`() {
 		val httpRequest = createCompleteHttpRequest()
 		toadlet.handleMethodPOST(URI(""), httpRequest, toadletContext)
@@ -102,11 +111,9 @@ class ImageToadletTest {
 	private val httpRequest = mock<HTTPRequest>()
 	private val toadletContext = mock<ToadletContext>()
 	private val imageService = object : ImageService {
-		override fun getImage(id: String) = null
 		override fun addImage(data: ByteArray) =
 			ImageMetadata("id-1", 720, 576, 1234)
 				.takeIf { data.contentEquals(byteArrayOf(0, 1, 2, 3)) }
-				?: ImageMetadata("0", 0, 0, 0)
 	}
 	private val highLevelSimpleClient = mock<HighLevelSimpleClient>()
 	private val toadlet = ImageToadlet("/test/upload", imageService, highLevelSimpleClient)

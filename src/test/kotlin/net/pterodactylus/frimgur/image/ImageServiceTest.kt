@@ -4,6 +4,8 @@ import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.any
+import org.hamcrest.Matchers.containsInAnyOrder
+import org.hamcrest.Matchers.emptyIterable
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.nullValue
 import org.hamcrest.TypeSafeDiagnosingMatcher
@@ -49,6 +51,19 @@ class ImageServiceTest {
 		val originalMetadata = imageService.addImage(getBytes("1x1.png"))
 		val storedMetadata = imageService.getImage(originalMetadata!!.id)
 		assertThat(storedMetadata, equalTo(originalMetadata))
+	}
+
+	@Test
+	fun `new image service does not have any images`() {
+		assertThat(imageService.getImageIds(), emptyIterable())
+	}
+
+	@Test
+	fun `image servce can list added images`() {
+		val id1 = imageService.addImage(getBytes("1x1.png"))!!.id
+		val id2 = imageService.addImage(getBytes("1x1.gif"))!!.id
+		val id3 = imageService.addImage(getBytes("1x1.png"))!!.id
+		assertThat(imageService.getImageIds(), containsInAnyOrder(id1, id2, id3))
 	}
 
 	private fun getBytes(path: String) = javaClass.getResourceAsStream(path)!!.readBytes()

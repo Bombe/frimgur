@@ -27,6 +27,13 @@ interface ImageService {
 	 */
 	fun getImage(id: String): ImageMetadata?
 
+	/**
+	 * Returns the IDs of all images that are currently stored in this image service.
+	 *
+	 * @return The IDs of all stored images
+	 */
+	fun getImageIds(): List<String> = emptyList()
+
 }
 
 class DefaultImageService : ImageService {
@@ -37,6 +44,8 @@ class DefaultImageService : ImageService {
 			?.also { imageMetadata -> imageData[imageMetadata.id] = ImageData(imageMetadata, data.clone()) }
 
 	override fun getImage(id: String): ImageMetadata? = imageData[id]?.metadata
+
+	override fun getImageIds() = imageData.keys.toList()
 
 	private val imageData = mutableMapOf<String, ImageData>()
 

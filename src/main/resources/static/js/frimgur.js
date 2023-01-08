@@ -28,27 +28,32 @@ const replacePlaceholderId = (oldId, newId) => {
 const showPlaceholder = (imageId, imageBlob) => {
   const placeholderElement = createPlaceholderElement(imageId)
   const canvasElement = placeholderElement.querySelector('canvas')
-  drawImageToCanvas(imageBlob, canvasElement)
+  const canvasWidth = 300
+  const canvasHeight = 150
+  drawImageToCanvas(imageBlob, canvasElement, canvasWidth, canvasHeight).then((image) => {
+    const dimensionsNode = document.createTextNode(`${image.width} × ${image.height}`)
+    placeholderElement.querySelector('.dimensions').appendChild(dimensionsNode)
+    canvasElement.style.width = `${canvasWidth}px`
+    canvasElement.style.height = `${canvasHeight}px`
+    placeholderElement.style.width = `${canvasWidth}px`
+    placeholderElement.style.height = `${canvasHeight}px`
+  })
   document.getElementById('inserted-images').appendChild(placeholderElement)
 }
 
-const drawImageToCanvas = (imageBlob, canvasElement) => {
+const drawImageToCanvas = (imageBlob, canvasElement, canvasWidth, canvasHeight) => {
   const canvas = canvasElement.getContext('2d')
-  decodeImage(imageBlob).then(image => {
+  return decodeImage(imageBlob).then(image => {
     const pixelRatio = window.devicePixelRatio
-    const canvasWidth = 300
-    const canvasHeight = 150
     canvasElement.width = Math.floor(canvasWidth * pixelRatio)
     canvasElement.height = Math.floor(canvasHeight * pixelRatio)
-    canvasElement.style.width = `${canvasWidth}px`
-    canvasElement.style.height = `${canvasHeight}px`
     canvas.scale(pixelRatio, pixelRatio)
     const widthRatio = image.width / canvasWidth
     const heightRatio = image.height / canvasHeight
     const downscaleFactor = Math.max(widthRatio, heightRatio)
     canvas.drawImage(image, (canvasWidth - (image.width / downscaleFactor)) / 2, (canvasHeight - (image.height / downscaleFactor)) / 2, image.width / downscaleFactor, image.height / downscaleFactor)
+    return Promise.resolve(image)
   })
-
 }
 
 const decodeImage = (imageBlob) => {
@@ -60,11 +65,9 @@ const decodeImage = (imageBlob) => {
 const createImageElementId = (imageId) => `image-${imageId}`
 
 const createPlaceholderElement = (imageId) => {
-  const placeholderElement = document.createElement('div')
-  placeholderElement.id = createImageElementId(imageId)
-  placeholderElement.setAttribute('class', 'image-placeholder')
-  const canvasElement = document.createElement('canvas')
-  placeholderElement.appendChild(canvasElement)
+  const placeholderTemplateElement = document.getElementById('image-template')
+  const placeholderElement = placeholderTemplateElement.cloneNode(true)
+  placeholderElement.setAttribute('id', createImageElementId(imageId))
   return placeholderElement
 }
 

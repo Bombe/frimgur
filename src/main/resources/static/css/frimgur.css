@@ -2,8 +2,21 @@
     display: none;
 }
 
-#inserted-images canvas {
-    border: solid 1px #000;
-    margin: 1ex;
-    padding: 0.5ex;
+.image-placeholder {
+    display: inline-block;
+    margin-right: 1em;
+    margin-bottom: 1em;
+}
+
+.image-placeholder .canvas-container {
+    border: 1px solid #000;
+    position: absolute;
+}
+
+.image-placeholder .image-overlay {
+    z-index: 1;
+}
+
+#image-template {
+    display: none;
 }

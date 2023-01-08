@@ -19,6 +19,7 @@ class InjectionTest {
 	fun `web interface can be created`() {
 		val injector = createInjector(
 			FreenetModule(mock(), pluginRespirator),
+			ImageModule(),
 			WebInterfaceModule("/prefix/", "Menu.Test", "Menu.Tooltip")
 		)
 		assertThat(injector.getInstance(WebInterface::class.java), notNullValue())

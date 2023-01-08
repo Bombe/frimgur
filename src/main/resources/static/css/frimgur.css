@@ -2,3 +2,8 @@
     display: none;
 }
 
+#inserted-images canvas {
+    border: solid 1px #000;
+    margin: 1ex;
+    padding: 0.5ex;
+}

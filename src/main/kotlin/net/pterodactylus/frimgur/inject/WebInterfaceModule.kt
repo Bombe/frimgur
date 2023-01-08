@@ -11,6 +11,8 @@ import net.pterodactylus.frimgur.web.ClasspathFileToadlet
 import net.pterodactylus.frimgur.web.DefaultToadletRegistry
 import net.pterodactylus.frimgur.web.DefaultWebInterface
 import net.pterodactylus.frimgur.web.FreenetToadletFactory
+import net.pterodactylus.frimgur.web.ImageService
+import net.pterodactylus.frimgur.web.ImageUploadToadlet
 import net.pterodactylus.frimgur.web.MainPageProcessor
 import net.pterodactylus.frimgur.web.RedirectToadlet
 import net.pterodactylus.frimgur.web.ToadletRegistry
@@ -34,11 +36,13 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 		@Named("Main") mainToadlet: Toadlet,
 		@Named("StaticJavascript") staticJavascriptToadlet: Toadlet,
 		@Named("StaticCss") staticCssToadlet: Toadlet,
+		@Named("Upload") uploadToadlet: Toadlet,
 		@Named("Redirect") redirectToadlet: Toadlet,
 	): ToadletRegistry =
 		DefaultToadletRegistry(toadletContainer, menuCategoryKey, pluginL10n).apply {
 			addToadlet(ToadletSpec(staticJavascriptToadlet))
 			addToadlet(ToadletSpec(staticCssToadlet))
+			addToadlet(ToadletSpec(uploadToadlet))
 			addToadlet(ToadletSpec(mainToadlet, "Navigation.Main.Title", "Navigation.Main.Tooltip"))
 			addToadlet(ToadletSpec(redirectToadlet))
 		}
@@ -70,5 +74,10 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 	@Named("Redirect")
 	fun getRedirectToadlet(highLevelSimpleClient: HighLevelSimpleClient): Toadlet =
 		RedirectToadlet(prefix, prefix + "index.html", highLevelSimpleClient)
+
+	@Provides
+	@Named("Upload")
+	fun getUploadToadlet(imageService: ImageService, highLevelSimpleClient: HighLevelSimpleClient): Toadlet =
+		ImageUploadToadlet(prefix + "image/", imageService, highLevelSimpleClient)
 
 }

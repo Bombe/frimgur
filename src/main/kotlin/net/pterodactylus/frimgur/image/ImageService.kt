@@ -1,5 +1,9 @@
 package net.pterodactylus.frimgur.image
 
+import java.io.ByteArrayInputStream
+import java.util.UUID
+import javax.imageio.ImageIO
+
 /**
  * Service for image-related functionality.
  */
@@ -22,6 +26,19 @@ interface ImageService {
 	 * or `null` if no image with the given ID exists
 	 */
 	fun getImage(id: String): ImageMetadata?
+
+}
+
+class DefaultImageService : ImageService {
+
+	override fun addImage(type: String, data: ByteArray): ImageMetadata {
+		val bufferedImage = ImageIO.read(ByteArrayInputStream(data))
+		return ImageMetadata(UUID.randomUUID().toString(), bufferedImage.width, bufferedImage.height, data.size)
+	}
+
+	override fun getImage(id: String): ImageMetadata? {
+		TODO("Not yet implemented")
+	}
 
 }
 

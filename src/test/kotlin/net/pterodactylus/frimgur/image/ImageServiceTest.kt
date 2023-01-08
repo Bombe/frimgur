@@ -1,0 +1,70 @@
+package net.pterodactylus.frimgur.image
+
+import org.hamcrest.Description
+import org.hamcrest.Matcher
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.any
+import org.hamcrest.Matchers.equalTo
+import org.hamcrest.TypeSafeDiagnosingMatcher
+import kotlin.test.Test
+
+/**
+ * Unit test for [DefaultImageService].
+ */
+class ImageServiceTest {
+
+	@Test
+	fun `image service can parse PNG files`() {
+		val metadata = imageService.addImage("image/png", getBytes("1x1.png"))
+		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(67)))
+	}
+
+	@Test
+	fun `image service can parse JPEG files`() {
+		val metadata = imageService.addImage("image/jpeg", getBytes("1x1.jpg"))
+		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(333)))
+	}
+
+	@Test
+	fun `image service can parse GIF files`() {
+		val metadata = imageService.addImage("image/gif", getBytes("1x1.gif"))
+		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(35)))
+	}
+
+	@Test
+	fun `image service can parse BMP files`() {
+		val metadata = imageService.addImage("image/bmp", getBytes("1x1.bmp"))
+		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(66)))
+	}
+
+	private fun getBytes(path: String) = javaClass.getResourceAsStream(path)!!.readBytes()
+
+	private val imageService = DefaultImageService()
+
+}
+
+private fun isMetadataWith(width: Matcher<Int> = any(Int::class.java), height: Matcher<Int> = any(Int::class.java), size: Matcher<Int> = any(Int::class.java)): Matcher<ImageMetadata> = object : TypeSafeDiagnosingMatcher<ImageMetadata>() {
+
+	override fun matchesSafely(imageMetadata: ImageMetadata, mismatchDescription: Description): Boolean {
+		if (!width.matches(imageMetadata.width)) {
+			mismatchDescription.appendText("width is ").appendValue(imageMetadata.width)
+			return false
+		}
+		if (!height.matches(imageMetadata.height)) {
+			mismatchDescription.appendText("height is ").appendValue(imageMetadata.height)
+			return false
+		}
+		if (!size.matches(imageMetadata.size)) {
+			mismatchDescription.appendText("size is ").appendValue(imageMetadata.size)
+			return false
+		}
+		return true
+	}
+
+	override fun describeTo(description: Description) {
+		description.appendText("image metadata with width ").appendDescriptionOf(width)
+			.appendText(", height ").appendDescriptionOf(height)
+			.appendText(", and size ").appendDescriptionOf(size)
+	}
+
+}

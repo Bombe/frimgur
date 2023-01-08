@@ -26,17 +26,13 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 	}
 
 	fun handleMethodPOST(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
-		val imageData = httpRequest.getPartAsBytesFailsafe("image-data", 20.millions())
-		if (imageData.isEmpty()) {
-			toadletContext.sendReplyHeaders(400, "Bad Request", MultiValueTable(), null, 0)
-			return
-		}
-		val imageMetadata = imageService.addImage(imageData)
-		if (imageMetadata == null) {
-			toadletContext.sendReplyHeaders(400, "Bad Request", MultiValueTable(), null, 0)
-			return
-		}
-		toadletContext.sendReplyHeaders(201, "Created", MultiValueTable<String, String>().apply { put("Location", imageMetadata.id) }, null, 0)
+		httpRequest.getPartAsBytesFailsafe("image-data", 20.millions())
+			.takeIf { it.isNotEmpty() }
+			?.let(imageService::addImage)
+			?.also { imageMetadata ->
+				toadletContext.sendReplyHeaders(201, "Created", MultiValueTable<String, String>().apply { put("Location", imageMetadata.id) }, null, 0)
+			}
+			?: toadletContext.sendReplyHeaders(400, "Bad Request", MultiValueTable(), null, 0)
 	}
 
 	override fun path() = path

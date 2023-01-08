@@ -13,9 +13,10 @@ interface ImageService {
 	 * Decodes the given image, stores it, and returns its metadata.
 	 *
 	 * @param data The encoded image
-	 * @return The metadata parsed from the given image data
+	 * @return The metadata parsed from the given image data,
+	 * or `null` if the image cannot be parsed
 	 */
-	fun addImage(data: ByteArray): ImageMetadata
+	fun addImage(data: ByteArray): ImageMetadata?
 
 	/**
 	 * Returns metadata for the image with the given ID.

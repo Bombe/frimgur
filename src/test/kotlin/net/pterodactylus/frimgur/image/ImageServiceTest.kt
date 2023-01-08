@@ -5,6 +5,7 @@ import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.any
 import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.nullValue
 import org.hamcrest.TypeSafeDiagnosingMatcher
 import kotlin.test.Test
 
@@ -37,13 +38,19 @@ class ImageServiceTest {
 		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(66)))
 	}
 
+	@Test
+	fun `invalid image data returns null`() {
+		val metadata = imageService.addImage(byteArrayOf())
+		assertThat(metadata, nullValue())
+	}
+
 	private fun getBytes(path: String) = javaClass.getResourceAsStream(path)!!.readBytes()
 
 	private val imageService = DefaultImageService()
 
 }
 
-private fun isMetadataWith(width: Matcher<Int> = any(Int::class.java), height: Matcher<Int> = any(Int::class.java), size: Matcher<Int> = any(Int::class.java)): Matcher<ImageMetadata> = object : TypeSafeDiagnosingMatcher<ImageMetadata>() {
+private fun isMetadataWith(width: Matcher<Int> = any(Int::class.java), height: Matcher<Int> = any(Int::class.java), size: Matcher<Int> = any(Int::class.java)): Matcher<ImageMetadata?> = object : TypeSafeDiagnosingMatcher<ImageMetadata>() {
 
 	override fun matchesSafely(imageMetadata: ImageMetadata, mismatchDescription: Description): Boolean {
 		if (!width.matches(imageMetadata.width)) {

@@ -44,6 +44,13 @@ class ImageServiceTest {
 		assertThat(metadata, nullValue())
 	}
 
+	@Test
+	fun `adding an image makes it available`() {
+		val originalMetadata = imageService.addImage(getBytes("1x1.png"))
+		val storedMetadata = imageService.getImage(originalMetadata!!.id)
+		assertThat(storedMetadata, equalTo(originalMetadata))
+	}
+
 	private fun getBytes(path: String) = javaClass.getResourceAsStream(path)!!.readBytes()
 
 	private val imageService = DefaultImageService()

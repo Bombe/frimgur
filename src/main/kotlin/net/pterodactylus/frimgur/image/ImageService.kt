@@ -31,14 +31,14 @@ interface ImageService {
 
 class DefaultImageService : ImageService {
 
-	override fun addImage(data: ByteArray): ImageMetadata {
-		val bufferedImage = ImageIO.read(ByteArrayInputStream(data))
-		return ImageMetadata(UUID.randomUUID().toString(), bufferedImage.width, bufferedImage.height, data.size)
-	}
+	override fun addImage(data: ByteArray): ImageMetadata? =
+		ImageIO.read(ByteArrayInputStream(data))
+			?.let { bufferedImage -> ImageMetadata(UUID.randomUUID().toString(), bufferedImage.width, bufferedImage.height, data.size) }
+			?.also { imageMetadata -> imageData[imageMetadata.id] = ImageData(imageMetadata, data.clone()) }
 
-	override fun getImage(id: String): ImageMetadata? {
-		TODO("Not yet implemented")
-	}
+	override fun getImage(id: String): ImageMetadata? = imageData[id]?.metadata
+
+	private val imageData = mutableMapOf<String, ImageData>()
 
 }
 
@@ -60,3 +60,9 @@ data class ImageMetadata(
 	val size: Int
 
 )
+
+/**
+ * Data of an image, consisting of both its [metadata][ImageMetadata] and
+ * its content.
+ */
+data class ImageData(val metadata: ImageMetadata, val data: ByteArray)

@@ -16,7 +16,7 @@ interface ImageService {
 	 * @return The metadata parsed from the given image data,
 	 * or `null` if the image cannot be parsed
 	 */
-	fun addImage(data: ByteArray): ImageMetadata?
+	fun addImage(data: ByteArray): ImageMetadata? = null
 
 	/**
 	 * Returns metadata for the image with the given ID.
@@ -25,7 +25,7 @@ interface ImageService {
 	 * @return The metadata for the image with the given ID,
 	 * or `null` if no image with the given ID exists
 	 */
-	fun getImage(id: String): ImageMetadata?
+	fun getImage(id: String): ImageMetadata? = null
 
 	/**
 	 * Returns the IDs of all images that are currently stored in this image service.

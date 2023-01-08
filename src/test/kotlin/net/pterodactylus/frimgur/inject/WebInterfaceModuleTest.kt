@@ -7,7 +7,7 @@ import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
 import net.pterodactylus.frimgur.test.bind
 import net.pterodactylus.frimgur.web.FreenetToadletFactory
-import net.pterodactylus.frimgur.web.ImageService
+import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.web.ToadletRegistry
 import net.pterodactylus.frimgur.web.WebInterface
 import org.hamcrest.MatcherAssert.assertThat

@@ -2,8 +2,8 @@ package net.pterodactylus.frimgur.inject
 
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
-import net.pterodactylus.frimgur.web.ImageMetadata
-import net.pterodactylus.frimgur.web.ImageService
+import net.pterodactylus.frimgur.image.ImageMetadata
+import net.pterodactylus.frimgur.image.ImageService
 import java.util.UUID.randomUUID
 
 /**

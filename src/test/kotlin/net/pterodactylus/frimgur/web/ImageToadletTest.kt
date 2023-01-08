@@ -7,6 +7,8 @@ import com.spotify.hamcrest.jackson.JsonMatchers.jsonText
 import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.ToadletContext
 import freenet.support.api.HTTPRequest
+import net.pterodactylus.frimgur.image.ImageMetadata
+import net.pterodactylus.frimgur.image.ImageService
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.mockito.ArgumentMatchers.anyBoolean

@@ -1,14 +1,13 @@
 package net.pterodactylus.frimgur.web
 
-import com.fasterxml.jackson.annotation.JsonRootName
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.Toadlet
 import freenet.clients.http.ToadletContext
 import freenet.support.MultiValueTable
 import freenet.support.api.HTTPRequest
+import net.pterodactylus.frimgur.image.ImageMetadata
+import net.pterodactylus.frimgur.image.ImageService
 import java.net.URI
 
 /**
@@ -42,50 +41,6 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 }
 
 private fun Int.millions() = this * 1_000_000
-
-/**
- * Service for image-related functionality.
- */
-interface ImageService {
-
-	/**
-	 * Decodes the given image, stores it, and returns its metadata.
-	 *
-	 * @param type The MIME type of the image
-	 * @param data The encoded image
-	 * @return The metadata parsed from the given image data
-	 */
-	fun addImage(type: String, data: ByteArray): ImageMetadata
-
-	/**
-	 * Returns metadata for the image with the given ID.
-	 *
-	 * @param id The ID of the image to get the metadata for
-	 * @return The metadata for the image with the given ID,
-	 * or `null` if no image with the given ID exists
-	 */
-	fun getImage(id: String): ImageMetadata?
-
-}
-
-/**
- * Metadata of an image.
- */
-data class ImageMetadata(
-
-	/** The ID of the image. */
-	val id: String,
-
-	/** The width of the image in pixels. */
-	val width: Int,
-
-	/** The height of the image in pixels. */
-	val height: Int,
-
-	/** The size of the encoded image in bytes. */
-	val size: Int
-
-)
 
 private val objectMapper = jacksonObjectMapper()
 

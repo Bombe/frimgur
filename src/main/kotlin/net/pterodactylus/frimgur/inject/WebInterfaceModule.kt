@@ -11,7 +11,7 @@ import net.pterodactylus.frimgur.web.ClasspathFileToadlet
 import net.pterodactylus.frimgur.web.DefaultToadletRegistry
 import net.pterodactylus.frimgur.web.DefaultWebInterface
 import net.pterodactylus.frimgur.web.FreenetToadletFactory
-import net.pterodactylus.frimgur.web.ImageService
+import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.web.ImageToadlet
 import net.pterodactylus.frimgur.web.MainPageProcessor
 import net.pterodactylus.frimgur.web.RedirectToadlet

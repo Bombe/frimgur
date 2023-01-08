@@ -12,7 +12,7 @@ import net.pterodactylus.frimgur.web.DefaultToadletRegistry
 import net.pterodactylus.frimgur.web.DefaultWebInterface
 import net.pterodactylus.frimgur.web.FreenetToadletFactory
 import net.pterodactylus.frimgur.web.ImageService
-import net.pterodactylus.frimgur.web.ImageUploadToadlet
+import net.pterodactylus.frimgur.web.ImageToadlet
 import net.pterodactylus.frimgur.web.MainPageProcessor
 import net.pterodactylus.frimgur.web.RedirectToadlet
 import net.pterodactylus.frimgur.web.ToadletRegistry
@@ -78,6 +78,6 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 	@Provides
 	@Named("Upload")
 	fun getUploadToadlet(imageService: ImageService, highLevelSimpleClient: HighLevelSimpleClient): Toadlet =
-		ImageUploadToadlet(prefix + "image/", imageService, highLevelSimpleClient)
+		ImageToadlet(prefix + "image/", imageService, highLevelSimpleClient)
 
 }

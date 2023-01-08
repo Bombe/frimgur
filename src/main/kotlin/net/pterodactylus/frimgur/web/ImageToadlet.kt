@@ -1,5 +1,9 @@
 package net.pterodactylus.frimgur.web
 
+import com.fasterxml.jackson.annotation.JsonRootName
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.Toadlet
 import freenet.clients.http.ToadletContext
@@ -10,10 +14,16 @@ import java.net.URI
 /**
  * [Toadlet] that takes an encoded image and stores it together with some metadata.
  */
-class ImageUploadToadlet(private val path: String, private val imageService: ImageService, highLevelSimpleClient: HighLevelSimpleClient) : Toadlet(highLevelSimpleClient) {
+class ImageToadlet(private val path: String, private val imageService: ImageService, highLevelSimpleClient: HighLevelSimpleClient) : Toadlet(highLevelSimpleClient) {
 
 	override fun handleMethodGET(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
-		TODO("Not yet implemented")
+		val imageId = uri.path.removePrefix(path)
+		val imageMetadata = imageService.getImage(imageId)
+		if (imageMetadata == null) {
+			toadletContext.sendReplyHeaders(404, "Not Found", null, null, 0)
+			return
+		}
+		writeHTMLReply(toadletContext, 200, "OK", imageMetadata.toJson().toString())
 	}
 
 	fun handleMethodPOST(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
@@ -40,8 +50,21 @@ interface ImageService {
 
 	/**
 	 * Decodes the given image, stores it, and returns its metadata.
+	 *
+	 * @param type The MIME type of the image
+	 * @param data The encoded image
+	 * @return The metadata parsed from the given image data
 	 */
 	fun addImage(type: String, data: ByteArray): ImageMetadata
+
+	/**
+	 * Returns metadata for the image with the given ID.
+	 *
+	 * @param id The ID of the image to get the metadata for
+	 * @return The metadata for the image with the given ID,
+	 * or `null` if no image with the given ID exists
+	 */
+	fun getImage(id: String): ImageMetadata?
 
 }
 
@@ -63,3 +86,14 @@ data class ImageMetadata(
 	val size: Int
 
 )
+
+private val objectMapper = jacksonObjectMapper()
+
+private fun ImageMetadata.toJson() = objectMapper.createObjectNode()!!.apply {
+	put("id", id)
+	putObject("metadata").apply {
+		put("width", width)
+		put("height", height)
+		put("size", size)
+	}
+}

@@ -14,6 +14,7 @@ class ImageModule : AbstractModule() {
 	@Provides
 	fun getImageService(): ImageService =
 		object : ImageService {
+			override fun getImage(id: String) = null
 			override fun addImage(type: String, data: ByteArray) = ImageMetadata(randomUUID().toString(), 1, 2, 3)
 		}
 

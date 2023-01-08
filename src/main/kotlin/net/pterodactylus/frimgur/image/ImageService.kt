@@ -34,6 +34,13 @@ interface ImageService {
 	 */
 	fun getImageIds(): List<String> = emptyList()
 
+	/**
+	 * Removes the image with the given ID from this image service.
+	 *
+	 * @param id The ID of the image to remove
+	 */
+	fun removeImage(id: String) = Unit
+
 }
 
 class DefaultImageService : ImageService {
@@ -46,6 +53,10 @@ class DefaultImageService : ImageService {
 	override fun getImage(id: String): ImageMetadata? = imageData[id]?.metadata
 
 	override fun getImageIds() = imageData.keys.toList()
+
+	override fun removeImage(id: String) {
+		imageData.remove(id)
+	}
 
 	private val imageData = mutableMapOf<String, ImageData>()
 

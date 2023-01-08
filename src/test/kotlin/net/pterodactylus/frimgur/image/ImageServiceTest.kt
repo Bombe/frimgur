@@ -4,6 +4,7 @@ import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.any
+import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.emptyIterable
 import org.hamcrest.Matchers.equalTo
@@ -64,6 +65,14 @@ class ImageServiceTest {
 		val id2 = imageService.addImage(getBytes("1x1.gif"))!!.id
 		val id3 = imageService.addImage(getBytes("1x1.png"))!!.id
 		assertThat(imageService.getImageIds(), containsInAnyOrder(id1, id2, id3))
+	}
+
+	@Test
+	fun `image can be removed`() {
+		val id1 = imageService.addImage(getBytes("1x1.png"))!!.id
+		val id2 = imageService.addImage(getBytes("1x1.gif"))!!.id
+		imageService.removeImage(id1)
+		assertThat(imageService.getImageIds(), contains(id2))
 	}
 
 	private fun getBytes(path: String) = javaClass.getResourceAsStream(path)!!.readBytes()

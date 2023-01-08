@@ -71,11 +71,10 @@ const createPlaceholderElement = (imageId) => {
   return placeholderElement
 }
 
-const sendImageDataToServer = (imageData, imageType) => {
+const sendImageDataToServer = (imageBlob) => {
   const formData = new FormData()
   formData.append('formPassword', formPassword)
-  formData.append('image-type', imageType)
-  formData.append('image-data', new Blob([ imageData ], { type: imageType }))
+  formData.append('image-data', imageBlob)
   return fetch('image/', { method: 'POST', body: formData })
 }
 

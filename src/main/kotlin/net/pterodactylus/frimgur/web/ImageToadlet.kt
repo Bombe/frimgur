@@ -26,13 +26,12 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 	}
 
 	fun handleMethodPOST(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
-		val imageType = httpRequest.getPartAsStringFailsafe("image-type", 50)
 		val imageData = httpRequest.getPartAsBytesFailsafe("image-data", 20.millions())
 		if (imageData.isEmpty()) {
 			toadletContext.sendReplyHeaders(400, "Bad Request", MultiValueTable(), null, 0)
 			return
 		}
-		val imageMetadata = imageService.addImage(imageType, imageData)
+		val imageMetadata = imageService.addImage(imageData)
 		toadletContext.sendReplyHeaders(201, "Created", MultiValueTable<String, String>().apply { put("Location", imageMetadata.id) }, null, 0)
 	}
 

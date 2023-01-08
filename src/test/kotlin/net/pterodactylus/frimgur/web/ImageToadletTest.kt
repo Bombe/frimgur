@@ -38,7 +38,7 @@ class ImageToadletTest {
 	fun `GET request with image ID returns data about that image`() {
 		val imageService = object : ImageService {
 			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34).takeIf { id == "123" }
-			override fun addImage(type: String, data: ByteArray) = ImageMetadata("0", 0, 0, 0)
+			override fun addImage(data: ByteArray) = ImageMetadata("0", 0, 0, 0)
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)
@@ -63,7 +63,7 @@ class ImageToadletTest {
 	fun `GET request with image ID returns json content-type`() {
 		val imageService = object : ImageService {
 			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34).takeIf { id == "123" }
-			override fun addImage(type: String, data: ByteArray) = ImageMetadata("0", 0, 0, 0)
+			override fun addImage(data: ByteArray) = ImageMetadata("0", 0, 0, 0)
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)
@@ -93,11 +93,6 @@ class ImageToadletTest {
 	}
 
 	private fun createCompleteHttpRequest() = object : HTTPRequest by httpRequest {
-		override fun getPartAsStringFailsafe(name: String, maxLength: Int) = when (name) {
-			"image-type" -> "image/png"
-			else -> ""
-		}
-
 		override fun getPartAsBytesFailsafe(name: String, maxLength: Int) = when (name) {
 			"image-data" -> byteArrayOf(0, 1, 2, 3)
 			else -> byteArrayOf()
@@ -108,9 +103,9 @@ class ImageToadletTest {
 	private val toadletContext = mock<ToadletContext>()
 	private val imageService = object : ImageService {
 		override fun getImage(id: String) = null
-		override fun addImage(type: String, data: ByteArray) =
+		override fun addImage(data: ByteArray) =
 			ImageMetadata("id-1", 720, 576, 1234)
-				.takeIf { type == "image/png" && data.contentEquals(byteArrayOf(0, 1, 2, 3)) }
+				.takeIf { data.contentEquals(byteArrayOf(0, 1, 2, 3)) }
 				?: ImageMetadata("0", 0, 0, 0)
 	}
 	private val highLevelSimpleClient = mock<HighLevelSimpleClient>()

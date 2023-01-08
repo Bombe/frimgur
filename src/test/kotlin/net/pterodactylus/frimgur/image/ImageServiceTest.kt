@@ -15,25 +15,25 @@ class ImageServiceTest {
 
 	@Test
 	fun `image service can parse PNG files`() {
-		val metadata = imageService.addImage("image/png", getBytes("1x1.png"))
+		val metadata = imageService.addImage(getBytes("1x1.png"))
 		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(67)))
 	}
 
 	@Test
 	fun `image service can parse JPEG files`() {
-		val metadata = imageService.addImage("image/jpeg", getBytes("1x1.jpg"))
+		val metadata = imageService.addImage(getBytes("1x1.jpg"))
 		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(333)))
 	}
 
 	@Test
 	fun `image service can parse GIF files`() {
-		val metadata = imageService.addImage("image/gif", getBytes("1x1.gif"))
+		val metadata = imageService.addImage(getBytes("1x1.gif"))
 		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(35)))
 	}
 
 	@Test
 	fun `image service can parse BMP files`() {
-		val metadata = imageService.addImage("image/bmp", getBytes("1x1.bmp"))
+		val metadata = imageService.addImage(getBytes("1x1.bmp"))
 		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(66)))
 	}
 

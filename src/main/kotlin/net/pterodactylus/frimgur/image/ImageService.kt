@@ -12,11 +12,10 @@ interface ImageService {
 	/**
 	 * Decodes the given image, stores it, and returns its metadata.
 	 *
-	 * @param type The MIME type of the image
 	 * @param data The encoded image
 	 * @return The metadata parsed from the given image data
 	 */
-	fun addImage(type: String, data: ByteArray): ImageMetadata
+	fun addImage(data: ByteArray): ImageMetadata
 
 	/**
 	 * Returns metadata for the image with the given ID.
@@ -31,7 +30,7 @@ interface ImageService {
 
 class DefaultImageService : ImageService {
 
-	override fun addImage(type: String, data: ByteArray): ImageMetadata {
+	override fun addImage(data: ByteArray): ImageMetadata {
 		val bufferedImage = ImageIO.read(ByteArrayInputStream(data))
 		return ImageMetadata(UUID.randomUUID().toString(), bufferedImage.width, bufferedImage.height, data.size)
 	}

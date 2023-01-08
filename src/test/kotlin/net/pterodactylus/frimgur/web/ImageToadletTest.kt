@@ -58,6 +58,17 @@ class ImageToadletTest {
 	}
 
 	@Test
+	fun `GET request with image ID returns json content-type`() {
+		val imageService = object : ImageService {
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34).takeIf { id == "123" }
+			override fun addImage(type: String, data: ByteArray) = ImageMetadata("0", 0, 0, 0)
+		}
+		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
+		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)
+		verify(toadletContext).sendReplyHeaders(any(), any(), isNull(), eq("application/json"), anyLong(), anyBoolean())
+	}
+
+	@Test
 	fun `GET request with invalid image ID results in 404`() {
 		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(404), any(), isNull(), isNull(), anyLong())

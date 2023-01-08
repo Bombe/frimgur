@@ -23,7 +23,7 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 			toadletContext.sendReplyHeaders(404, "Not Found", null, null, 0)
 			return
 		}
-		writeHTMLReply(toadletContext, 200, "OK", imageMetadata.toJson().toString())
+		writeReply(toadletContext, 200, "application/json", "OK", imageMetadata.toJson().toString())
 	}
 
 	fun handleMethodPOST(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {

@@ -46,9 +46,29 @@ interface ImageService {
 class DefaultImageService : ImageService {
 
 	override fun addImage(data: ByteArray): ImageMetadata? =
-		ImageIO.read(ByteArrayInputStream(data))
-			?.let { bufferedImage -> ImageMetadata(UUID.randomUUID().toString(), bufferedImage.width, bufferedImage.height, data.size) }
-			?.also { imageMetadata -> imageData[imageMetadata.id] = ImageData(imageMetadata, data.clone()) }
+		detectImageType(data)
+			?.let { imageType ->
+				ByteArrayInputStream(data).use { byteArrayInputStream ->
+					ImageIO.read(byteArrayInputStream)
+						?.let { bufferedImage -> ImageMetadata(UUID.randomUUID().toString(), bufferedImage.width, bufferedImage.height, data.size, imageType) }
+						?.also { imageMetadata -> imageData[imageMetadata.id] = ImageData(imageMetadata, data.clone()) }
+				}
+			}
+
+	private fun detectImageType(data: ByteArray): String? =
+		ByteArrayInputStream(data).use { inputStream ->
+			ImageIO.createImageInputStream(inputStream).use { imageInputStream ->
+				ImageIO.getImageReaders(imageInputStream).nextOrNull()?.formatName.let {
+					when (it) {
+						"gif" -> "image/gif"
+						"png" -> "image/png"
+						"JPEG" -> "image/jpeg"
+						"bmp" -> "image/bmp"
+						else -> null
+					}
+				}
+			}
+		}
 
 	override fun getImage(id: String): ImageMetadata? = imageData[id]?.metadata
 
@@ -61,6 +81,8 @@ class DefaultImageService : ImageService {
 	private val imageData = mutableMapOf<String, ImageData>()
 
 }
+
+private fun <T> Iterator<T>.nextOrNull() = if (hasNext()) next() else null
 
 /**
  * Metadata of an image.
@@ -77,7 +99,10 @@ data class ImageMetadata(
 	val height: Int,
 
 	/** The size of the encoded image in bytes. */
-	val size: Int
+	val size: Int,
+
+	/** The MIME type of the image. */
+	val mimeType: String = ""
 
 )
 

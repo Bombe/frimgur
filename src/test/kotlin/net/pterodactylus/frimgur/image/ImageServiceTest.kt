@@ -20,25 +20,25 @@ class ImageServiceTest {
 	@Test
 	fun `image service can parse PNG files`() {
 		val metadata = imageService.addImage(getBytes("1x1.png"))
-		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(67)))
+		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(67), equalTo("image/png")))
 	}
 
 	@Test
 	fun `image service can parse JPEG files`() {
 		val metadata = imageService.addImage(getBytes("1x1.jpg"))
-		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(333)))
+		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(333), equalTo("image/jpeg")))
 	}
 
 	@Test
 	fun `image service can parse GIF files`() {
 		val metadata = imageService.addImage(getBytes("1x1.gif"))
-		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(35)))
+		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(35), equalTo("image/gif")))
 	}
 
 	@Test
 	fun `image service can parse BMP files`() {
 		val metadata = imageService.addImage(getBytes("1x1.bmp"))
-		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(66)))
+		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(66), equalTo("image/bmp")))
 	}
 
 	@Test
@@ -81,7 +81,7 @@ class ImageServiceTest {
 
 }
 
-private fun isMetadataWith(width: Matcher<Int> = any(Int::class.java), height: Matcher<Int> = any(Int::class.java), size: Matcher<Int> = any(Int::class.java)): Matcher<ImageMetadata?> = object : TypeSafeDiagnosingMatcher<ImageMetadata>() {
+private fun isMetadataWith(width: Matcher<Int> = any(Int::class.java), height: Matcher<Int> = any(Int::class.java), size: Matcher<Int> = any(Int::class.java), mimeType: Matcher<String> = any(String::class.java)): Matcher<ImageMetadata?> = object : TypeSafeDiagnosingMatcher<ImageMetadata>() {
 
 	override fun matchesSafely(imageMetadata: ImageMetadata, mismatchDescription: Description): Boolean {
 		if (!width.matches(imageMetadata.width)) {
@@ -96,13 +96,18 @@ private fun isMetadataWith(width: Matcher<Int> = any(Int::class.java), height: M
 			mismatchDescription.appendText("size is ").appendValue(imageMetadata.size)
 			return false
 		}
+		if (!mimeType.matches(imageMetadata.mimeType)) {
+			mismatchDescription.appendText("MIME type is ").appendValue(imageMetadata.mimeType)
+			return false
+		}
 		return true
 	}
 
 	override fun describeTo(description: Description) {
 		description.appendText("image metadata with width ").appendDescriptionOf(width)
 			.appendText(", height ").appendDescriptionOf(height)
-			.appendText(", and size ").appendDescriptionOf(size)
+			.appendText(", size ").appendDescriptionOf(size)
+			.appendText(", and MIME type ").appendDescriptionOf(mimeType)
 	}
 
 }

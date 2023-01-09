@@ -57,7 +57,11 @@ class ImageServiceTest {
 	@Test
 	fun `adding an image notifies listener`() {
 		val listenerCalled = AtomicBoolean(false)
-		imageService.onNewImage { listenerCalled.set(true) }
+		imageService.onNewImage { (metadata, data) ->
+			if ((metadata.width == 1) && (metadata.height == 1) && (metadata.size == 67) && (metadata.mimeType == "image/png") && (data.contentEquals(getBytes("1x1.png")))) {
+				listenerCalled.set(true)
+			}
+		}
 		imageService.addImage(getBytes("1x1.png"))
 		assertThat(listenerCalled.get(), equalTo(true))
 	}
@@ -65,7 +69,7 @@ class ImageServiceTest {
 	@Test
 	fun `adding an invalid image does not notify listener`() {
 		val listenerCalled = AtomicBoolean(false)
-		imageService.onNewImage { listenerCalled.set(true) }
+		imageService.onNewImage { _ -> listenerCalled.set(true) }
 		imageService.addImage(byteArrayOf(0, 1, 2, 3))
 		assertThat(listenerCalled.get(), equalTo(false))
 	}

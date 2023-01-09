@@ -27,6 +27,8 @@ interface ImageService {
 	 */
 	fun getImage(id: String): ImageMetadata? = null
 
+	fun getImageData(id: String): ImageData? = null
+
 	/**
 	 * Returns the IDs of all images that are currently stored in this image service.
 	 *
@@ -71,6 +73,8 @@ class DefaultImageService : ImageService {
 		}
 
 	override fun getImage(id: String): ImageMetadata? = imageData[id]?.metadata
+
+	override fun getImageData(id: String): ImageData? = imageData[id]
 
 	override fun getImageIds() = imageData.keys.toList()
 

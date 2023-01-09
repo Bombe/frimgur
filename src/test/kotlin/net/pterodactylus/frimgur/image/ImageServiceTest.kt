@@ -68,6 +68,20 @@ class ImageServiceTest {
 	}
 
 	@Test
+	fun `image service can return image data for valid ID`() {
+		val id1 = imageService.addImage(getBytes("1x1.png"))!!.id
+		val imageData = imageService.getImageData(id1)!!
+		assertThat(imageData.metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(67), equalTo("image/png")))
+		assertThat(imageData.data, equalTo(getBytes("1x1.png")))
+	}
+
+	@Test
+	fun `image service returns null data for invalid ID`() {
+		val imageData = imageService.getImageData("123")
+		assertThat(imageData, nullValue())
+	}
+
+	@Test
 	fun `image can be removed`() {
 		val id1 = imageService.addImage(getBytes("1x1.png"))!!.id
 		val id2 = imageService.addImage(getBytes("1x1.gif"))!!.id

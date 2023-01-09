@@ -5,7 +5,6 @@ import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.any
 import org.hamcrest.Matchers.contains
-import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.emptyIterable
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.nullValue
@@ -64,7 +63,16 @@ class ImageServiceTest {
 		val id1 = imageService.addImage(getBytes("1x1.png"))!!.id
 		val id2 = imageService.addImage(getBytes("1x1.gif"))!!.id
 		val id3 = imageService.addImage(getBytes("1x1.png"))!!.id
-		assertThat(imageService.getImageIds(), containsInAnyOrder(id1, id2, id3))
+		assertThat(imageService.getImageIds(), contains(id1, id2, id3))
+	}
+
+	@Test
+	fun `images are listed in insert-order`() {
+		val insertedIds = (1..1000).map {
+			imageService.addImage(getBytes("1x1.png"))!!.id
+		}
+		val idsInService = imageService.getImageIds()
+		assertThat(idsInService, contains(insertedIds.map(::equalTo)))
 	}
 
 	@Test

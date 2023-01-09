@@ -31,6 +31,8 @@ interface ImageService {
 
 	/**
 	 * Returns the IDs of all images that are currently stored in this image service.
+	 * The returned list is sorted by time of [image addition][addImage], oldest
+	 * image ID first.
 	 *
 	 * @return The IDs of all stored images
 	 */
@@ -76,7 +78,11 @@ class DefaultImageService : ImageService {
 
 	override fun getImageData(id: String): ImageData? = imageData[id]
 
-	override fun getImageIds() = imageData.keys.toList()
+	override fun getImageIds() = imageData
+		.map(Map.Entry<String, ImageData>::value)
+		.map(ImageData::metadata)
+		.sorted()
+		.map(ImageMetadata::id)
 
 	override fun removeImage(id: String) {
 		imageData.remove(id)
@@ -107,8 +113,14 @@ data class ImageMetadata(
 
 	/** The MIME type of the image. */
 	val mimeType: String = ""
+) : Comparable<ImageMetadata> {
 
-)
+	override fun compareTo(other: ImageMetadata) =
+		compareBy(ImageMetadata::insertTime).compare(this, other)
+
+	private val insertTime: Long = System.currentTimeMillis()
+
+}
 
 /**
  * Data of an image, consisting of both its [metadata][ImageMetadata] and

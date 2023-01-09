@@ -45,6 +45,13 @@ interface ImageService {
 	 */
 	fun removeImage(id: String) = Unit
 
+	/**
+	 * Adds a listener that gets notified when an image has been [added][addImage].
+	 *
+	 * @param listener The listener to notifies on new images
+	 */
+	fun onNewImage(listener: (imageMetadata: ImageMetadata) -> Unit) = Unit
+
 }
 
 class DefaultImageService : ImageService {
@@ -56,6 +63,7 @@ class DefaultImageService : ImageService {
 					ImageIO.read(byteArrayInputStream)
 						?.let { bufferedImage -> ImageMetadata(UUID.randomUUID().toString(), bufferedImage.width, bufferedImage.height, data.size, imageType) }
 						?.also { imageMetadata -> imageData[imageMetadata.id] = ImageData(imageMetadata, data.clone()) }
+						?.also { imageMetadata -> newImageListeners.forEach { listener -> listener(imageMetadata) } }
 				}
 			}
 
@@ -88,6 +96,11 @@ class DefaultImageService : ImageService {
 		imageData.remove(id)
 	}
 
+	override fun onNewImage(listener: (imageMetadata: ImageMetadata) -> Unit) {
+		newImageListeners += listener
+	}
+
+	private val newImageListeners = mutableListOf<(ImageMetadata) -> Unit>()
 	private val imageData = mutableMapOf<String, ImageData>()
 
 }

@@ -9,6 +9,7 @@ import org.hamcrest.Matchers.emptyIterable
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.nullValue
 import org.hamcrest.TypeSafeDiagnosingMatcher
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.test.Test
 
 /**
@@ -51,6 +52,22 @@ class ImageServiceTest {
 		val originalMetadata = imageService.addImage(getBytes("1x1.png"))
 		val storedMetadata = imageService.getImage(originalMetadata!!.id)
 		assertThat(storedMetadata, equalTo(originalMetadata))
+	}
+
+	@Test
+	fun `adding an image notifies listener`() {
+		val listenerCalled = AtomicBoolean(false)
+		imageService.onNewImage { listenerCalled.set(true) }
+		imageService.addImage(getBytes("1x1.png"))
+		assertThat(listenerCalled.get(), equalTo(true))
+	}
+
+	@Test
+	fun `adding an invalid image does not notify listener`() {
+		val listenerCalled = AtomicBoolean(false)
+		imageService.onNewImage { listenerCalled.set(true) }
+		imageService.addImage(byteArrayOf(0, 1, 2, 3))
+		assertThat(listenerCalled.get(), equalTo(false))
 	}
 
 	@Test

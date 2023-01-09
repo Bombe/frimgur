@@ -78,7 +78,26 @@ const sendImageDataToServer = (imageBlob) => {
   return fetch('image/', { method: 'POST', body: formData })
 }
 
+const fetchImageDataFromServer = (imageId) =>
+  fetch(`image-data/${imageId}`)
+    .then(response => ({ arrayBuffer: response.arrayBuffer(), contentType: response.headers.get('Content-Type') }))
+    .then(({ arrayBuffer, contentType }) => arrayBuffer.then(data => ({ data, contentType })))
+    .then(({ data, contentType }) => new Blob([ data ], { type: contentType }))
+
+const populateWithExistingImages = () => {
+  fetch('images/')
+    .then(response => response.json())
+    .then(response => {
+      for (const imageMetadata of response) {
+        fetchImageDataFromServer(imageMetadata.id).then(imageBlob => {
+          showPlaceholder(imageMetadata.id, imageBlob)
+        })
+      }
+    })
+}
+
 window.onload = () => {
   formPassword = document.getElementById('form-password').textContent
+  populateWithExistingImages()
   addClipboardListener()
 }

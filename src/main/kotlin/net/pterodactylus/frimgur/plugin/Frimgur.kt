@@ -38,6 +38,7 @@ open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless {
 		val insertService: InsertService = injector.getInstance()
 		imageService.onNewImage { imageData -> insertService.insertImage(imageData.metadata.id, imageData.data, imageData.metadata.mimeType) }
 		insertService.onInsertStarting { id -> imageService.setImageStatus(id, Inserting) }
+		insertService.onInsertGeneratingUri(imageService::setImageKey)
 	}
 
 	protected open fun createInjector(): Injector = Guice.createInjector(getModules())

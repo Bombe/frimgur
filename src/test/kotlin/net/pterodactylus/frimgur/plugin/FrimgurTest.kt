@@ -3,6 +3,12 @@ package net.pterodactylus.frimgur.plugin
 import com.google.inject.Injector
 import com.google.inject.Module
 import com.google.inject.util.Modules.override
+import freenet.client.HighLevelSimpleClient
+import freenet.client.InsertBlock
+import freenet.client.InsertContext
+import freenet.client.async.ClientPutCallback
+import freenet.client.async.ClientPutter
+import freenet.keys.FreenetURI
 import freenet.l10n.BaseL10n
 import freenet.pluginmanager.FredPlugin
 import freenet.pluginmanager.FredPluginL10n
@@ -132,6 +138,31 @@ class FrimgurTest {
 			val insertService: InsertService = injector.getInstance()
 			insertService.insertImage("id1", byteArrayOf(), "image/test")
 			assertThat(imageStatusSet, contains("id1" to Inserting))
+		}
+	}
+
+	@Test
+	fun `image service is called to set key when insert generates uri`() {
+		val clientPutCallbacks = mutableListOf<ClientPutCallback>()
+		val highLevelSimpleClient = captureClientPutCallback { clientPutCallback -> clientPutCallbacks += clientPutCallback }
+		val imageKeys = mutableListOf<Pair<String, String>>()
+		val imageService = object : ImageService {
+			override fun setImageKey(id: String, key: String) {
+				imageKeys += id to key
+			}
+		}
+		runPlugin(bind<HighLevelSimpleClient>().toInstance(highLevelSimpleClient), bind<ImageService>().toInstance(imageService)) { injector ->
+			val insertService: InsertService = injector.getInstance()
+			insertService.insertImage("id1", byteArrayOf(), "image/test")
+			clientPutCallbacks.first().onGeneratedURI(FreenetURI("KSK@Test"), mock())
+			assertThat(imageKeys, contains(equalTo("id1" to "KSK@Test")))
+		}
+	}
+
+	private fun captureClientPutCallback(action: (ClientPutCallback) -> Unit) = object : HighLevelSimpleClient by mock() {
+		override fun insert(insertBlock: InsertBlock, filenameHint: String?, isMetadata: Boolean, insertContext: InsertContext?, clientPutCallback: ClientPutCallback, priority: Short): ClientPutter? {
+			action(clientPutCallback)
+			return mock<HighLevelSimpleClient>().insert(insertBlock, filenameHint, isMetadata, insertContext, clientPutCallback, priority)
 		}
 	}
 

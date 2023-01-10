@@ -8,8 +8,8 @@ import freenet.pluginmanager.FredPluginL10n
  */
 interface WebInterface {
 
-	fun start()
-	fun stop()
+	fun start() = Unit
+	fun stop() = Unit
 
 }
 

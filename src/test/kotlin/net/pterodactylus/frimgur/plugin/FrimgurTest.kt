@@ -71,9 +71,7 @@ class FrimgurTest {
 	fun `Frimgur starts the web interface`() {
 		val started = AtomicBoolean(false)
 		val webInterface = object : WebInterface {
-			override fun start() =
-				started.set(true)
-			override fun stop() = Unit
+			override fun start() = started.set(true)
 		}
 		val frimgur = object : Frimgur() {
 			override fun getModules() = listOf(
@@ -90,9 +88,7 @@ class FrimgurTest {
 	fun `terminating Frimgur stops the web interface`() {
 		val stopped = AtomicBoolean(false)
 		val webInterface = object : WebInterface {
-			override fun start() = Unit
-			override fun stop() =
-				stopped.set(true)
+			override fun stop() = stopped.set(true)
 		}
 		val frimgur = object : Frimgur() {
 			override fun getModules() = listOf(

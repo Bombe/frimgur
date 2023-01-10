@@ -9,6 +9,7 @@ import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.FredPluginThreadless
 import freenet.pluginmanager.PluginRespirator
 import net.pterodactylus.frimgur.image.ImageService
+import net.pterodactylus.frimgur.image.ImageStatus.Failed
 import net.pterodactylus.frimgur.image.ImageStatus.Inserting
 import net.pterodactylus.frimgur.inject.FreenetModule
 import net.pterodactylus.frimgur.inject.ImageModule
@@ -39,6 +40,7 @@ open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless {
 		imageService.onNewImage { imageData -> insertService.insertImage(imageData.metadata.id, imageData.data, imageData.metadata.mimeType) }
 		insertService.onInsertStarting { id -> imageService.setImageStatus(id, Inserting) }
 		insertService.onInsertGeneratingUri(imageService::setImageKey)
+		insertService.onInsertFailed { id -> imageService.setImageStatus(id, Failed) }
 	}
 
 	protected open fun createInjector(): Injector = Guice.createInjector(getModules())

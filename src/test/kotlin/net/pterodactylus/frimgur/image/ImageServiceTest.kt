@@ -19,25 +19,25 @@ class ImageServiceTest {
 
 	@Test
 	fun `image service can parse PNG files`() {
-		val metadata = imageService.addImage(getBytes("1x1.png"))
+		val metadata = imageService.addImage(get1x1Png())
 		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(67), equalTo("image/png")))
 	}
 
 	@Test
 	fun `image service can parse JPEG files`() {
-		val metadata = imageService.addImage(getBytes("1x1.jpg"))
+		val metadata = imageService.addImage(get1x1Jpeg())
 		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(333), equalTo("image/jpeg")))
 	}
 
 	@Test
 	fun `image service can parse GIF files`() {
-		val metadata = imageService.addImage(getBytes("1x1.gif"))
+		val metadata = imageService.addImage(get1x1Gif())
 		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(35), equalTo("image/gif")))
 	}
 
 	@Test
 	fun `image service can parse BMP files`() {
-		val metadata = imageService.addImage(getBytes("1x1.bmp"))
+		val metadata = imageService.addImage(get1x1Bmp())
 		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(66), equalTo("image/bmp")))
 	}
 
@@ -49,7 +49,7 @@ class ImageServiceTest {
 
 	@Test
 	fun `adding an image makes it available`() {
-		val originalMetadata = imageService.addImage(getBytes("1x1.png"))
+		val originalMetadata = imageService.addImage(get1x1Png())
 		val storedMetadata = imageService.getImage(originalMetadata!!.id)
 		assertThat(storedMetadata, equalTo(originalMetadata))
 	}
@@ -58,11 +58,11 @@ class ImageServiceTest {
 	fun `adding an image notifies listener`() {
 		val listenerCalled = AtomicBoolean(false)
 		imageService.onNewImage { (metadata, data) ->
-			if ((metadata.width == 1) && (metadata.height == 1) && (metadata.size == 67) && (metadata.mimeType == "image/png") && (data.contentEquals(getBytes("1x1.png")))) {
+			if ((metadata.width == 1) && (metadata.height == 1) && (metadata.size == 67) && (metadata.mimeType == "image/png") && (data.contentEquals(get1x1Png()))) {
 				listenerCalled.set(true)
 			}
 		}
-		imageService.addImage(getBytes("1x1.png"))
+		imageService.addImage(get1x1Png())
 		assertThat(listenerCalled.get(), equalTo(true))
 	}
 
@@ -81,16 +81,16 @@ class ImageServiceTest {
 
 	@Test
 	fun `image servce can list added images`() {
-		val id1 = imageService.addImage(getBytes("1x1.png"))!!.id
-		val id2 = imageService.addImage(getBytes("1x1.gif"))!!.id
-		val id3 = imageService.addImage(getBytes("1x1.png"))!!.id
+		val id1 = imageService.addImage(get1x1Png())!!.id
+		val id2 = imageService.addImage(get1x1Gif())!!.id
+		val id3 = imageService.addImage(get1x1Png())!!.id
 		assertThat(imageService.getImageIds(), contains(id1, id2, id3))
 	}
 
 	@Test
 	fun `images are listed in insert-order`() {
 		val insertedIds = (1..1000).map {
-			imageService.addImage(getBytes("1x1.png"))!!.id
+			imageService.addImage(get1x1Png())!!.id
 		}
 		val idsInService = imageService.getImageIds()
 		assertThat(idsInService, contains(insertedIds.map(::equalTo)))
@@ -98,10 +98,10 @@ class ImageServiceTest {
 
 	@Test
 	fun `image service can return image data for valid ID`() {
-		val id1 = imageService.addImage(getBytes("1x1.png"))!!.id
+		val id1 = imageService.addImage(get1x1Png())!!.id
 		val imageData = imageService.getImageData(id1)!!
 		assertThat(imageData.metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(67), equalTo("image/png")))
-		assertThat(imageData.data, equalTo(getBytes("1x1.png")))
+		assertThat(imageData.data, equalTo(get1x1Png()))
 	}
 
 	@Test
@@ -112,13 +112,11 @@ class ImageServiceTest {
 
 	@Test
 	fun `image can be removed`() {
-		val id1 = imageService.addImage(getBytes("1x1.png"))!!.id
-		val id2 = imageService.addImage(getBytes("1x1.gif"))!!.id
+		val id1 = imageService.addImage(get1x1Png())!!.id
+		val id2 = imageService.addImage(get1x1Gif())!!.id
 		imageService.removeImage(id1)
 		assertThat(imageService.getImageIds(), contains(id2))
 	}
-
-	private fun getBytes(path: String) = javaClass.getResourceAsStream(path)!!.readBytes()
 
 	private val imageService = DefaultImageService()
 

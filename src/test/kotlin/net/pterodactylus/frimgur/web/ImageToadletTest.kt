@@ -38,7 +38,6 @@ class ImageToadletTest {
 	fun `GET request with image ID returns data about that image`() {
 		val imageService = object : ImageService {
 			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34).takeIf { id == "123" }
-			override fun addImage(data: ByteArray) = ImageMetadata("0", 0, 0, 0)
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)
@@ -63,7 +62,6 @@ class ImageToadletTest {
 	fun `GET request with image ID returns json content-type`() {
 		val imageService = object : ImageService {
 			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34).takeIf { id == "123" }
-			override fun addImage(data: ByteArray) = ImageMetadata("0", 0, 0, 0)
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)

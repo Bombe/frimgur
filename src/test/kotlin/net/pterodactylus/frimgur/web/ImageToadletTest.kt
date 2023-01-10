@@ -3,12 +3,14 @@ package net.pterodactylus.frimgur.web
 import com.spotify.hamcrest.jackson.IsJsonObject.jsonObject
 import com.spotify.hamcrest.jackson.JsonMatchers.isJsonStringMatching
 import com.spotify.hamcrest.jackson.JsonMatchers.jsonInt
+import com.spotify.hamcrest.jackson.JsonMatchers.jsonNull
 import com.spotify.hamcrest.jackson.JsonMatchers.jsonText
 import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.ToadletContext
 import freenet.support.api.HTTPRequest
 import net.pterodactylus.frimgur.image.ImageMetadata
 import net.pterodactylus.frimgur.image.ImageService
+import net.pterodactylus.frimgur.image.ImageStatus.Inserted
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.mockito.ArgumentMatchers.anyBoolean
@@ -37,7 +39,7 @@ class ImageToadletTest {
 	@Test
 	fun `GET request with image ID returns data about that image`() {
 		val imageService = object : ImageService {
-			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34).takeIf { id == "123" }
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", Inserted, "CHK@Test").takeIf { id == "123" }
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)
@@ -53,6 +55,29 @@ class ImageToadletTest {
 							.where("width", jsonInt(12))
 							.where("height", jsonInt(23))
 							.where("size", jsonInt(34))
+							.where("status", jsonText("Inserted"))
+							.where("key", jsonText("CHK@Test"))
+					)
+			)
+		)
+	}
+
+	@Test
+	fun `unset key in image metadata is rendered as JSON null`() {
+		val imageService = object : ImageService {
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", Inserted).takeIf { id == "123" }
+		}
+		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
+		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)
+		verify(toadletContext).sendReplyHeaders(eq(200), any(), isNull(), any(), anyLong(), anyBoolean())
+		val body = argumentCaptor<ByteArray>()
+		verify(toadletContext).writeData(body.capture(), anyInt(), anyInt())
+		assertThat(
+			body.firstValue.decodeToString(), isJsonStringMatching(
+				jsonObject()
+					.where(
+						"metadata", jsonObject()
+							.where("key", jsonNull())
 					)
 			)
 		)

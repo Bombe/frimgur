@@ -17,6 +17,7 @@ import freenet.pluginmanager.PluginRespirator
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus
 import net.pterodactylus.frimgur.image.ImageStatus.Failed
+import net.pterodactylus.frimgur.image.ImageStatus.Inserted
 import net.pterodactylus.frimgur.image.ImageStatus.Inserting
 import net.pterodactylus.frimgur.image.get1x1Png
 import net.pterodactylus.frimgur.insert.InsertService
@@ -176,6 +177,24 @@ class FrimgurTest {
 			insertService.insertImage("id1", byteArrayOf(), "image/test")
 			clientPutCallbacks.first().onFailure(mock(), mock())
 			assertThat(imageStatus, hasItem(equalTo("id1" to Failed)))
+		}
+	}
+
+	@Test
+	fun `image service is called to set status when insert finishes`() {
+		val clientPutCallbacks = mutableListOf<ClientPutCallback>()
+		val highLevelSimpleClient = captureClientPutCallback { clientPutCallback -> clientPutCallbacks += clientPutCallback }
+		val imageStatus = mutableListOf<Pair<String, ImageStatus>>()
+		val imageService = object : ImageService {
+			override fun setImageStatus(id: String, status: ImageStatus) {
+				imageStatus += id to status
+			}
+		}
+		runPlugin(bind<HighLevelSimpleClient>().toInstance(highLevelSimpleClient), bind<ImageService>().toInstance(imageService)) { injector ->
+			val insertService: InsertService = injector.getInstance()
+			insertService.insertImage("id1", byteArrayOf(), "image/test")
+			clientPutCallbacks.first().onSuccess(mock())
+			assertThat(imageStatus, hasItem(equalTo("id1" to Inserted)))
 		}
 	}
 

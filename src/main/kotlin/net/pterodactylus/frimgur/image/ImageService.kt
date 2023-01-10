@@ -1,5 +1,6 @@
 package net.pterodactylus.frimgur.image
 
+import net.pterodactylus.frimgur.image.ImageStatus.Inserting
 import java.io.ByteArrayInputStream
 import java.util.UUID
 import javax.imageio.ImageIO
@@ -28,6 +29,22 @@ interface ImageService {
 	fun getImage(id: String): ImageMetadata? = null
 
 	fun getImageData(id: String): ImageData? = null
+
+	/**
+	 * Sets the status of the image with the given ID.
+	 *
+	 * @param id The ID of the image to set the status of
+	 * @param status The new status of the image
+	 */
+	fun setImageStatus(id: String, status: ImageStatus) = Unit
+
+	/**
+	 * Sets the key of the image with the given ID.
+	 *
+	 * @param id The ID of the image to set the key of
+	 * @param key The new key of the image
+	 */
+	fun setImageKey(id: String, key: String) = Unit
 
 	/**
 	 * Returns the IDs of all images that are currently stored in this image service.
@@ -88,6 +105,18 @@ class DefaultImageService : ImageService {
 
 	override fun getImageData(id: String): ImageData? = imageData[id]
 
+	override fun setImageStatus(id: String, status: ImageStatus) {
+		imageData[id]?.let { oldImageData ->
+			imageData[id] = oldImageData.copy(metadata = oldImageData.metadata.copy(status = status))
+		}
+	}
+
+	override fun setImageKey(id: String, key: String) {
+		imageData[id]?.let { oldImageData ->
+			imageData[id] = oldImageData.copy(metadata = oldImageData.metadata.copy(key = key))
+		}
+	}
+
 	override fun getImageIds() = imageData
 		.map(Map.Entry<String, ImageData>::value)
 		.map(ImageData::metadata)
@@ -127,14 +156,31 @@ data class ImageMetadata(
 	val size: Int,
 
 	/** The MIME type of the image. */
-	val mimeType: String = ""
-) : Comparable<ImageMetadata> {
+	val mimeType: String = "",
+
+	/** The status of the image. */
+	val status: ImageStatus = Inserting,
+
+	/** The generated key of the image. */
+	val key: String? = null,
+
+	) : Comparable<ImageMetadata> {
 
 	override fun compareTo(other: ImageMetadata) =
 		compareBy(ImageMetadata::insertTime).compare(this, other)
 
 	private val insertTime: Long = System.currentTimeMillis()
 
+}
+
+/**
+ * The states of an image. The typical lifecycle of an image has only two states,
+ * and all images start as `Inserting`. One of the other two states is then set
+ * when the [insert][net.pterodactylus.frimgur.insert.InsertService] reaches
+ * the appropriate stage.
+ */
+enum class ImageStatus {
+	Inserting, Failed, Inserted
 }
 
 /**

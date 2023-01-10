@@ -1,5 +1,8 @@
 package net.pterodactylus.frimgur.image
 
+import net.pterodactylus.frimgur.image.ImageStatus.Failed
+import net.pterodactylus.frimgur.image.ImageStatus.Inserted
+import net.pterodactylus.frimgur.image.ImageStatus.Inserting
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
@@ -94,6 +97,39 @@ class ImageServiceTest {
 		}
 		val idsInService = imageService.getImageIds()
 		assertThat(idsInService, contains(insertedIds.map(::equalTo)))
+	}
+
+	@Test
+	fun `added image has status 'inserting'`() {
+		val id = imageService.addImage(get1x1Png())!!.id
+		assertThat(imageService.getImage(id)!!.status, equalTo(Inserting))
+	}
+
+	@Test
+	fun `image status can be set 'inserted'`() {
+		val id = imageService.addImage(get1x1Png())!!.id
+		imageService.setImageStatus(id, Inserted)
+		assertThat(imageService.getImage(id)!!.status, equalTo(Inserted))
+	}
+
+	@Test
+	fun `image status can be set 'failed'`() {
+		val id = imageService.addImage(get1x1Png())!!.id
+		imageService.setImageStatus(id, Failed)
+		assertThat(imageService.getImage(id)!!.status, equalTo(Failed))
+	}
+
+	@Test
+	fun `added image does not have a generated key`() {
+		val id = imageService.addImage(get1x1Png())!!.id
+		assertThat(imageService.getImage(id)!!.key, nullValue())
+	}
+
+	@Test
+	fun `image key can be set`() {
+		val id = imageService.addImage(get1x1Png())!!.id
+		imageService.setImageKey(id, "CHK@Test")
+		assertThat(imageService.getImage(id)!!.key, equalTo("CHK@Test"))
 	}
 
 	@Test

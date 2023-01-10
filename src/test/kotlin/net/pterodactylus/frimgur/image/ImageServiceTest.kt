@@ -3,15 +3,12 @@ package net.pterodactylus.frimgur.image
 import net.pterodactylus.frimgur.image.ImageStatus.Failed
 import net.pterodactylus.frimgur.image.ImageStatus.Inserted
 import net.pterodactylus.frimgur.image.ImageStatus.Inserting
-import org.hamcrest.Description
-import org.hamcrest.Matcher
+import net.pterodactylus.frimgur.test.isMetadataWith
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.any
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.emptyIterable
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.nullValue
-import org.hamcrest.TypeSafeDiagnosingMatcher
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.test.Test
 
@@ -155,36 +152,5 @@ class ImageServiceTest {
 	}
 
 	private val imageService = DefaultImageService()
-
-}
-
-private fun isMetadataWith(width: Matcher<Int> = any(Int::class.java), height: Matcher<Int> = any(Int::class.java), size: Matcher<Int> = any(Int::class.java), mimeType: Matcher<String> = any(String::class.java)): Matcher<ImageMetadata?> = object : TypeSafeDiagnosingMatcher<ImageMetadata>() {
-
-	override fun matchesSafely(imageMetadata: ImageMetadata, mismatchDescription: Description): Boolean {
-		if (!width.matches(imageMetadata.width)) {
-			mismatchDescription.appendText("width is ").appendValue(imageMetadata.width)
-			return false
-		}
-		if (!height.matches(imageMetadata.height)) {
-			mismatchDescription.appendText("height is ").appendValue(imageMetadata.height)
-			return false
-		}
-		if (!size.matches(imageMetadata.size)) {
-			mismatchDescription.appendText("size is ").appendValue(imageMetadata.size)
-			return false
-		}
-		if (!mimeType.matches(imageMetadata.mimeType)) {
-			mismatchDescription.appendText("MIME type is ").appendValue(imageMetadata.mimeType)
-			return false
-		}
-		return true
-	}
-
-	override fun describeTo(description: Description) {
-		description.appendText("image metadata with width ").appendDescriptionOf(width)
-			.appendText(", height ").appendDescriptionOf(height)
-			.appendText(", size ").appendDescriptionOf(size)
-			.appendText(", and MIME type ").appendDescriptionOf(mimeType)
-	}
 
 }

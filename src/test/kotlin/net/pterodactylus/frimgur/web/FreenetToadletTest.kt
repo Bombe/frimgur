@@ -5,14 +5,12 @@ import freenet.clients.http.PageMaker
 import freenet.clients.http.PageNode
 import freenet.clients.http.ToadletContext
 import freenet.support.HTMLNode
+import net.pterodactylus.frimgur.test.isHtmlNode
 import net.pterodactylus.frimgur.web.annotations.ToadletName
-import org.hamcrest.Description
-import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasItem
-import org.hamcrest.TypeSafeDiagnosingMatcher
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -125,24 +123,4 @@ private fun <T> createObject(clazz: Class<T>, parameterTypes: Array<Class<*>>, v
 	val constructor = clazz.getDeclaredConstructor(*parameterTypes)
 	constructor.isAccessible = true
 	return constructor.newInstance(*arguments)
-}
-
-private fun isHtmlNode(name: Matcher<String>, attributes: Matcher<Iterable<Pair<String, String>>>) = object : TypeSafeDiagnosingMatcher<HTMLNode>() {
-	override fun matchesSafely(item: HTMLNode, mismatchDescription: Description): Boolean {
-		if (!name.matches(item.firstTag)) {
-			mismatchDescription.appendText("name is ").appendValue(item.firstTag)
-			return false;
-		}
-		if (!attributes.matches(item.attributes.toList())) {
-			mismatchDescription.appendText("attributes are ").appendValue(item.attributes)
-			return false;
-		}
-		return true
-	}
-
-	override fun describeTo(description: Description) {
-		description.appendText("HTML node with name ").appendDescriptionOf(name)
-			.appendText(" and attributes ").appendDescriptionOf(attributes)
-	}
-
 }

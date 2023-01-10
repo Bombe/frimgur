@@ -39,5 +39,7 @@ private fun ImageMetadata.toJson() = objectMapper.createObjectNode()!!.apply {
 		put("width", width)
 		put("height", height)
 		put("size", size)
+		put("status", status.name)
+		put("key", key)
 	}
 }

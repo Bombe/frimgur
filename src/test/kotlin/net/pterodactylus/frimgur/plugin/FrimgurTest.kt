@@ -1,6 +1,7 @@
 package net.pterodactylus.frimgur.plugin
 
 import com.google.inject.Injector
+import com.google.inject.Module
 import com.google.inject.util.Modules.override
 import freenet.l10n.BaseL10n
 import freenet.pluginmanager.FredPlugin
@@ -8,12 +9,15 @@ import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.FredPluginThreadless
 import freenet.pluginmanager.PluginRespirator
 import net.pterodactylus.frimgur.image.ImageService
+import net.pterodactylus.frimgur.image.ImageStatus
+import net.pterodactylus.frimgur.image.ImageStatus.Inserting
 import net.pterodactylus.frimgur.image.get1x1Png
 import net.pterodactylus.frimgur.insert.InsertService
 import net.pterodactylus.frimgur.test.bind
 import net.pterodactylus.frimgur.util.getInstance
 import net.pterodactylus.frimgur.web.WebInterface
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.instanceOf
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
@@ -105,19 +109,38 @@ class FrimgurTest {
 	@Test
 	fun `insert service is wired up as event listener for new images`() {
 		val insertService = mock<InsertService>()
+		runPlugin(bind<InsertService>().toInstance(insertService)) { injector ->
+			val imageService = injector.getInstance<ImageService>()
+			val metadata = imageService.addImage(testImage)
+			verify(insertService).insertImage(eq(metadata!!.id), eq(testImage), eq("image/png"))
+		}
+	}
+
+	@Test
+	fun `image service is called to set status to inserting when insert starts`() {
+		val imageStatusSet = mutableListOf<Pair<String, ImageStatus>>()
+		val imageService = object : ImageService {
+			override fun setImageStatus(id: String, status: ImageStatus) {
+				imageStatusSet += id to status
+			}
+		}
+		runPlugin(bind<ImageService>().toInstance(imageService)) { injector ->
+			val insertService: InsertService = injector.getInstance()
+			insertService.insertImage("id1", byteArrayOf(), "image/test")
+			assertThat(imageStatusSet, contains("id1" to Inserting))
+		}
+	}
+
+	private fun runPlugin(vararg overrideModules: Module, action: (Injector) -> Unit) {
 		val injector = AtomicReference<Injector>()
 		val frimgur = object : Frimgur() {
 			override fun createInjector() = super.createInjector().also(injector::set)
 			override fun getModules() = listOf(
-				override(super.getModules()).with(
-					bind<InsertService>().toInstance(insertService)
-				)
+				override(super.getModules()).with(*overrideModules)
 			)
 		}
 		frimgur.runPlugin(pluginRespirator)
-		val imageService = injector.get().getInstance<ImageService>()
-		val metadata = imageService.addImage(testImage)
-		verify(insertService).insertImage(eq(metadata!!.id), eq(testImage), eq("image/png"))
+		action(injector.get())
 	}
 
 	private val frimgur = Frimgur()

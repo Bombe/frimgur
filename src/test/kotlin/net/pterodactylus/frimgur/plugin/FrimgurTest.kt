@@ -16,14 +16,15 @@ import net.pterodactylus.frimgur.insert.InsertService
 import net.pterodactylus.frimgur.test.bind
 import net.pterodactylus.frimgur.util.getInstance
 import net.pterodactylus.frimgur.web.WebInterface
+import org.hamcrest.Description
+import org.hamcrest.Matcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.instanceOf
+import org.hamcrest.TypeSafeDiagnosingMatcher
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
@@ -108,11 +109,16 @@ class FrimgurTest {
 
 	@Test
 	fun `insert service is wired up as event listener for new images`() {
-		val insertService = mock<InsertService>()
+		val insertImageArguments = mutableListOf<Triple<String, ByteArray, String>>()
+		val insertService = object : InsertService {
+			override fun insertImage(id: String, data: ByteArray, mimeType: String) {
+				insertImageArguments += Triple(id, data, mimeType)
+			}
+		}
 		runPlugin(bind<InsertService>().toInstance(insertService)) { injector ->
 			val imageService = injector.getInstance<ImageService>()
-			val metadata = imageService.addImage(testImage)
-			verify(insertService).insertImage(eq(metadata!!.id), eq(testImage), eq("image/png"))
+			val metadata = imageService.addImage(testImage)!!
+			assertThat(insertImageArguments, contains(isTriple(equalTo(metadata.id), equalTo(testImage), equalTo("image/png"))))
 		}
 	}
 
@@ -146,6 +152,32 @@ class FrimgurTest {
 	private val frimgur = Frimgur()
 	private val pluginRespirator = mock<PluginRespirator>(defaultAnswer = RETURNS_DEEP_STUBS).apply {
 		whenever(toadletContainer.formPassword).thenReturn("123")
+	}
+
+}
+
+private fun <F, S, T> isTriple(first: Matcher<F>, second: Matcher<S>, third: Matcher<T>) = object : TypeSafeDiagnosingMatcher<Triple<F, S, T>>() {
+
+	override fun matchesSafely(triple: Triple<F, S, T>, mismatchDescription: Description): Boolean {
+		if (!first.matches(triple.first)) {
+			mismatchDescription.appendText("first was ").appendValue(triple.first)
+			return false
+		}
+		if (!second.matches(triple.second)) {
+			mismatchDescription.appendText("second was ").appendValue(triple.second)
+			return false
+		}
+		if (!third.matches(triple.third)) {
+			mismatchDescription.appendText("third was ").appendValue(triple.third)
+			return false
+		}
+		return true
+	}
+
+	override fun describeTo(description: Description) {
+		description.appendText("triple of ").appendDescriptionOf(first)
+			.appendText(", ").appendDescriptionOf(second)
+			.appendText(", and ").appendDescriptionOf(third)
 	}
 
 }

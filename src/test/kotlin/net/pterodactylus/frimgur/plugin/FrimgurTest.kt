@@ -132,11 +132,7 @@ class FrimgurTest {
 	@Test
 	fun `image service is called to set status to inserting when insert starts`() {
 		val imageStatusSet = mutableListOf<Pair<String, ImageStatus>>()
-		val imageService = object : ImageService {
-			override fun setImageStatus(id: String, status: ImageStatus) {
-				imageStatusSet += id to status
-			}
-		}
+		val imageService = captureImageStatus { id, status -> imageStatusSet += id to status }
 		runPlugin(bind<ImageService>().toInstance(imageService)) { injector ->
 			val insertService: InsertService = injector.getInstance()
 			insertService.insertImage("id1", byteArrayOf(), "image/test")
@@ -167,11 +163,7 @@ class FrimgurTest {
 		val clientPutCallbacks = mutableListOf<ClientPutCallback>()
 		val highLevelSimpleClient = captureClientPutCallback { clientPutCallback -> clientPutCallbacks += clientPutCallback }
 		val imageStatus = mutableListOf<Pair<String, ImageStatus>>()
-		val imageService = object : ImageService {
-			override fun setImageStatus(id: String, status: ImageStatus) {
-				imageStatus += id to status
-			}
-		}
+		val imageService = captureImageStatus { id, status -> imageStatus += id to status }
 		runPlugin(bind<HighLevelSimpleClient>().toInstance(highLevelSimpleClient), bind<ImageService>().toInstance(imageService)) { injector ->
 			val insertService: InsertService = injector.getInstance()
 			insertService.insertImage("id1", byteArrayOf(), "image/test")
@@ -185,17 +177,17 @@ class FrimgurTest {
 		val clientPutCallbacks = mutableListOf<ClientPutCallback>()
 		val highLevelSimpleClient = captureClientPutCallback { clientPutCallback -> clientPutCallbacks += clientPutCallback }
 		val imageStatus = mutableListOf<Pair<String, ImageStatus>>()
-		val imageService = object : ImageService {
-			override fun setImageStatus(id: String, status: ImageStatus) {
-				imageStatus += id to status
-			}
-		}
+		val imageService = captureImageStatus { id, status -> imageStatus += id to status }
 		runPlugin(bind<HighLevelSimpleClient>().toInstance(highLevelSimpleClient), bind<ImageService>().toInstance(imageService)) { injector ->
 			val insertService: InsertService = injector.getInstance()
 			insertService.insertImage("id1", byteArrayOf(), "image/test")
 			clientPutCallbacks.first().onSuccess(mock())
 			assertThat(imageStatus, hasItem(equalTo("id1" to Inserted)))
 		}
+	}
+
+	private fun captureImageStatus(action: (id: String, status: ImageStatus) -> Unit) = object : ImageService {
+		override fun setImageStatus(id: String, status: ImageStatus) = action(id, status)
 	}
 
 	private fun captureClientPutCallback(action: (ClientPutCallback) -> Unit) = object : HighLevelSimpleClient by mock() {

@@ -1,20 +1,28 @@
 package net.pterodactylus.frimgur.plugin
 
+import com.google.inject.Injector
 import com.google.inject.util.Modules.override
 import freenet.l10n.BaseL10n
 import freenet.pluginmanager.FredPlugin
 import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.FredPluginThreadless
 import freenet.pluginmanager.PluginRespirator
+import net.pterodactylus.frimgur.image.ImageService
+import net.pterodactylus.frimgur.image.get1x1Png
+import net.pterodactylus.frimgur.insert.InsertService
 import net.pterodactylus.frimgur.test.bind
+import net.pterodactylus.frimgur.util.getInstance
 import net.pterodactylus.frimgur.web.WebInterface
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.instanceOf
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.Test
 
 /**
@@ -98,9 +106,29 @@ class FrimgurTest {
 		assertThat(stopped.get(), equalTo(true))
 	}
 
+	@Test
+	fun `insert service is wired up as event listener for new images`() {
+		val insertService = mock<InsertService>()
+		val injector = AtomicReference<Injector>()
+		val frimgur = object : Frimgur() {
+			override fun createInjector() = super.createInjector().also(injector::set)
+			override fun getModules() = listOf(
+				override(super.getModules()).with(
+					bind<InsertService>().toInstance(insertService)
+				)
+			)
+		}
+		frimgur.runPlugin(pluginRespirator)
+		val imageService = injector.get().getInstance<ImageService>()
+		val metadata = imageService.addImage(testImage)
+		verify(insertService).insertImage(eq(metadata!!.id), eq(testImage), eq("image/png"))
+	}
+
 	private val frimgur = Frimgur()
 	private val pluginRespirator = mock<PluginRespirator>(defaultAnswer = RETURNS_DEEP_STUBS).apply {
 		whenever(toadletContainer.formPassword).thenReturn("123")
 	}
 
 }
+
+private val testImage = get1x1Png()

@@ -2,6 +2,7 @@ package net.pterodactylus.frimgur.plugin
 
 import com.google.inject.Guice
 import com.google.inject.Injector
+import com.google.inject.Module
 import freenet.l10n.BaseL10n.LANGUAGE
 import freenet.pluginmanager.FredPlugin
 import freenet.pluginmanager.FredPluginL10n
@@ -26,7 +27,9 @@ open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless {
 			.apply { start() }
 	}
 
-	protected open fun createInjector(): Injector = Guice.createInjector(
+	protected open fun createInjector(): Injector = Guice.createInjector(getModules())
+
+	protected open fun getModules(): List<Module> = listOf(
 		FreenetModule(this, pluginRespirator),
 		ImageModule(),
 		WebInterfaceModule("/frimgur/", "Navigation.Menu.Title", "Navigation.Menu.Tooltip")

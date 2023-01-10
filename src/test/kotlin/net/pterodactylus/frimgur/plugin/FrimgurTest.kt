@@ -1,6 +1,6 @@
 package net.pterodactylus.frimgur.plugin
 
-import com.google.inject.Guice
+import com.google.inject.util.Modules.override
 import freenet.l10n.BaseL10n
 import freenet.pluginmanager.FredPlugin
 import freenet.pluginmanager.FredPluginL10n
@@ -24,7 +24,6 @@ class FrimgurTest {
 
 	@Test
 	fun `Frimgur instance can be run`() {
-		whenever(pluginRespirator.toadletContainer.formPassword).thenReturn("123")
 		frimgur.runPlugin(pluginRespirator)
 	}
 
@@ -69,8 +68,10 @@ class FrimgurTest {
 			override fun stop() = Unit
 		}
 		val frimgur = object : Frimgur() {
-			override fun createInjector() = Guice.createInjector(
-				bind<WebInterface>().toInstance(webInterface)
+			override fun getModules() = listOf(
+				override(super.getModules()).with(
+					bind<WebInterface>().toInstance(webInterface)
+				)
 			)
 		}
 		frimgur.runPlugin(pluginRespirator)
@@ -86,8 +87,10 @@ class FrimgurTest {
 				stopped.set(true)
 		}
 		val frimgur = object : Frimgur() {
-			override fun createInjector() = Guice.createInjector(
-				bind<WebInterface>().toInstance(webInterface)
+			override fun getModules() = listOf(
+				override(super.getModules()).with(
+					bind<WebInterface>().toInstance(webInterface)
+				)
 			)
 		}
 		frimgur.runPlugin(pluginRespirator)
@@ -96,6 +99,8 @@ class FrimgurTest {
 	}
 
 	private val frimgur = Frimgur()
-	private val pluginRespirator = mock<PluginRespirator>(defaultAnswer = RETURNS_DEEP_STUBS)
+	private val pluginRespirator = mock<PluginRespirator>(defaultAnswer = RETURNS_DEEP_STUBS).apply {
+		whenever(toadletContainer.formPassword).thenReturn("123")
+	}
 
 }

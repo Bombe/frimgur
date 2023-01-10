@@ -10,6 +10,7 @@ import freenet.pluginmanager.FredPluginThreadless
 import freenet.pluginmanager.PluginRespirator
 import net.pterodactylus.frimgur.inject.FreenetModule
 import net.pterodactylus.frimgur.inject.ImageModule
+import net.pterodactylus.frimgur.inject.InsertModule
 import net.pterodactylus.frimgur.inject.WebInterfaceModule
 import net.pterodactylus.frimgur.web.WebInterface
 import java.util.Locale
@@ -32,6 +33,7 @@ open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless {
 	protected open fun getModules(): List<Module> = listOf(
 		FreenetModule(this, pluginRespirator),
 		ImageModule(),
+		InsertModule(),
 		WebInterfaceModule("/frimgur/", "Navigation.Menu.Title", "Navigation.Menu.Tooltip")
 	)
 

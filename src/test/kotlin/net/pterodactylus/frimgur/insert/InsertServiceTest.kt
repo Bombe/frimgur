@@ -3,6 +3,8 @@ package net.pterodactylus.frimgur.insert
 import freenet.client.HighLevelSimpleClient
 import freenet.client.InsertBlock
 import freenet.client.InsertContext
+import freenet.client.async.ClientPutCallback
+import freenet.keys.FreenetURI
 import freenet.keys.FreenetURI.EMPTY_CHK_URI
 import freenet.node.RequestStarter.MAXIMUM_PRIORITY_CLASS
 import freenet.support.api.Bucket
@@ -79,6 +81,39 @@ class InsertServiceTest {
 	fun `insert service notifies listener when insert is started`() {
 		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test")
 		assertThat(insertStartedIds, contains("id1"))
+	}
+
+	@Test
+	fun `insert service notifies listener when insert has generated URI`() {
+		val generatedUris = mutableListOf<Pair<String, String>>()
+		insertService.onInsertGeneratingUri { id, uri -> generatedUris += id to uri }
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test")
+		val clientPutCallback = argumentCaptor<ClientPutCallback>()
+		verify(highLevelSimpleClient).insert(anyOrNull(), anyOrNull(), anyBoolean(), anyOrNull(), clientPutCallback.capture(), anyShort())
+		clientPutCallback.firstValue.onGeneratedURI(FreenetURI("KSK@Test"), mock())
+		assertThat(generatedUris, contains("id1" to "KSK@Test"))
+	}
+
+	@Test
+	fun `insert service notifies listener when insert has finished`() {
+		val finishedIds = mutableListOf<String>()
+		insertService.onInsertFinished { id -> finishedIds += id }
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test")
+		val clientPutCallback = argumentCaptor<ClientPutCallback>()
+		verify(highLevelSimpleClient).insert(anyOrNull(), anyOrNull(), anyBoolean(), anyOrNull(), clientPutCallback.capture(), anyShort())
+		clientPutCallback.firstValue.onSuccess(mock())
+		assertThat(finishedIds, contains("id1"))
+	}
+
+	@Test
+	fun `insert service notifies listener when insert has failed`() {
+		val failedIds = mutableListOf<String>()
+		insertService.onInsertFailed { id -> failedIds += id }
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test")
+		val clientPutCallback = argumentCaptor<ClientPutCallback>()
+		verify(highLevelSimpleClient).insert(anyOrNull(), anyOrNull(), anyBoolean(), anyOrNull(), clientPutCallback.capture(), anyShort())
+		clientPutCallback.firstValue.onFailure(mock(), mock())
+		assertThat(failedIds, contains("id1"))
 	}
 
 	private val insertContext = mock<InsertContext>()

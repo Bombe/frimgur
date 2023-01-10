@@ -36,6 +36,12 @@ interface InsertService {
 	 */
 	fun onInsertStarting(listener: (id: String) -> Unit) = Unit
 
+	fun onInsertGeneratingUri(listener: (id: String, uri: String) -> Unit) = Unit
+
+	fun onInsertFinished(listener: (id: String) -> Unit) = Unit
+
+	fun onInsertFailed(listener: (id: String) -> Unit) = Unit
+
 }
 
 /**
@@ -47,14 +53,41 @@ class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleCli
 		val insertBlock = InsertBlock(data.toBucket(), ClientMetadata(mimeType), FreenetURI("CHK@"))
 		val insertContext = highLevelSimpleClient.getInsertContext(false)
 		insertStartingListeners.forEach { listener -> listener(id) }
-		highLevelSimpleClient.insert(insertBlock, null, false, insertContext, getEmptyClientPutCallback(requestClient), MAXIMUM_PRIORITY_CLASS)
+		highLevelSimpleClient.insert(insertBlock, null, false, insertContext, object : ClientPutCallback by getEmptyClientPutCallback(requestClient) {
+			override fun onGeneratedURI(freenetURI: FreenetURI, p1: BaseClientPutter) {
+				insertGeneratingUriListeners.forEach { listener -> listener(id, freenetURI.toString()) }
+			}
+
+			override fun onSuccess(baseClientPutter: BaseClientPutter) {
+				insertFinishedListeners.forEach { listener -> listener(id) }
+			}
+
+			override fun onFailure(p0: InsertException?, p1: BaseClientPutter?) {
+				insertFailedListeners.forEach { listener -> listener(id) }
+			}
+		}, MAXIMUM_PRIORITY_CLASS)
 	}
 
 	override fun onInsertStarting(listener: (id: String) -> Unit) {
 		insertStartingListeners += listener
 	}
 
+	override fun onInsertGeneratingUri(listener: (id: String, uri: String) -> Unit) {
+		insertGeneratingUriListeners += listener
+	}
+
+	override fun onInsertFinished(listener: (id: String) -> Unit) {
+		insertFinishedListeners += listener
+	}
+
+	override fun onInsertFailed(listener: (id: String) -> Unit) {
+		insertFailedListeners += listener
+	}
+
 	private val insertStartingListeners = mutableListOf<(String) -> Unit>()
+	private val insertGeneratingUriListeners = mutableListOf<(String, String) -> Unit>()
+	private val insertFinishedListeners = mutableListOf<(String) -> Unit>()
+	private val insertFailedListeners = mutableListOf<(String) -> Unit>()
 	private val requestClient = RequestClientBuilder().realTime().build()
 
 }

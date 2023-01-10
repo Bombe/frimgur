@@ -1,6 +1,5 @@
 package net.pterodactylus.frimgur.web
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.Toadlet
 import freenet.clients.http.ToadletContext
@@ -29,17 +28,4 @@ class ListImagesToadlet(private val path: String, private val imageService: Imag
 
 	override fun path() = path
 
-}
-
-private val objectMapper = jacksonObjectMapper()
-
-private fun ImageMetadata.toJson() = objectMapper.createObjectNode()!!.apply {
-	put("id", id)
-	putObject("metadata").apply {
-		put("width", width)
-		put("height", height)
-		put("size", size)
-		put("status", status.name)
-		put("key", key)
-	}
 }

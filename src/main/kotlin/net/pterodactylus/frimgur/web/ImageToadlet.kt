@@ -1,12 +1,10 @@
 package net.pterodactylus.frimgur.web
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.Toadlet
 import freenet.clients.http.ToadletContext
 import freenet.support.MultiValueTable
 import freenet.support.api.HTTPRequest
-import net.pterodactylus.frimgur.image.ImageMetadata
 import net.pterodactylus.frimgur.image.ImageService
 import java.net.URI
 
@@ -40,16 +38,3 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 }
 
 private fun Int.millions() = this * 1_000_000
-
-private val objectMapper = jacksonObjectMapper()
-
-private fun ImageMetadata.toJson() = objectMapper.createObjectNode()!!.apply {
-	put("id", id)
-	putObject("metadata").apply {
-		put("width", width)
-		put("height", height)
-		put("size", size)
-		put("status", status.name)
-		put("key", key)
-	}
-}

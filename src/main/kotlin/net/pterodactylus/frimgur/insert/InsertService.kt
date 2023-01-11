@@ -53,7 +53,7 @@ class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleCli
 		val insertBlock = InsertBlock(data.toBucket(), ClientMetadata(mimeType), FreenetURI("CHK@"))
 		val insertContext = highLevelSimpleClient.getInsertContext(false)
 		insertStartingListeners.forEach { listener -> listener(id) }
-		highLevelSimpleClient.insert(insertBlock, null, false, insertContext, object : ClientPutCallback by getEmptyClientPutCallback(requestClient) {
+		highLevelSimpleClient.insert(insertBlock, createFilenameForMimeType(mimeType), false, insertContext, object : ClientPutCallback by getEmptyClientPutCallback(requestClient) {
 			override fun onGeneratedURI(freenetURI: FreenetURI, p1: BaseClientPutter) {
 				insertGeneratingUriListeners.forEach { listener -> listener(id, freenetURI.toString()) }
 			}
@@ -66,6 +66,14 @@ class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleCli
 				insertFailedListeners.forEach { listener -> listener(id) }
 			}
 		}, MAXIMUM_PRIORITY_CLASS)
+	}
+
+	private fun createFilenameForMimeType(mimeType: String) = when (mimeType) {
+		"image/png" -> "image.png"
+		"image/jpeg" -> "image.jpg"
+		"image/bmp" -> "image.bmp"
+		"image/gif" -> "image.gif"
+		else -> "image"
 	}
 
 	override fun onInsertStarting(listener: (id: String) -> Unit) {

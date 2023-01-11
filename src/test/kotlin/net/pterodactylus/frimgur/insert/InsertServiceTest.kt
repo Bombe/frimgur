@@ -60,6 +60,38 @@ class InsertServiceTest {
 	}
 
 	@Test
+	fun `insert service sets correct target filename for png insert`() {
+		verifyFilenameHint("image/png", "image.png")
+	}
+
+	@Test
+	fun `insert service sets correct target filename for jpeg insert`() {
+		verifyFilenameHint("image/jpeg", "image.jpg")
+	}
+
+	@Test
+	fun `insert service sets correct target filename for bmp insert`() {
+		verifyFilenameHint("image/bmp", "image.bmp")
+	}
+
+	@Test
+	fun `insert service sets correct target filename for gif insert`() {
+		verifyFilenameHint("image/gif", "image.gif")
+	}
+
+	@Test
+	fun `insert service sets default target filename for unknown mime type`() {
+		verifyFilenameHint("image/test", "image")
+	}
+
+	private fun verifyFilenameHint(mimeType: String, expectedFilename: String) {
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), mimeType)
+		val filenameHint = argumentCaptor<String>()
+		verify(highLevelSimpleClient).insert(anyOrNull(), filenameHint.capture(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
+		assertThat(filenameHint.firstValue, equalTo(expectedFilename))
+	}
+
+	@Test
 	fun `insert service sets correct priority for insert`() {
 		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test")
 		verify(highLevelSimpleClient).insert(anyOrNull(), anyOrNull(), anyBoolean(), anyOrNull(), anyOrNull(), eq(MAXIMUM_PRIORITY_CLASS))

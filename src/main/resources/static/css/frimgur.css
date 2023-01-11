@@ -15,10 +15,10 @@
 .image-placeholder .canvas-container {
     border: 1px solid #000;
     position: absolute;
+    z-index: -1;
 }
 
 .image-placeholder .image-overlay {
-    z-index: 1;
 }
 
 #image-template {

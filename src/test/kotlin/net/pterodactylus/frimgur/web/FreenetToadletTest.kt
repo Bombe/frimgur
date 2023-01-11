@@ -11,6 +11,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasItem
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -35,6 +36,12 @@ class FreenetToadletTest {
 	fun `toadlet returns HTTP status 200`() {
 		toadlet.handleMethodGET(URI(""), mock(), toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(200), eq("OK"), any(), any(), anyLong())
+	}
+
+	@Test
+	fun `toadlet returns text-html mime type`() {
+		toadlet.handleMethodGET(URI(""), mock(), toadletContext)
+		verify(toadletContext).sendReplyHeaders(anyInt(), any(), any(), eq("text/html"), anyLong())
 	}
 
 	@Test

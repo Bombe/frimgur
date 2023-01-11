@@ -2,6 +2,10 @@
     display: none;
 }
 
+#content .hidden {
+    display: none;
+}
+
 .image-placeholder {
     display: inline-block;
     margin-right: 1em;

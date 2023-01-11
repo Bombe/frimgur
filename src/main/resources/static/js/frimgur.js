@@ -96,8 +96,16 @@ const populateWithExistingImages = () => {
     })
 }
 
+const checkIfOnMacOsAndChangeShortcut = () => {
+  if (navigator.platform === 'MacIntel') {
+    document.getElementById('on-mac').className = ''
+    document.getElementById('on-everything-else').className = 'hidden'
+  }
+}
+
 window.onload = () => {
   formPassword = document.getElementById('form-password').textContent
+  checkIfOnMacOsAndChangeShortcut()
   populateWithExistingImages()
   addClipboardListener()
 }

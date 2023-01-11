@@ -7,15 +7,14 @@
 }
 
 .image-placeholder {
-    display: inline-block;
-    margin-right: 1em;
-    margin-bottom: 1em;
+    display: grid;
+    grid-template: 1fr / min-content auto;
+    margin-top: 1em;
+    gap: 1em;
 }
 
 .image-placeholder .canvas-container {
     border: 1px solid #000;
-    position: absolute;
-    z-index: -1;
 }
 
 .image-placeholder .image-overlay {

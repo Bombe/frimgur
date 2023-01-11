@@ -7,7 +7,7 @@ const addClipboardListener = () => {
           file.arrayBuffer().then(arrayBuffer => {
             const imageBlob = new Blob([ arrayBuffer ], { type: file.type })
             let temporaryImageId = crypto.randomUUID()
-            showPlaceholder(temporaryImageId, imageBlob)
+            showPlaceholder(temporaryImageId, {}, imageBlob)
             sendImageDataToServer(imageBlob)
               .then(response => {
                 const realImageId = response.headers.get('Location')
@@ -25,18 +25,24 @@ const replacePlaceholderId = (oldId, newId) => {
   element.setAttribute('id', createImageElementId(newId))
 }
 
-const showPlaceholder = (imageId, imageBlob) => {
-  const placeholderElement = createPlaceholderElement(imageId)
+const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
+  const placeholderElement = getPlaceholderElement(imageId)
+  if (imageMetadata.metadata != null) {
+    const statusNode = document.createTextNode(`${imageMetadata.metadata.status}`)
+    placeholderElement.querySelector('.status').replaceChildren(statusNode)
+    const keyNode = document.createTextNode(imageMetadata.metadata.key ? imageMetadata.metadata.key : '')
+    placeholderElement.querySelector('.key').replaceChildren(keyNode)
+  }
   const canvasElement = placeholderElement.querySelector('canvas')
   const canvasWidth = 300
   const canvasHeight = 150
   drawImageToCanvas(imageBlob, canvasElement, canvasWidth, canvasHeight).then((image) => {
     const dimensionsNode = document.createTextNode(`${image.width} × ${image.height}`)
-    placeholderElement.querySelector('.dimensions').appendChild(dimensionsNode)
+    placeholderElement.querySelector('.dimensions').replaceChildren(dimensionsNode)
     canvasElement.style.width = `${canvasWidth}px`
     canvasElement.style.height = `${canvasHeight}px`
-    placeholderElement.style.width = `${canvasWidth}px`
-    placeholderElement.style.height = `${canvasHeight}px`
+    canvasElement.parentElement.style.width = `${canvasWidth}px`
+    canvasElement.parentElement.style.height = `${canvasHeight}px`
   })
   document.getElementById('inserted-images').appendChild(placeholderElement)
 }
@@ -64,7 +70,11 @@ const decodeImage = (imageBlob) => {
 
 const createImageElementId = (imageId) => `image-${imageId}`
 
-const createPlaceholderElement = (imageId) => {
+const getPlaceholderElement = (imageId) => {
+  const existingPlaceholderElement = document.getElementById(createImageElementId(imageId))
+  if (existingPlaceholderElement != null) {
+    return existingPlaceholderElement
+  }
   const placeholderTemplateElement = document.getElementById('image-template')
   const placeholderElement = placeholderTemplateElement.cloneNode(true)
   placeholderElement.setAttribute('id', createImageElementId(imageId))
@@ -80,8 +90,8 @@ const sendImageDataToServer = (imageBlob) => {
 
 const fetchImageDataFromServer = (imageId) =>
   fetch(`image-data/${imageId}`)
-    .then(response => ({ arrayBuffer: response.arrayBuffer(), contentType: response.headers.get('Content-Type') }))
-    .then(({ arrayBuffer, contentType }) => arrayBuffer.then(data => ({ data, contentType })))
+    .then(response => ({ data: response.arrayBuffer(), contentType: response.headers.get('Content-Type') }))
+    .then(({ data, contentType }) => data.then(arrayBuffer => ({ data: arrayBuffer, contentType })))
     .then(({ data, contentType }) => new Blob([ data ], { type: contentType }))
 
 const populateWithExistingImages = () => {
@@ -90,7 +100,7 @@ const populateWithExistingImages = () => {
     .then(response => {
       for (const imageMetadata of response) {
         fetchImageDataFromServer(imageMetadata.id).then(imageBlob => {
-          showPlaceholder(imageMetadata.id, imageBlob)
+          showPlaceholder(imageMetadata.id, imageMetadata, imageBlob)
         })
       }
     })

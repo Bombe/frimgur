@@ -209,7 +209,9 @@ class FrimgurTest {
 		action(injector.get())
 	}
 
-	private val frimgur = Frimgur()
+	private val frimgur = object : Frimgur() {
+		override fun getResourceBundleSuffix() = "_test"
+	}
 	private val pluginRespirator = mock<PluginRespirator>(defaultAnswer = RETURNS_DEEP_STUBS).apply {
 		whenever(toadletContainer.formPassword).thenReturn("123")
 	}

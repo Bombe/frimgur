@@ -63,8 +63,10 @@ open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless {
 	}
 
 	override fun getString(key: String): String {
-		return ResourceBundle.getBundle("i18n/frimgur", Locale.forLanguageTag(language.shortCode)).getString(key)
+		return ResourceBundle.getBundle("i18n/frimgur" + getResourceBundleSuffix(), Locale.forLanguageTag(language.shortCode)).getString(key)
 	}
+
+	protected open fun getResourceBundleSuffix() = ""
 
 	private var language = LANGUAGE.ENGLISH
 	private lateinit var pluginRespirator: PluginRespirator

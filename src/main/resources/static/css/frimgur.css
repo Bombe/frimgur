@@ -17,6 +17,10 @@
     border: 1px solid #000;
 }
 
+.image-placeholder canvas {
+    display: block;
+}
+
 .image-placeholder .image-overlay {
 }
 

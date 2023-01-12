@@ -26,7 +26,7 @@ const replacePlaceholderId = (oldId, newId) => {
 }
 
 const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
-  const placeholderElement = getPlaceholderElement(imageId)
+  const placeholderElement = getOrCreatePlaceholderElement(imageId)
   if (imageMetadata.metadata != null) {
     const statusNode = document.createTextNode(`${imageMetadata.metadata.status}`)
     placeholderElement.querySelector('.status').replaceChildren(statusNode)
@@ -36,15 +36,12 @@ const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
   const canvasElement = placeholderElement.querySelector('canvas')
   const canvasWidth = 300
   const canvasHeight = 150
+  canvasElement.style.width = `${canvasWidth}px`
+  canvasElement.style.height = `${canvasHeight}px`
   drawImageToCanvas(imageBlob, canvasElement, canvasWidth, canvasHeight).then((image) => {
     const dimensionsNode = document.createTextNode(`${image.width} × ${image.height}`)
     placeholderElement.querySelector('.dimensions').replaceChildren(dimensionsNode)
-    canvasElement.style.width = `${canvasWidth}px`
-    canvasElement.style.height = `${canvasHeight}px`
-    canvasElement.parentElement.style.width = `${canvasWidth}px`
-    canvasElement.parentElement.style.height = `${canvasHeight}px`
   })
-  document.getElementById('inserted-images').appendChild(placeholderElement)
 }
 
 const drawImageToCanvas = (imageBlob, canvasElement, canvasWidth, canvasHeight) => {
@@ -70,7 +67,7 @@ const decodeImage = (imageBlob) => {
 
 const createImageElementId = (imageId) => `image-${imageId}`
 
-const getPlaceholderElement = (imageId) => {
+const getOrCreatePlaceholderElement = (imageId) => {
   const existingPlaceholderElement = document.getElementById(createImageElementId(imageId))
   if (existingPlaceholderElement != null) {
     return existingPlaceholderElement
@@ -78,6 +75,7 @@ const getPlaceholderElement = (imageId) => {
   const placeholderTemplateElement = document.getElementById('image-template')
   const placeholderElement = placeholderTemplateElement.cloneNode(true)
   placeholderElement.setAttribute('id', createImageElementId(imageId))
+  document.getElementById('inserted-images').appendChild(placeholderElement)
   return placeholderElement
 }
 
@@ -98,6 +96,9 @@ const populateWithExistingImages = () => {
   fetch('images/')
     .then(response => response.json())
     .then(response => {
+      for (const imageMetadata of response) {
+        getOrCreatePlaceholderElement(imageMetadata.id)
+      }
       for (const imageMetadata of response) {
         fetchImageDataFromServer(imageMetadata.id).then(imageBlob => {
           showPlaceholder(imageMetadata.id, imageMetadata, imageBlob)

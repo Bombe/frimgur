@@ -4,6 +4,8 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.emptyIterable
 import org.hamcrest.Matchers.equalTo
+import java.util.Locale.ENGLISH
+import java.util.Locale.GERMAN
 import kotlin.test.Test
 
 /**
@@ -18,7 +20,7 @@ class PebblePageProcessorTest {
 
 	@Test
 	fun `default title is empty string`() {
-		assertThat(PebblePageProcessor("", "").processPage(PageRequest()).title, equalTo(""))
+		assertThat(PebblePageProcessor("", "", { ENGLISH }).processPage(PageRequest()).title, equalTo(""))
 	}
 
 	@Test
@@ -38,8 +40,14 @@ class PebblePageProcessorTest {
 		assertThat(pebblePageProcessor.processPage(PageRequest()).javascriptLinks, contains("static/test1.js", "static/test2.js"))
 	}
 
+	@Test
+	fun `page processor can access resource bundle`() {
+		val pageProcessor = object : PebblePageProcessor("static/html/test-i18n.html", "", { GERMAN }) {}
+		assertThat(pageProcessor.processPage(PageRequest()).content, equalTo("Testnachricht"))
+	}
+
 	private val scriptLinks = mutableListOf<String>()
-	private val pebblePageProcessor = object : PebblePageProcessor("static/html/test.html", "") {
+	private val pebblePageProcessor = object : PebblePageProcessor("static/html/test.html", "", { ENGLISH }) {
 		override fun getTitle(pageRequest: PageRequest) = "Test Title"
 		override fun getScriptLinks(pageRequest: PageRequest) = scriptLinks
 	}

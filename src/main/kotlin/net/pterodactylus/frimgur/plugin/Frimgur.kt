@@ -51,7 +51,8 @@ open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless {
 		FreenetModule(this, pluginRespirator),
 		ImageModule(),
 		InsertModule(),
-		WebInterfaceModule("/frimgur/", "Navigation.Menu.Title", "Navigation.Menu.Tooltip")
+		WebInterfaceModule("/frimgur/", "Navigation.Menu.Title", "Navigation.Menu.Tooltip"),
+		Module { binder -> binder.bind(Locale::class.java).toProvider { Locale.forLanguageTag(language.shortCode) } }
 	)
 
 	override fun terminate() {

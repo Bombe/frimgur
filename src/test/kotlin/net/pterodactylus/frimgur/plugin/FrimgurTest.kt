@@ -30,9 +30,11 @@ import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasItem
 import org.hamcrest.Matchers.instanceOf
+import org.hamcrest.Matchers.notNullValue
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.Test
@@ -183,6 +185,13 @@ class FrimgurTest {
 			insertService.insertImage("id1", byteArrayOf(), "image/test")
 			clientPutCallbacks.first().onSuccess(mock())
 			assertThat(imageStatus, hasItem(equalTo("id1" to Inserted)))
+		}
+	}
+
+	@Test
+	fun `locale provider is bound by plugin`() {
+		runPlugin {
+			assertThat(it.getInstance<Locale>(), notNullValue())
 		}
 	}
 

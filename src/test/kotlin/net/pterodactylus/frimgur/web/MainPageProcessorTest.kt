@@ -5,6 +5,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
+import java.util.Locale.ENGLISH
 import kotlin.test.Test
 
 /**
@@ -32,6 +33,6 @@ class MainPageProcessorTest {
 		assertThat(mainPageProcessor.processPage(PageRequest()).javascriptLinks, contains("static/js/frimgur.js"))
 	}
 
-	private val mainPageProcessor = MainPageProcessor("")
+	private val mainPageProcessor = MainPageProcessor("", { ENGLISH })
 
 }

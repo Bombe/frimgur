@@ -7,11 +7,11 @@ import freenet.clients.http.PageMaker
 import freenet.clients.http.Toadlet
 import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
+import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.web.ClasspathFileToadlet
 import net.pterodactylus.frimgur.web.DefaultToadletRegistry
 import net.pterodactylus.frimgur.web.DefaultWebInterface
 import net.pterodactylus.frimgur.web.FreenetToadletFactory
-import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.web.ImageDataToadlet
 import net.pterodactylus.frimgur.web.ImageToadlet
 import net.pterodactylus.frimgur.web.ListImagesToadlet
@@ -20,7 +20,9 @@ import net.pterodactylus.frimgur.web.RedirectToadlet
 import net.pterodactylus.frimgur.web.ToadletRegistry
 import net.pterodactylus.frimgur.web.ToadletSpec
 import net.pterodactylus.frimgur.web.WebInterface
+import java.util.Locale
 import javax.inject.Named
+import javax.inject.Provider
 
 /**
  * Guice [module][com.google.inject.Module] for creating [WebInterface] instances.
@@ -59,8 +61,8 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 
 	@Provides
 	@Named("Main")
-	fun getMainToadlet(freenetToadletFactory: FreenetToadletFactory, @Named("FormPassword") formPassword: String): Toadlet =
-		freenetToadletFactory.createFreenetToadlet(MainPageProcessor(formPassword))
+	fun getMainToadlet(freenetToadletFactory: FreenetToadletFactory, @Named("FormPassword") formPassword: String, localeProvider: Provider<Locale>): Toadlet =
+		freenetToadletFactory.createFreenetToadlet(MainPageProcessor(formPassword, localeProvider::get))
 
 	@Provides
 	@Named("StaticJavascript")

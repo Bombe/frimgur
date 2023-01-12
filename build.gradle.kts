@@ -1,5 +1,8 @@
 plugins {
 	id("org.jetbrains.kotlin.jvm") version "1.7.10"
+
+	// 0.13.0 is the latest version still working with Java 8
+	id("com.palantir.git-version") version "0.13.0"
 }
 
 repositories {
@@ -28,9 +31,25 @@ tasks.named<Test>("test") {
 	useJUnitPlatform()
 }
 
+val gitVersion: groovy.lang.Closure<String> by extra
+val versionDetails: groovy.lang.Closure<com.palantir.gradle.gitversion.VersionDetails> by extra
+
+val createVersionProperties by tasks.registering {
+	val versionFile = file("$buildDir/resources/generated-resources/version.properties")
+	outputs.file(versionFile)
+	doLast {
+		versionFile.delete()
+		versionFile.appendText("version: ${gitVersion()}\n")
+		versionFile.appendText("hash: ${versionDetails().gitHashFull}\n")
+	}
+}
+
+tasks["processResources"].dependsOn(createVersionProperties)
+
 tasks.create("fatJar", Jar::class) {
 	archiveFileName.set(project.name.toLowerCase() + "-jar-with-dependencies.jar")
 	from((configurations.runtimeClasspath.get()).map { if (it.isDirectory) it else zipTree(it) })
+	from(createVersionProperties.get().outputs)
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
 	manifest {
 		attributes("Plugin-Main-Class" to "net.pterodactylus.frimgur.plugin.Frimgur")

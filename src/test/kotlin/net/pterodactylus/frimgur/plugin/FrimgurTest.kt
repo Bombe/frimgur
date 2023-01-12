@@ -13,6 +13,7 @@ import freenet.l10n.BaseL10n
 import freenet.pluginmanager.FredPlugin
 import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.FredPluginThreadless
+import freenet.pluginmanager.FredPluginVersioned
 import freenet.pluginmanager.PluginRespirator
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus
@@ -193,6 +194,16 @@ class FrimgurTest {
 		runPlugin {
 			assertThat(it.getInstance<Locale>(), notNullValue())
 		}
+	}
+
+	@Test
+	fun `Frimgur implements FredPluginVersioned`() {
+		assertThat(frimgur, instanceOf(FredPluginVersioned::class.java))
+	}
+
+	@Test
+	fun `plugin main class returns its version`() {
+		assertThat(frimgur.version, equalTo("unknown"))
 	}
 
 	private fun captureImageStatus(action: (id: String, status: ImageStatus) -> Unit) = object : ImageService {

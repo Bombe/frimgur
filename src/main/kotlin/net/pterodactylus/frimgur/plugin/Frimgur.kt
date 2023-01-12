@@ -7,6 +7,7 @@ import freenet.l10n.BaseL10n.LANGUAGE
 import freenet.pluginmanager.FredPlugin
 import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.FredPluginThreadless
+import freenet.pluginmanager.FredPluginVersioned
 import freenet.pluginmanager.PluginRespirator
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus.Failed
@@ -18,6 +19,7 @@ import net.pterodactylus.frimgur.inject.InsertModule
 import net.pterodactylus.frimgur.inject.WebInterfaceModule
 import net.pterodactylus.frimgur.insert.InsertService
 import net.pterodactylus.frimgur.util.getInstance
+import net.pterodactylus.frimgur.util.versionProperties
 import net.pterodactylus.frimgur.web.WebInterface
 import java.util.Locale
 import java.util.ResourceBundle
@@ -25,7 +27,7 @@ import java.util.ResourceBundle
 /**
  * Frimgur main plugin class.
  */
-open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless {
+open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless, FredPluginVersioned {
 
 	override fun runPlugin(pluginRespirator: PluginRespirator) {
 		this.pluginRespirator = pluginRespirator
@@ -66,6 +68,8 @@ open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless {
 	override fun getString(key: String): String {
 		return ResourceBundle.getBundle("i18n/frimgur" + getResourceBundleSuffix(), Locale.forLanguageTag(language.shortCode)).getString(key)
 	}
+
+	override fun getVersion() = versionProperties.version
 
 	protected open fun getResourceBundleSuffix() = ""
 

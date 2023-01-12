@@ -39,7 +39,7 @@ const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
   canvasElement.style.width = `${canvasWidth}px`
   canvasElement.style.height = `${canvasHeight}px`
   drawImageToCanvas(imageBlob, canvasElement, canvasWidth, canvasHeight).then((image) => {
-    const dimensionsNode = document.createTextNode(`${image.width} × ${image.height}`)
+    const dimensionsNode = document.createTextNode(`${image.width} × ${image.height}`)
     placeholderElement.querySelector('.dimensions').replaceChildren(dimensionsNode)
   })
 }

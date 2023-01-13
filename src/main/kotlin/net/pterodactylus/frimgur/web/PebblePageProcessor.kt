@@ -1,6 +1,7 @@
 package net.pterodactylus.frimgur.web
 
 import com.mitchellbosecke.pebble.PebbleEngine
+import com.mitchellbosecke.pebble.loader.ClasspathLoader
 import com.mitchellbosecke.pebble.template.PebbleTemplate
 import java.io.StringWriter
 import java.util.Locale
@@ -27,4 +28,4 @@ open class PebblePageProcessor(templateName: String, private val formPassword: S
 
 }
 
-private val pebbleEngine = PebbleEngine.Builder().build()
+private val pebbleEngine = PebbleEngine.Builder().loader(ClasspathLoader(PebblePageProcessor::class.java.classLoader)).build()

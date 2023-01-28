@@ -28,21 +28,21 @@ class Fri18nFunctionTest {
 
 	@Test
 	fun `function returns value from bundle`() {
-		val template = pebbleEngine.getLiteralTemplate("{{ fri18n('i18n', 'Test.Message') }}")
+		val template = pebbleEngine.getLiteralTemplate("{{ i18n('i18n', 'Test.Message') }}")
 		val output = StringWriter().apply { template.evaluate(this, ENGLISH) }.toString()
 		assertThat(output, equalTo("Test Message"))
 	}
 
 	@Test
 	fun `function can format message with one parameter`() {
-		val template = pebbleEngine.getLiteralTemplate("{{ fri18n('i18n', 'Test.WithOneParam', 'a') }}")
+		val template = pebbleEngine.getLiteralTemplate("{{ i18n('i18n', 'Test.WithOneParam', 'a') }}")
 		val output = StringWriter().apply { template.evaluate(this, ENGLISH) }.toString()
 		assertThat(output, equalTo("Parameter a"))
 	}
 
 	@Test
 	fun `function can format message with two parameters`() {
-		val template = pebbleEngine.getLiteralTemplate("{{ fri18n('i18n', 'Test.WithTwoParams', ['a', 'b']) }}")
+		val template = pebbleEngine.getLiteralTemplate("{{ i18n('i18n', 'Test.WithTwoParams', ['a', 'b']) }}")
 		val output = StringWriter().apply { template.evaluate(this, ENGLISH) }.toString()
 		assertThat(output, equalTo("Parameters a and b"))
 	}

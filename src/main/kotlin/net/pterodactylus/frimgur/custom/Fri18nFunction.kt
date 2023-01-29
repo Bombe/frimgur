@@ -34,7 +34,7 @@ class Fri18nFunction(private var classLoader: ClassLoader) : Function {
 }
 
 /**
- * Returns a Pebble [Extension] that will install [Fri18nFunction] under the name `fri18n`.
+ * Returns a Pebble [Extension] that will install [Fri18nFunction] under the name `i18n`.
  */
 fun fri18nExtension(classLoader: ClassLoader = Fri18nFunction::class.java.classLoader) = object : AbstractExtension() {
 	override fun getFunctions(): Map<String, Function> = mapOf("i18n" to Fri18nFunction(classLoader))

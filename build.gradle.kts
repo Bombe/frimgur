@@ -3,6 +3,7 @@ plugins {
 
 	// 0.13.0 is the latest version still working with Java 8
 	id("com.palantir.git-version") version "0.13.0"
+	id("jacoco")
 }
 
 repositories {
@@ -55,4 +56,10 @@ tasks.create("fatJar", Jar::class) {
 		attributes("Plugin-Main-Class" to "net.pterodactylus.frimgur.plugin.Frimgur")
 	}
 	with(tasks.named<Jar>("jar").get())
+}
+
+tasks.jacocoTestReport {
+	reports {
+		xml.required.set(true)
+	}
 }

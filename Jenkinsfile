@@ -33,7 +33,7 @@ pipeline { agent any
             }
             steps {
                 sh './gradlew fatJar'
-                archiveArtifacts artifacts: 'build/libs/frimgur-*-jar-with-dependencies.jar', fingerprint: true
+                archiveArtifacts artifacts: 'build/libs/frimgur-jar-with-dependencies.jar', fingerprint: true
             }
         }
         stage('Compatibility (Java 17)') {

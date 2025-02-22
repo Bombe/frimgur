@@ -48,7 +48,7 @@ val createVersionProperties by tasks.registering {
 tasks["processResources"].dependsOn(createVersionProperties)
 
 tasks.create("fatJar", Jar::class) {
-	archiveFileName.set(project.name.toLowerCase() + "-" + gitVersion() + "-jar-with-dependencies.jar")
+	archiveFileName.set(project.name.toLowerCase() + "-jar-with-dependencies.jar")
 	from((configurations.runtimeClasspath.get()).map { if (it.isDirectory) it else zipTree(it) })
 	from(createVersionProperties.get().outputs)
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE

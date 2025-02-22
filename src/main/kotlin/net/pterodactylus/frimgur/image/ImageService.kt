@@ -4,6 +4,8 @@ import net.pterodactylus.frimgur.image.ImageStatus.Inserting
 import java.io.ByteArrayInputStream
 import java.util.UUID
 import javax.imageio.ImageIO
+import net.pterodactylus.frimgur.image.ImageStatus.Inserted
+import net.pterodactylus.frimgur.image.ImageStatus.Waiting
 
 /**
  * Service for image-related functionality.
@@ -78,7 +80,7 @@ class DefaultImageService : ImageService {
 			?.let { imageType ->
 				ByteArrayInputStream(data).use { byteArrayInputStream ->
 					ImageIO.read(byteArrayInputStream)
-						?.let { bufferedImage -> ImageMetadata(UUID.randomUUID().toString(), bufferedImage.width, bufferedImage.height, data.size, imageType) }
+						?.let { bufferedImage -> ImageMetadata(UUID.randomUUID().toString(), bufferedImage.width, bufferedImage.height, data.size, imageType, Waiting) }
 						?.let { imageMetadata -> ImageData(imageMetadata, data) }
 						?.also { imageData -> this.imageData[imageData.metadata.id] = imageData }
 						?.also { imageData -> newImageListeners.forEach { listener -> listener(imageData) } }
@@ -174,13 +176,12 @@ data class ImageMetadata(
 }
 
 /**
- * The states of an image. The typical lifecycle of an image has only two states,
- * and all images start as `Inserting`. One of the other two states is then set
- * when the [insert][net.pterodactylus.frimgur.insert.InsertService] reaches
- * the appropriate stage.
+ * The current state of an image. Some of the states are mutually exclusive
+ * in the lifecycle of a single image, e.g. there is no possible transition
+ * from [Failed] to [Inserted].
  */
 enum class ImageStatus {
-	Inserting, Failed, Inserted
+	Waiting, Inserting, Failed, Inserted
 }
 
 /**

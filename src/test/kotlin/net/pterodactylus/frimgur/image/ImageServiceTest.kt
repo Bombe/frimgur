@@ -1,8 +1,9 @@
 package net.pterodactylus.frimgur.image
 
+import kotlin.test.Test
 import net.pterodactylus.frimgur.image.ImageStatus.Failed
 import net.pterodactylus.frimgur.image.ImageStatus.Inserted
-import net.pterodactylus.frimgur.image.ImageStatus.Inserting
+import net.pterodactylus.frimgur.image.ImageStatus.Waiting
 import net.pterodactylus.frimgur.test.isMetadataWith
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
@@ -10,7 +11,6 @@ import org.hamcrest.Matchers.emptyIterable
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.nullValue
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.test.Test
 
 /**
  * Unit test for [DefaultImageService].
@@ -97,9 +97,9 @@ class ImageServiceTest {
 	}
 
 	@Test
-	fun `added image has status 'inserting'`() {
+	fun `added image has status 'waiting'`() {
 		val id = imageService.addImage(get1x1Png())!!.id
-		assertThat(imageService.getImage(id)!!.status, equalTo(Inserting))
+		assertThat(imageService.getImage(id)!!.status, equalTo(Waiting))
 	}
 
 	@Test

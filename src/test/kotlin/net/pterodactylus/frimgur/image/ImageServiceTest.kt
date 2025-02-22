@@ -80,7 +80,7 @@ class ImageServiceTest {
 	}
 
 	@Test
-	fun `image servce can list added images`() {
+	fun `image service can list added images`() {
 		val id1 = imageService.addImage(get1x1Png())!!.id
 		val id2 = imageService.addImage(get1x1Gif())!!.id
 		val id3 = imageService.addImage(get1x1Png())!!.id

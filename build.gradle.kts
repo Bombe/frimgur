@@ -1,5 +1,5 @@
 plugins {
-	id("org.jetbrains.kotlin.jvm") version "1.7.10"
+	id("org.jetbrains.kotlin.jvm") version "1.7.22"
 
 	// 0.13.0 is the latest version still working with Java 8
 	id("com.palantir.git-version") version "0.13.0"
@@ -22,7 +22,7 @@ dependencies {
 
 	testImplementation(group = "org.freenetproject", name = "fred", version = "build01491")
 	testImplementation(platform("org.junit:junit-bom:5.12.0"))
-	testRuntimeOnly(group = "org.junit.platform", name = "junit-platform-launcher")
+	testRuntimeOnly(group = "org.junit.platform", name = "junit-platform-launcher", version = "1.12.0")
 	testImplementation(group = "org.jetbrains.kotlin", name = "kotlin-test")
 	testImplementation(group = "org.hamcrest", name = "hamcrest", version = "2.2")
 	testImplementation(group = "org.mockito", name = "mockito-junit-jupiter", version = "4.11.0")

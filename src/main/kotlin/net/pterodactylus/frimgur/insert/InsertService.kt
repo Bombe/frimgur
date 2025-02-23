@@ -25,8 +25,9 @@ interface InsertService {
 	 * @param id The ID of the image
 	 * @param data The data of the image
 	 * @param mimeType The MIME type of the image
+	 * @param filename The name of the file
 	 */
-	fun insertImage(id: String, data: ByteArray, mimeType: String) = Unit
+	fun insertImage(id: String, data: ByteArray, mimeType: String, filename: String) = Unit
 
 	/**
 	 * Adds a listener that will be notified when the insert of the image
@@ -49,11 +50,11 @@ interface InsertService {
  */
 class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleClient) : InsertService {
 
-	override fun insertImage(id: String, data: ByteArray, mimeType: String) {
+	override fun insertImage(id: String, data: ByteArray, mimeType: String, filename: String) {
 		val insertBlock = InsertBlock(data.toBucket(), ClientMetadata(mimeType), FreenetURI("CHK@"))
 		val insertContext = highLevelSimpleClient.getInsertContext(false)
 		insertStartingListeners.forEach { listener -> listener(id) }
-		highLevelSimpleClient.insert(insertBlock, createFilenameForMimeType(mimeType), false, insertContext, object : ClientPutCallback by getEmptyClientPutCallback(requestClient) {
+		highLevelSimpleClient.insert(insertBlock, filename, false, insertContext, object : ClientPutCallback by getEmptyClientPutCallback(requestClient) {
 			override fun onGeneratedURI(freenetURI: FreenetURI, p1: BaseClientPutter) {
 				insertGeneratingUriListeners.forEach { listener -> listener(id, freenetURI.toString()) }
 			}
@@ -66,14 +67,6 @@ class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleCli
 				insertFailedListeners.forEach { listener -> listener(id) }
 			}
 		}, MAXIMUM_PRIORITY_CLASS)
-	}
-
-	private fun createFilenameForMimeType(mimeType: String) = when (mimeType) {
-		"image/png" -> "image.png"
-		"image/jpeg" -> "image.jpg"
-		"image/bmp" -> "image.bmp"
-		"image/gif" -> "image.gif"
-		else -> "image"
 	}
 
 	override fun onInsertStarting(listener: (id: String) -> Unit) {

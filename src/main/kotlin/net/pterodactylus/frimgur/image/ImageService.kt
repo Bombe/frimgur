@@ -87,7 +87,7 @@ class DefaultImageService : ImageService {
 			?.let { imageType ->
 				ByteArrayInputStream(data).use { byteArrayInputStream ->
 					ImageIO.read(byteArrayInputStream)
-						?.let { bufferedImage -> ImageMetadata(UUID.randomUUID().toString(), bufferedImage.width, bufferedImage.height, data.size, imageType, Waiting) }
+						?.let { bufferedImage -> ImageMetadata(UUID.randomUUID().toString(), bufferedImage.width, bufferedImage.height, data.size, imageType, createFilenameForMimeType(imageType), Waiting) }
 						?.let { imageMetadata -> ImageData(imageMetadata, data) }
 						?.also { imageData -> this.imageData[imageData.metadata.id] = imageData }
 						?.also { imageData -> newImageListeners.forEach { listener -> listener(imageData) } }
@@ -109,6 +109,14 @@ class DefaultImageService : ImageService {
 				}
 			}
 		}
+
+	private fun createFilenameForMimeType(mimeType: String) = when (mimeType) {
+		"image/png" -> "image.png"
+		"image/jpeg" -> "image.jpg"
+		"image/bmp" -> "image.bmp"
+		"image/gif" -> "image.gif"
+		else -> "image"
+	}
 
 	override fun getImage(id: String): ImageMetadata? = imageData[id]?.metadata
 
@@ -175,6 +183,9 @@ data class ImageMetadata(
 
 	/** The MIME type of the image. */
 	val mimeType: String = "",
+
+	/** The name of the file to insert. */
+	val filename: String = "",
 
 	/** The status of the image. */
 	val status: ImageStatus = Inserting,

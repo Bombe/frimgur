@@ -44,7 +44,7 @@ class ImageToadletTest {
 	@Test
 	fun `GET request with image ID returns data about that image`() {
 		val imageService = object : ImageService {
-			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", Inserted, "CHK@Test").takeIf { id == "123" }
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", "image.tst", Inserted, "CHK@Test").takeIf { id == "123" }
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)
@@ -62,6 +62,7 @@ class ImageToadletTest {
 							.where("size", jsonInt(34))
 							.where("status", jsonText("Inserted"))
 							.where("key", jsonText("CHK@Test"))
+							.where("filename", jsonText("image.tst"))
 					)
 			)
 		)
@@ -70,7 +71,7 @@ class ImageToadletTest {
 	@Test
 	fun `unset key in image metadata is rendered as JSON null`() {
 		val imageService = object : ImageService {
-			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", Inserted).takeIf { id == "123" }
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "123" }
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)
@@ -145,7 +146,7 @@ class ImageToadletTest {
 	@Test
 	fun `PUT request for valid image ID with empty JSON object as body returns 204`() {
 		val imageService = object : ImageService {
-			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", Inserted).takeIf { id == "123" }
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "123" }
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{}".toByteArray()))
@@ -156,7 +157,7 @@ class ImageToadletTest {
 	@Test
 	fun `PUT request for valid image ID with new status as body returns 200`() {
 		val imageService = object : ImageService {
-			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", Inserted).takeIf { id == "123" }
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "123" }
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\"}".toByteArray()))
@@ -168,7 +169,7 @@ class ImageToadletTest {
 	fun `PUT request for valid image ID with new status as body sets image status to Inserting`() {
 		val insertingImages = AtomicReference<String>()
 		val imageService = object : ImageService {
-			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", Inserted).takeIf { id == "123" }
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "123" }
 			override fun setImageStatus(id: String, status: ImageStatus) = if (status == Inserting) { insertingImages.set(id) } else {}
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)

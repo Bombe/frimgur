@@ -31,13 +31,13 @@ class InsertServiceTest {
 
 	@Test
 	fun `insert service can insert image`() {
-		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test")
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "image")
 		verify(highLevelSimpleClient).insert(anyOrNull(), anyOrNull(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
 	}
 
 	@Test
 	fun `insert service sets correct data for insert`() {
-		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test")
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "image")
 		val insertBlock = argumentCaptor<InsertBlock>()
 		verify(highLevelSimpleClient).insert(insertBlock.capture(), anyOrNull(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
 		assertThat(insertBlock.firstValue.data.toByteArray(), equalTo(byteArrayOf(0, 1, 2, 3)))
@@ -45,7 +45,7 @@ class InsertServiceTest {
 
 	@Test
 	fun `insert service sets correct mime type for insert`() {
-		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test")
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "image")
 		val insertBlock = argumentCaptor<InsertBlock>()
 		verify(highLevelSimpleClient).insert(insertBlock.capture(), anyOrNull(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
 		assertThat(insertBlock.firstValue.clientMetadata.mimeType, equalTo("image/test"))
@@ -53,65 +53,41 @@ class InsertServiceTest {
 
 	@Test
 	fun `insert service sets correct target URI for insert`() {
-		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test")
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "image")
 		val insertBlock = argumentCaptor<InsertBlock>()
 		verify(highLevelSimpleClient).insert(insertBlock.capture(), anyOrNull(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
 		assertThat(insertBlock.firstValue.desiredURI, equalTo(EMPTY_CHK_URI))
 	}
 
 	@Test
-	fun `insert service sets correct target filename for png insert`() {
-		verifyFilenameHint("image/png", "image.png")
-	}
-
-	@Test
-	fun `insert service sets correct target filename for jpeg insert`() {
-		verifyFilenameHint("image/jpeg", "image.jpg")
-	}
-
-	@Test
-	fun `insert service sets correct target filename for bmp insert`() {
-		verifyFilenameHint("image/bmp", "image.bmp")
-	}
-
-	@Test
-	fun `insert service sets correct target filename for gif insert`() {
-		verifyFilenameHint("image/gif", "image.gif")
-	}
-
-	@Test
-	fun `insert service sets default target filename for unknown mime type`() {
-		verifyFilenameHint("image/test", "image")
-	}
-
-	private fun verifyFilenameHint(mimeType: String, expectedFilename: String) {
-		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), mimeType)
+	fun `insert service uses given filename for insert`() {
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/jpeg", "test-image.jpg")
 		val filenameHint = argumentCaptor<String>()
 		verify(highLevelSimpleClient).insert(anyOrNull(), filenameHint.capture(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
-		assertThat(filenameHint.firstValue, equalTo(expectedFilename))
+		assertThat(filenameHint.firstValue, equalTo("test-image.jpg"))
 	}
 
 	@Test
 	fun `insert service sets correct priority for insert`() {
-		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test")
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "image")
 		verify(highLevelSimpleClient).insert(anyOrNull(), anyOrNull(), anyBoolean(), anyOrNull(), anyOrNull(), eq(MAXIMUM_PRIORITY_CLASS))
 	}
 
 	@Test
 	fun `insert service sets insert context for insert`() {
-		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test")
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "image")
 		verify(highLevelSimpleClient).insert(anyOrNull(), anyOrNull(), anyBoolean(), eq(insertContext), anyOrNull(), anyShort())
 	}
 
 	@Test
 	fun `insert service specifies callback for insert`() {
-		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test")
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "image")
 		verify(highLevelSimpleClient).insert(anyOrNull(), anyOrNull(), anyBoolean(), anyOrNull(), any(), anyShort())
 	}
 
 	@Test
 	fun `insert service notifies listener when insert is started`() {
-		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test")
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "image")
 		assertThat(insertStartedIds, contains("id1"))
 	}
 
@@ -119,7 +95,7 @@ class InsertServiceTest {
 	fun `insert service notifies listener when insert has generated URI`() {
 		val generatedUris = mutableListOf<Pair<String, String>>()
 		insertService.onInsertGeneratingUri { id, uri -> generatedUris += id to uri }
-		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test")
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "image")
 		val clientPutCallback = argumentCaptor<ClientPutCallback>()
 		verify(highLevelSimpleClient).insert(anyOrNull(), anyOrNull(), anyBoolean(), anyOrNull(), clientPutCallback.capture(), anyShort())
 		clientPutCallback.firstValue.onGeneratedURI(FreenetURI("KSK@Test"), mock())
@@ -130,7 +106,7 @@ class InsertServiceTest {
 	fun `insert service notifies listener when insert has finished`() {
 		val finishedIds = mutableListOf<String>()
 		insertService.onInsertFinished { id -> finishedIds += id }
-		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test")
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "image")
 		val clientPutCallback = argumentCaptor<ClientPutCallback>()
 		verify(highLevelSimpleClient).insert(anyOrNull(), anyOrNull(), anyBoolean(), anyOrNull(), clientPutCallback.capture(), anyShort())
 		clientPutCallback.firstValue.onSuccess(mock())
@@ -141,7 +117,7 @@ class InsertServiceTest {
 	fun `insert service notifies listener when insert has failed`() {
 		val failedIds = mutableListOf<String>()
 		insertService.onInsertFailed { id -> failedIds += id }
-		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test")
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "image")
 		val clientPutCallback = argumentCaptor<ClientPutCallback>()
 		verify(highLevelSimpleClient).insert(anyOrNull(), anyOrNull(), anyBoolean(), anyOrNull(), clientPutCallback.capture(), anyShort())
 		clientPutCallback.firstValue.onFailure(mock(), mock())

@@ -23,7 +23,6 @@ import net.pterodactylus.frimgur.image.ImageStatus.Inserting
 import net.pterodactylus.frimgur.image.get1x1Png
 import net.pterodactylus.frimgur.insert.InsertService
 import net.pterodactylus.frimgur.test.bind
-import net.pterodactylus.frimgur.test.isTriple
 import net.pterodactylus.frimgur.util.getInstance
 import net.pterodactylus.frimgur.web.WebInterface
 import org.hamcrest.MatcherAssert.assertThat
@@ -119,17 +118,18 @@ class FrimgurTest {
 
 	@Test
 	fun `insert service is wired up as event listener for images that are inserting`() {
-		val insertImageArguments = mutableListOf<Triple<String, ByteArray, String>>()
+		data class Arguments(val id: String, val data: ByteArray, val mimeType: String, val filename: String)
+		val insertImageArguments = mutableListOf<Arguments>()
 		val insertService = object : InsertService {
-			override fun insertImage(id: String, data: ByteArray, mimeType: String) {
-				insertImageArguments += Triple(id, data, mimeType)
+			override fun insertImage(id: String, data: ByteArray, mimeType: String, filename: String) {
+				insertImageArguments += Arguments(id, data, mimeType, filename)
 			}
 		}
 		runPlugin(bind<InsertService>().toInstance(insertService)) { injector ->
 			val imageService = injector.getInstance<ImageService>()
 			val metadata = imageService.addImage(testImage)!!
 			imageService.setImageStatus(metadata.id, Inserting)
-			assertThat(insertImageArguments, contains(isTriple(equalTo(metadata.id), equalTo(testImage), equalTo("image/png"))))
+			assertThat(insertImageArguments, contains(Arguments(metadata.id, testImage, "image/png", "image.png")))
 		}
 	}
 
@@ -145,7 +145,7 @@ class FrimgurTest {
 		}
 		runPlugin(bind<HighLevelSimpleClient>().toInstance(highLevelSimpleClient), bind<ImageService>().toInstance(imageService)) { injector ->
 			val insertService: InsertService = injector.getInstance()
-			insertService.insertImage("id1", byteArrayOf(), "image/test")
+			insertService.insertImage("id1", byteArrayOf(), "image/test", "image")
 			clientPutCallbacks.first().onGeneratedURI(FreenetURI("KSK@Test"), mock())
 			assertThat(imageKeys, contains(equalTo("id1" to "KSK@Test")))
 		}
@@ -159,7 +159,7 @@ class FrimgurTest {
 		val imageService = captureImageStatus { id, status -> imageStatus += id to status }
 		runPlugin(bind<HighLevelSimpleClient>().toInstance(highLevelSimpleClient), bind<ImageService>().toInstance(imageService)) { injector ->
 			val insertService: InsertService = injector.getInstance()
-			insertService.insertImage("id1", byteArrayOf(), "image/test")
+			insertService.insertImage("id1", byteArrayOf(), "image/test", "image")
 			clientPutCallbacks.first().onFailure(mock(), mock())
 			assertThat(imageStatus, hasItem(equalTo("id1" to Failed)))
 		}
@@ -173,7 +173,7 @@ class FrimgurTest {
 		val imageService = captureImageStatus { id, status -> imageStatus += id to status }
 		runPlugin(bind<HighLevelSimpleClient>().toInstance(highLevelSimpleClient), bind<ImageService>().toInstance(imageService)) { injector ->
 			val insertService: InsertService = injector.getInstance()
-			insertService.insertImage("id1", byteArrayOf(), "image/test")
+			insertService.insertImage("id1", byteArrayOf(), "image/test", "image")
 			clientPutCallbacks.first().onSuccess(mock())
 			assertThat(imageStatus, hasItem(equalTo("id1" to Inserted)))
 		}

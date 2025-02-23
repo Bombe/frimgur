@@ -8,6 +8,7 @@ import com.spotify.hamcrest.jackson.JsonMatchers.jsonText
 import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.ToadletContext
 import freenet.support.api.HTTPRequest
+import freenet.support.io.ArrayBucket
 import net.pterodactylus.frimgur.image.ImageMetadata
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus.Inserted
@@ -25,6 +26,10 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import java.net.URI
 import kotlin.test.Test
+import net.pterodactylus.frimgur.image.ImageStatus
+import net.pterodactylus.frimgur.image.ImageStatus.Inserting
+import org.mockito.kotlin.whenever
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Unit test for [ImageToadlet].
@@ -129,6 +134,47 @@ class ImageToadletTest {
 			"image-data" -> byteArrayOf(0, 1, 2, 3)
 			else -> byteArrayOf()
 		}
+	}
+
+	@Test
+	fun `PUT request for invalid image ID returns 404`() {
+		toadlet.handleMethodPUT(URI("/path/123"), httpRequest, toadletContext)
+		verify(toadletContext).sendReplyHeaders(eq(404), any(), isNull(), isNull(), anyLong())
+	}
+
+	@Test
+	fun `PUT request for valid image ID with empty JSON object as body returns 204`() {
+		val imageService = object : ImageService {
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", Inserted).takeIf { id == "123" }
+		}
+		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{}".toByteArray()))
+		toadlet.handleMethodPUT(URI("/path/123"), httpRequest, toadletContext)
+		verify(toadletContext).sendReplyHeaders(eq(204), any(), isNull(), isNull(), anyLong())
+	}
+
+	@Test
+	fun `PUT request for valid image ID with new status as body returns 200`() {
+		val imageService = object : ImageService {
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", Inserted).takeIf { id == "123" }
+		}
+		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\"}".toByteArray()))
+		toadlet.handleMethodPUT(URI("/path/123"), httpRequest, toadletContext)
+		verify(toadletContext).sendReplyHeaders(eq(200), any(), isNull(), isNull(), anyLong())
+	}
+
+	@Test
+	fun `PUT request for valid image ID with new status as body sets image status to Inserting`() {
+		val insertingImages = AtomicReference<String>()
+		val imageService = object : ImageService {
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", Inserted).takeIf { id == "123" }
+			override fun setImageStatus(id: String, status: ImageStatus) = if (status == Inserting) { insertingImages.set(id) } else {}
+		}
+		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\"}".toByteArray()))
+		toadlet.handleMethodPUT(URI("/path/123"), httpRequest, toadletContext)
+		assertThat(insertingImages.get(), equalTo("123"))
 	}
 
 	private val httpRequest = mock<HTTPRequest>()

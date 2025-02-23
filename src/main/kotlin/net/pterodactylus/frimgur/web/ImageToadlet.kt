@@ -6,6 +6,8 @@ import freenet.clients.http.ToadletContext
 import freenet.support.MultiValueTable
 import freenet.support.api.HTTPRequest
 import net.pterodactylus.frimgur.image.ImageService
+import net.pterodactylus.frimgur.image.ImageStatus
+import net.pterodactylus.frimgur.image.ImageStatus.Inserting
 import java.net.URI
 
 /**
@@ -31,6 +33,31 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 				toadletContext.sendReplyHeaders(201, "Created", MultiValueTable<String, String>().apply { put("Location", imageMetadata.id) }, null, 0)
 			}
 			?: toadletContext.sendReplyHeaders(400, "Bad Request", MultiValueTable(), null, 0)
+	}
+
+	fun handleMethodPUT(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
+		val imageId = uri.path.removePrefix(path)
+		val imageMetadata = imageService.getImage(imageId)
+		if (imageMetadata == null) {
+			toadletContext.sendReplyHeaders(404, "Not Found", null, null, 0)
+			return
+		}
+		val changes = httpRequest.rawData.inputStream.use(objectMapper::readTree)
+		if (changes.isEmpty) {
+			toadletContext.sendReplyHeaders(204, "No Content", null, null, 0)
+			return
+		}
+		if (changes.has("status")) {
+			val newStatus = try {
+				ImageStatus.valueOf(changes.get("status").asText())
+			} catch (e: IllegalArgumentException) {
+				null
+			}
+			if (newStatus == Inserting) {
+				imageService.setImageStatus(imageId, Inserting)
+			}
+		}
+		toadletContext.sendReplyHeaders(200, "OK", null, null, 0)
 	}
 
 	override fun path() = path

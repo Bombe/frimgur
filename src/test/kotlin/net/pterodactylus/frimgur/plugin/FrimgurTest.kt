@@ -118,7 +118,7 @@ class FrimgurTest {
 	}
 
 	@Test
-	fun `insert service is wired up as event listener for new images`() {
+	fun `insert service is wired up as event listener for images that are inserting`() {
 		val insertImageArguments = mutableListOf<Triple<String, ByteArray, String>>()
 		val insertService = object : InsertService {
 			override fun insertImage(id: String, data: ByteArray, mimeType: String) {
@@ -128,18 +128,8 @@ class FrimgurTest {
 		runPlugin(bind<InsertService>().toInstance(insertService)) { injector ->
 			val imageService = injector.getInstance<ImageService>()
 			val metadata = imageService.addImage(testImage)!!
+			imageService.setImageStatus(metadata.id, Inserting)
 			assertThat(insertImageArguments, contains(isTriple(equalTo(metadata.id), equalTo(testImage), equalTo("image/png"))))
-		}
-	}
-
-	@Test
-	fun `image service is called to set status to inserting when insert starts`() {
-		val imageStatusSet = mutableListOf<Pair<String, ImageStatus>>()
-		val imageService = captureImageStatus { id, status -> imageStatusSet += id to status }
-		runPlugin(bind<ImageService>().toInstance(imageService)) { injector ->
-			val insertService: InsertService = injector.getInstance()
-			insertService.insertImage("id1", byteArrayOf(), "image/test")
-			assertThat(imageStatusSet, contains("id1" to Inserting))
 		}
 	}
 

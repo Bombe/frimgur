@@ -40,8 +40,7 @@ open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless, FredPlugi
 	private fun wireUpListeners(injector: Injector) {
 		val imageService: ImageService = injector.getInstance()
 		val insertService: InsertService = injector.getInstance()
-		imageService.onNewImage { imageData -> insertService.insertImage(imageData.metadata.id, imageData.data, imageData.metadata.mimeType) }
-		insertService.onInsertStarting { id -> imageService.setImageStatus(id, Inserting) }
+		imageService.onImageInserting { imageData -> insertService.insertImage(imageData.metadata.id, imageData.data, imageData.metadata.mimeType) }
 		insertService.onInsertGeneratingUri(imageService::setImageKey)
 		insertService.onInsertFailed { id -> imageService.setImageStatus(id, Failed) }
 		insertService.onInsertFinished { id -> imageService.setImageStatus(id, Inserted) }

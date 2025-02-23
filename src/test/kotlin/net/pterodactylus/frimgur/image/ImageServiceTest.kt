@@ -3,6 +3,7 @@ package net.pterodactylus.frimgur.image
 import kotlin.test.Test
 import net.pterodactylus.frimgur.image.ImageStatus.Failed
 import net.pterodactylus.frimgur.image.ImageStatus.Inserted
+import net.pterodactylus.frimgur.image.ImageStatus.Inserting
 import net.pterodactylus.frimgur.image.ImageStatus.Waiting
 import net.pterodactylus.frimgur.test.isMetadataWith
 import org.hamcrest.MatcherAssert.assertThat
@@ -11,6 +12,7 @@ import org.hamcrest.Matchers.emptyIterable
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.nullValue
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Unit test for [DefaultImageService].
@@ -149,6 +151,15 @@ class ImageServiceTest {
 		val id2 = imageService.addImage(get1x1Gif())!!.id
 		imageService.removeImage(id1)
 		assertThat(imageService.getImageIds(), contains(id2))
+	}
+
+	@Test
+	fun `image service notifies listener if image status has been changed to inserting`() {
+		val insertingImage = AtomicReference<ImageData>()
+		imageService.onImageInserting(insertingImage::set)
+		val imageId = imageService.addImage(get1x1Png())!!.id
+		imageService.setImageStatus(imageId, Inserting)
+		assertThat(insertingImage.get().metadata.id, equalTo(imageId))
 	}
 
 	private val imageService = DefaultImageService()

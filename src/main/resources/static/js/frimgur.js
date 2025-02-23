@@ -25,9 +25,14 @@ const replacePlaceholderId = (oldId, newId) => {
   element.setAttribute('id', createImageElementId(newId))
 }
 
+const updateImageStatusClassName = (element, newClassName) => {
+  element.className = element.className.replace("\bimage-status-[^ ]* +", "") + " " + ("image-status-" + newClassName.toLowerCase())
+}
+
 const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
   const placeholderElement = getOrCreatePlaceholderElement(imageId)
   if (imageMetadata.metadata != null) {
+    updateImageStatusClassName(placeholderElement, imageMetadata.metadata.status)
     const statusNode = document.createTextNode(`${imageMetadata.metadata.status}`)
     placeholderElement.querySelector('.status').replaceChildren(statusNode)
     const keyNode = document.createTextNode(imageMetadata.metadata.key ? imageMetadata.metadata.key : '')
@@ -41,6 +46,9 @@ const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
   drawImageToCanvas(imageBlob, canvasElement, canvasWidth, canvasHeight).then((image) => {
     const dimensionsNode = document.createTextNode(`${image.width} × ${image.height}`)
     placeholderElement.querySelector('.dimensions').replaceChildren(dimensionsNode)
+  })
+  placeholderElement.querySelector('button.button-start').addEventListener('click', async () => {
+    await fetch(`image/${imageId}`, { method: 'PUT', body: JSON.stringify({ status: 'Inserting' }) })
   })
 }
 

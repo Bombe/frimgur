@@ -24,6 +24,14 @@
 .image-placeholder .image-overlay {
 }
 
+.image-placeholder .image-overlay .button-start {
+    display: none;
+}
+
+.image-placeholder.image-status-waiting .image-overlay .button-start {
+    display: inherit;
+}
+
 #image-template {
     display: none;
 }

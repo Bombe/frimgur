@@ -29,6 +29,11 @@ const updateImageStatusClassName = (element, newClassName) => {
   element.className = element.className.replace("\bimage-status-[^ ]* +", "") + " " + ("image-status-" + newClassName.toLowerCase())
 }
 
+const setImageFilename = (placeholderElement, imageId) => async () => {
+  const inputField = placeholderElement.querySelector('.filename input')
+  await fetch(`image/${imageId}`, { method: 'PUT', body: JSON.stringify({ filename: inputField.value }) })
+}
+
 const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
   const placeholderElement = getOrCreatePlaceholderElement(imageId)
   if (imageMetadata.metadata != null) {
@@ -48,10 +53,8 @@ const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
     const dimensionsNode = document.createTextNode(`${image.width} × ${image.height}`)
     placeholderElement.querySelector('.dimensions').replaceChildren(dimensionsNode)
   })
-  placeholderElement.querySelector('.filename button').addEventListener('click', async () => {
-    const inputField = placeholderElement.querySelector('.filename input')
-    await fetch(`image/${imageId}`, { method: 'PUT', body: JSON.stringify({ filename: inputField.value })})
-  })
+  placeholderElement.querySelector('.filename input').addEventListener('change', setImageFilename(placeholderElement, imageId))
+  placeholderElement.querySelector('.filename button').addEventListener('click', setImageFilename(placeholderElement, imageId))
   placeholderElement.querySelector('button.button-start').addEventListener('click', async () => {
     await fetch(`image/${imageId}`, { method: 'PUT', body: JSON.stringify({ status: 'Inserting' }) })
   })

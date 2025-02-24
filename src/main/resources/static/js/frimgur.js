@@ -58,8 +58,9 @@ const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
   placeholderElement.querySelector('button.button-start').addEventListener('click', async () => {
     await fetch(`image/${imageId}`, { method: 'PUT', body: JSON.stringify({ status: 'Inserting' }) })
   })
-  placeholderElement.querySelector('button.button-remove').addEventListener('click', async () => {
-    await fetch(`image/${imageId}`, { method: 'DELETE' })
+  placeholderElement.querySelector('button.button-remove').addEventListener('click', () => {
+    fetch(`image/${imageId}`, { method: 'DELETE' })
+        .then(() => placeholderElement.remove())
   })
 }
 

@@ -12,7 +12,9 @@ const addClipboardListener = () => {
               .then(response => {
                 const realImageId = response.headers.get('Location')
                 replacePlaceholderId(temporaryImageId, realImageId)
+                return realImageId
               })
+              .then(imageId => refreshElementsForImage(imageId))
           })
         }
       }
@@ -31,6 +33,11 @@ const updatePlaceholderElement = (imageId, imageMetadata) => {
     placeholderElement.querySelector('.key').replaceChildren(keyNode)
   }
 }
+
+const refreshElementsForImage = (imageId) =>
+  fetch(`image/${imageId}`)
+      .then(response => response.json())
+      .then(imageMetadata => updatePlaceholderElement(imageId, imageMetadata))
 
 const replacePlaceholderId = (oldId, newId) => {
   const element = document.getElementById(createImageElementId(oldId))
@@ -94,6 +101,7 @@ const getOrCreatePlaceholderElement = (imageId) => {
   const placeholderElement = placeholderTemplateElement.cloneNode(true)
   placeholderElement.setAttribute('id', createImageElementId(imageId))
   const getImageIdFromElement = () => placeholderElement.getAttribute('id').replace(/^image-/, '')
+  placeholderElement.querySelector('button.button-refresh').addEventListener('click', () => refreshElementsForImage(getImageIdFromElement()))
   placeholderElement.querySelector('.filename input').addEventListener('change', () => setImageFilename(placeholderElement, getImageIdFromElement()))
   placeholderElement.querySelector('.filename button').addEventListener('click', () => setImageFilename(placeholderElement, getImageIdFromElement()))
   placeholderElement.querySelector('button.button-start').addEventListener('click', () =>

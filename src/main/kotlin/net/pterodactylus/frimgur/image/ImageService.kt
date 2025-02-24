@@ -41,6 +41,15 @@ interface ImageService {
 	fun setImageStatus(id: String, status: ImageStatus) = Unit
 
 	/**
+	 * Sets the filename that will be associated with an image on insert.
+	 * The filename can only be changed while the image’s status is [Waiting].
+	 *
+	 * @param id The ID of the image
+	 * @param filename The new filename for the image
+	 */
+	fun setImageFilename(id: String, filename: String) = Unit
+
+	/**
 	 * Sets the key of the image with the given ID.
 	 *
 	 * @param id The ID of the image to set the key of
@@ -121,6 +130,14 @@ class DefaultImageService : ImageService {
 	override fun getImage(id: String): ImageMetadata? = imageData[id]?.metadata
 
 	override fun getImageData(id: String): ImageData? = imageData[id]
+
+	override fun setImageFilename(id: String, filename: String) {
+		imageData[id]?.let { oldImageData ->
+			if (oldImageData.metadata.status == Waiting) {
+				imageData[id] = oldImageData.copy(metadata = oldImageData.metadata.copy(filename = filename))
+			}
+		}
+	}
 
 	override fun setImageStatus(id: String, status: ImageStatus) {
 		imageData[id]?.let { oldImageData ->

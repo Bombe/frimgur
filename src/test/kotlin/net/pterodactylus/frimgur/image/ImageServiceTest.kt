@@ -10,6 +10,7 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.emptyIterable
 import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.not
 import org.hamcrest.Matchers.nullValue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
@@ -160,6 +161,35 @@ class ImageServiceTest {
 		val imageId = imageService.addImage(get1x1Png())!!.id
 		imageService.setImageStatus(imageId, Inserting)
 		assertThat(insertingImage.get().metadata.id, equalTo(imageId))
+	}
+
+	@Test
+	fun `image service can change filename of an image in status waiting`() {
+		val imageId = imageService.addImage(get1x1Png())!!.id
+		imageService.setImageFilename(imageId, "new-filename.png");
+		assertThat(imageService.getImageData(imageId)!!.metadata.filename, equalTo("new-filename.png"))
+	}
+
+	@Test
+	fun `image service does not change filename of an image in status inserting`() {
+		verifyThatFilenameCannotBeChangedForStatus(Inserting)
+	}
+
+	@Test
+	fun `image service does not change filename of an image in status inserted`() {
+		verifyThatFilenameCannotBeChangedForStatus(Inserted)
+	}
+
+	@Test
+	fun `image service does not change filename of an image in status failed`() {
+		verifyThatFilenameCannotBeChangedForStatus(Failed)
+	}
+
+	private fun verifyThatFilenameCannotBeChangedForStatus(status: ImageStatus) {
+		val imageId = imageService.addImage(get1x1Png())!!.id
+		imageService.setImageStatus(imageId, status)
+		imageService.setImageFilename(imageId, "new-filename.png");
+		assertThat(imageService.getImageData(imageId)!!.metadata.filename, not(equalTo("new-filename.png")))
 	}
 
 	private val imageService = DefaultImageService()

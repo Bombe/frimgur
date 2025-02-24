@@ -57,6 +57,10 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 				imageService.setImageStatus(imageId, Inserting)
 			}
 		}
+		if (changes.has("filename")) {
+			val filename = changes.get("filename").asText()
+			imageService.setImageFilename(imageId, filename)
+		}
 		toadletContext.sendReplyHeaders(200, "OK", null, null, 0)
 	}
 

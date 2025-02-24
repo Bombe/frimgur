@@ -178,6 +178,20 @@ class ImageToadletTest {
 		assertThat(insertingImages.get(), equalTo("123"))
 	}
 
+	@Test
+	fun `PUT request for valid image ID with new filename as body sets image filename`() {
+		data class Arguments(val id: String, val filename: String)
+		val imageFilenames = mutableListOf<Arguments>()
+		val imageService = object : ImageService {
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "123" }
+			override fun setImageFilename(id: String, filename: String) = imageFilenames.add(Arguments(id, filename)).let { }
+		}
+		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"filename\":\"new-filename.png\"}".toByteArray()))
+		toadlet.handleMethodPUT(URI("/path/123"), httpRequest, toadletContext)
+		assertThat(imageFilenames.single(), equalTo(Arguments("123", "new-filename.png")))
+	}
+
 	private val httpRequest = mock<HTTPRequest>()
 	private val toadletContext = mock<ToadletContext>()
 	private val imageService = object : ImageService {

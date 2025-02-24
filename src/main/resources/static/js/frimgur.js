@@ -53,15 +53,6 @@ const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
     const dimensionsNode = document.createTextNode(`${image.width} × ${image.height}`)
     placeholderElement.querySelector('.dimensions').replaceChildren(dimensionsNode)
   })
-  placeholderElement.querySelector('.filename input').addEventListener('change', setImageFilename(placeholderElement, imageId))
-  placeholderElement.querySelector('.filename button').addEventListener('click', setImageFilename(placeholderElement, imageId))
-  placeholderElement.querySelector('button.button-start').addEventListener('click', async () => {
-    await fetch(`image/${imageId}`, { method: 'PUT', body: JSON.stringify({ status: 'Inserting' }) })
-  })
-  placeholderElement.querySelector('button.button-remove').addEventListener('click', () => {
-    fetch(`image/${imageId}`, { method: 'DELETE' })
-        .then(() => placeholderElement.remove())
-  })
 }
 
 const drawImageToCanvas = (imageBlob, canvasElement, canvasWidth, canvasHeight) => {
@@ -95,6 +86,15 @@ const getOrCreatePlaceholderElement = (imageId) => {
   const placeholderTemplateElement = document.getElementById('image-template')
   const placeholderElement = placeholderTemplateElement.cloneNode(true)
   placeholderElement.setAttribute('id', createImageElementId(imageId))
+  placeholderElement.querySelector('.filename input').addEventListener('change', setImageFilename(placeholderElement, imageId))
+  placeholderElement.querySelector('.filename button').addEventListener('click', setImageFilename(placeholderElement, imageId))
+  placeholderElement.querySelector('button.button-start').addEventListener('click', async () => {
+    await fetch(`image/${imageId}`, { method: 'PUT', body: JSON.stringify({ status: 'Inserting' }) })
+  })
+  placeholderElement.querySelector('button.button-remove').addEventListener('click', () => {
+    fetch(`image/${imageId}`, { method: 'DELETE' })
+        .then(() => placeholderElement.remove())
+  })
   document.getElementById('inserted-images').appendChild(placeholderElement)
   return placeholderElement
 }

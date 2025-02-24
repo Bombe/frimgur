@@ -26,7 +26,7 @@ const replacePlaceholderId = (oldId, newId) => {
 }
 
 const updateImageStatusClassName = (element, newClassName) => {
-  element.className = element.className.replace("\bimage-status-[^ ]* +", "") + " " + ("image-status-" + newClassName.toLowerCase())
+  element.className = element.className.replaceAll(/\bimage-status-[^ ]*\b/g, "") + " " + ("image-status-" + newClassName.toLowerCase())
 }
 
 const setImageFilename = (placeholderElement, imageId) => async () => {

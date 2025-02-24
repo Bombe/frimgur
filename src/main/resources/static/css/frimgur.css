@@ -32,6 +32,10 @@
     display: inherit;
 }
 
+.image-status-inserting .image-overlay .button-remove {
+    display: none;
+}
+
 .image-placeholder .filename {
     display: none;
 }

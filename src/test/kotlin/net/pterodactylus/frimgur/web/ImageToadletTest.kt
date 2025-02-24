@@ -192,6 +192,23 @@ class ImageToadletTest {
 		assertThat(imageFilenames.single(), equalTo(Arguments("123", "new-filename.png")))
 	}
 
+	@Test
+	fun `DELETE request calls image service`() {
+		val removedImages = mutableListOf<String>()
+		val imageService = object : ImageService {
+			override fun removeImage(id: String) = removedImages.add(id).let {}
+		}
+		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
+		toadlet.handleMethodDELETE(URI("/path/124"), httpRequest, toadletContext)
+		assertThat(removedImages.single(), equalTo("124"))
+	}
+
+	@Test
+	fun `DELETE request returns 204`() {
+		toadlet.handleMethodDELETE(URI("/path/123"), httpRequest, toadletContext)
+		verify(toadletContext).sendReplyHeaders(eq(204), any(), isNull(), isNull(), anyLong())
+	}
+
 	private val httpRequest = mock<HTTPRequest>()
 	private val toadletContext = mock<ToadletContext>()
 	private val imageService = object : ImageService {

@@ -64,6 +64,12 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 		toadletContext.sendReplyHeaders(200, "OK", null, null, 0)
 	}
 
+	fun handleMethodDELETE(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
+		val imageId = uri.path.removePrefix(path)
+		imageService.removeImage(imageId)
+		toadletContext.sendReplyHeaders(204, "No Content", null, null, 0)
+	}
+
 	override fun path() = path
 
 }

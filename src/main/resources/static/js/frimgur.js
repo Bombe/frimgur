@@ -20,6 +20,18 @@ const addClipboardListener = () => {
   )
 }
 
+const updatePlaceholderElement = (imageId, imageMetadata) => {
+  const placeholderElement = getOrCreatePlaceholderElement(imageId)
+  if (imageMetadata.metadata != null) {
+    updateImageStatusClassName(placeholderElement, imageMetadata.metadata.status)
+    const statusNode = document.createTextNode(`${imageMetadata.metadata.status}`)
+    placeholderElement.querySelector('.filename input').value = imageMetadata.metadata.filename
+    placeholderElement.querySelector('.status').replaceChildren(statusNode)
+    const keyNode = document.createTextNode(imageMetadata.metadata.key ? imageMetadata.metadata.key : '')
+    placeholderElement.querySelector('.key').replaceChildren(keyNode)
+  }
+}
+
 const replacePlaceholderId = (oldId, newId) => {
   const element = document.getElementById(createImageElementId(oldId))
   element.setAttribute('id', createImageElementId(newId))
@@ -37,12 +49,7 @@ const setImageFilename = (placeholderElement, imageId) => async () => {
 const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
   const placeholderElement = getOrCreatePlaceholderElement(imageId)
   if (imageMetadata.metadata != null) {
-    updateImageStatusClassName(placeholderElement, imageMetadata.metadata.status)
-    const statusNode = document.createTextNode(`${imageMetadata.metadata.status}`)
-    placeholderElement.querySelector('.filename input').value = imageMetadata.metadata.filename
-    placeholderElement.querySelector('.status').replaceChildren(statusNode)
-    const keyNode = document.createTextNode(imageMetadata.metadata.key ? imageMetadata.metadata.key : '')
-    placeholderElement.querySelector('.key').replaceChildren(keyNode)
+    updatePlaceholderElement(imageId, imageMetadata)
   }
   const canvasElement = placeholderElement.querySelector('canvas')
   const canvasWidth = 300

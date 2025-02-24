@@ -41,9 +41,9 @@ const updateImageStatusClassName = (element, newClassName) => {
   element.className = element.className.replaceAll(/\bimage-status-[^ ]*\b/g, "") + " " + ("image-status-" + newClassName.toLowerCase())
 }
 
-const setImageFilename = (placeholderElement, imageId) => async () => {
+const setImageFilename = (placeholderElement, imageId) => {
   const inputField = placeholderElement.querySelector('.filename input')
-  await fetch(`image/${imageId}`, { method: 'PUT', body: JSON.stringify({ filename: inputField.value }) })
+  return fetch(`image/${imageId}`, { method: 'PUT', body: JSON.stringify({ filename: inputField.value }) })
 }
 
 const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
@@ -93,15 +93,16 @@ const getOrCreatePlaceholderElement = (imageId) => {
   const placeholderTemplateElement = document.getElementById('image-template')
   const placeholderElement = placeholderTemplateElement.cloneNode(true)
   placeholderElement.setAttribute('id', createImageElementId(imageId))
-  placeholderElement.querySelector('.filename input').addEventListener('change', setImageFilename(placeholderElement, imageId))
-  placeholderElement.querySelector('.filename button').addEventListener('click', setImageFilename(placeholderElement, imageId))
-  placeholderElement.querySelector('button.button-start').addEventListener('click', async () => {
-    await fetch(`image/${imageId}`, { method: 'PUT', body: JSON.stringify({ status: 'Inserting' }) })
-  })
-  placeholderElement.querySelector('button.button-remove').addEventListener('click', () => {
-    fetch(`image/${imageId}`, { method: 'DELETE' })
+  const getImageIdFromElement = () => placeholderElement.getAttribute('id').replace(/^image-/, '')
+  placeholderElement.querySelector('.filename input').addEventListener('change', () => setImageFilename(placeholderElement, getImageIdFromElement()))
+  placeholderElement.querySelector('.filename button').addEventListener('click', () => setImageFilename(placeholderElement, getImageIdFromElement()))
+  placeholderElement.querySelector('button.button-start').addEventListener('click', () =>
+      fetch(`image/${getImageIdFromElement()}`, { method: 'PUT', body: JSON.stringify({ status: 'Inserting' }) })
+  )
+  placeholderElement.querySelector('button.button-remove').addEventListener('click', () =>
+    fetch(`image/${getImageIdFromElement()}`, { method: 'DELETE' })
         .then(() => placeholderElement.remove())
-  })
+  )
   document.getElementById('inserted-images').appendChild(placeholderElement)
   return placeholderElement
 }

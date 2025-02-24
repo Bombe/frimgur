@@ -134,6 +134,23 @@ class FrimgurTest {
 	}
 
 	@Test
+	fun `insert service called with name of file when a name has been set on the image`() {
+		data class Arguments(val id: String, val data: ByteArray, val mimeType: String, val filename: String)
+		val insertImageArguments = mutableListOf<Arguments>()
+		val insertService = object : InsertService {
+			override fun insertImage(id: String, data: ByteArray, mimeType: String, filename: String) =
+				insertImageArguments.add(Arguments(id, data, mimeType, filename)).let {}
+		}
+		runPlugin(bind<InsertService>().toInstance(insertService)) { injector ->
+			val imageService = injector.getInstance<ImageService>()
+			val metadata = imageService.addImage(testImage)!!
+			imageService.setImageFilename(metadata.id, "test.image")
+			imageService.setImageStatus(metadata.id, Inserting)
+			assertThat(insertImageArguments, contains(Arguments(metadata.id, testImage, "image/png", "test.image")))
+		}
+	}
+
+	@Test
 	fun `image service is called to set key when insert generates uri`() {
 		val clientPutCallbacks = mutableListOf<ClientPutCallback>()
 		val highLevelSimpleClient = captureClientPutCallback { clientPutCallback -> clientPutCallbacks += clientPutCallback }

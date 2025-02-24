@@ -34,6 +34,7 @@ const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
   if (imageMetadata.metadata != null) {
     updateImageStatusClassName(placeholderElement, imageMetadata.metadata.status)
     const statusNode = document.createTextNode(`${imageMetadata.metadata.status}`)
+    placeholderElement.querySelector('.filename input').value = imageMetadata.metadata.filename
     placeholderElement.querySelector('.status').replaceChildren(statusNode)
     const keyNode = document.createTextNode(imageMetadata.metadata.key ? imageMetadata.metadata.key : '')
     placeholderElement.querySelector('.key').replaceChildren(keyNode)
@@ -46,6 +47,10 @@ const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
   drawImageToCanvas(imageBlob, canvasElement, canvasWidth, canvasHeight).then((image) => {
     const dimensionsNode = document.createTextNode(`${image.width} × ${image.height}`)
     placeholderElement.querySelector('.dimensions').replaceChildren(dimensionsNode)
+  })
+  placeholderElement.querySelector('.filename button').addEventListener('click', async () => {
+    const inputField = placeholderElement.querySelector('.filename input')
+    await fetch(`image/${imageId}`, { method: 'PUT', body: JSON.stringify({ filename: inputField.value })})
   })
   placeholderElement.querySelector('button.button-start').addEventListener('click', async () => {
     await fetch(`image/${imageId}`, { method: 'PUT', body: JSON.stringify({ status: 'Inserting' }) })

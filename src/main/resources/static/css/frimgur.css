@@ -32,6 +32,14 @@
     display: inherit;
 }
 
+.image-placeholder .filename {
+    display: none;
+}
+
+.image-status-waiting .image-overlay .filename {
+    display: inherit;
+}
+
 #image-template {
     display: none;
 }

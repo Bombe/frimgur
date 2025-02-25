@@ -37,6 +37,34 @@
     display: none;
 }
 
+.image-placeholder .format > div {
+    display: inline;
+}
+
+.image-placeholder .format .type {
+    display: none;
+}
+
+.image-placeholder .format .type.other {
+    display: inherit;
+}
+
+.image-placeholder .format.image-type-png .type.png {
+    display: inline;
+}
+
+.image-placeholder .format.image-type-png .type.other {
+    display: none;
+}
+
+.image-placeholder .format.image-type-jpeg .type.jpeg {
+    display: inline;
+}
+
+.image-placeholder .format.image-type-jpeg .type.other {
+    display: none;
+}
+
 .image-status-waiting .image-overlay .filename {
     display: inherit;
 }

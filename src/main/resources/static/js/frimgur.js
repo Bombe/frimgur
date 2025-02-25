@@ -26,6 +26,7 @@ const updatePlaceholderElement = (imageId, imageMetadata) => {
   const placeholderElement = getOrCreatePlaceholderElement(imageId)
   if (imageMetadata.metadata != null) {
     updateImageStatusClassName(placeholderElement, imageMetadata.metadata.status)
+    updateImageTypeClassName(placeholderElement.querySelector('.format'), imageMetadata.metadata.mimeType)
     const statusNode = document.createTextNode(`${imageMetadata.metadata.status}`)
     placeholderElement.querySelector('.filename input').value = imageMetadata.metadata.filename
     placeholderElement.querySelector('.status').replaceChildren(statusNode)
@@ -62,6 +63,14 @@ const updateImageStatusClassName = (element, newClassName) => {
   element.className = element.className.replaceAll(/\bimage-status-[^ ]*\b/g, "") + " " + ("image-status-" + newClassName.toLowerCase())
 }
 
+const updateImageTypeClassName = (element, mimeType) => {
+  let format = mimeType.split(/\//).findLast(() => true)
+  if ((format !== 'png') && (format !== 'jpeg')) {
+    format = 'other'
+  }
+  element.className = element.className.replaceAll(/\bimage-type-[^ ]*\b/g, "") + " " + ("image-type-" + format)
+}
+
 const setImageFilename = (placeholderElement, imageId) => {
   const inputField = placeholderElement.querySelector('.filename input')
   return fetch(`image/${imageId}`, { method: 'PUT', body: JSON.stringify({ filename: inputField.value }) })
@@ -79,7 +88,7 @@ const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
   canvasElement.style.height = `${canvasHeight}px`
   drawImageToCanvas(imageBlob, canvasElement, canvasWidth, canvasHeight).then((image) => {
     const dimensionsNode = document.createTextNode(`${image.width} × ${image.height}`)
-    placeholderElement.querySelector('.dimensions').replaceChildren(dimensionsNode)
+    placeholderElement.querySelector('.format .dimensions').replaceChildren(dimensionsNode)
   })
 }
 

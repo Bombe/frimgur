@@ -34,10 +34,24 @@ const updatePlaceholderElement = (imageId, imageMetadata) => {
   }
 }
 
+const removePlaceholderElement = imageId => {
+  const placeholderElement = document.getElementById(createImageElementId(imageId))
+  if (placeholderElement) {
+    placeholderElement.remove()
+  }
+}
+
 const refreshElementsForImage = (imageId) =>
   fetch(`image/${imageId}`)
+      .then(response => {
+        if (response.status === 404) {
+          throw "Not Found"
+        }
+        return response
+      })
       .then(response => response.json())
       .then(imageMetadata => updatePlaceholderElement(imageId, imageMetadata))
+      .catch(() => removePlaceholderElement(imageId))
 
 const replacePlaceholderId = (oldId, newId) => {
   const element = document.getElementById(createImageElementId(oldId))

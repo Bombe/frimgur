@@ -14,5 +14,6 @@ fun ImageMetadata.toJson() = objectMapper.createObjectNode()!!.apply {
 		put("status", status.name)
 		put("key", key)
 		put("filename", filename)
+		put("mimeType", mimeType)
 	}
 }

@@ -63,6 +63,7 @@ class ImageToadletTest {
 							.where("status", jsonText("Inserted"))
 							.where("key", jsonText("CHK@Test"))
 							.where("filename", jsonText("image.tst"))
+							.where("mimeType", jsonText("image/test"))
 					)
 			)
 		)

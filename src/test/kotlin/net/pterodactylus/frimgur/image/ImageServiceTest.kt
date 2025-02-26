@@ -230,6 +230,14 @@ class ImageServiceTest {
 	}
 
 	@Test
+	fun `cloning an image with a key will remove the key`() {
+		val imageMetadata = imageService.addImage(get1x1Png())!!
+		imageService.setImageKey(imageMetadata.id, "some-key")
+		val clonedData = imageService.cloneImage(imageMetadata.id)!!
+		assertThat(clonedData.key, nullValue())
+	}
+
+	@Test
 	fun `cloning a PNG image and changing its type to a JPEG will create a new JPEG image`() {
 		val imageMetadata = imageService.addImage(get1x1Png())!!
 		val clonedData = imageService.cloneImage(imageMetadata.id, "image/jpeg")!!

@@ -73,7 +73,7 @@ const updateImageTypeClassName = (element, mimeType) => {
 
 const setImageFilename = (placeholderElement, imageId) => {
   const inputField = placeholderElement.querySelector('.filename input')
-  return fetch(`image/${imageId}`, { method: 'PUT', body: JSON.stringify({ filename: inputField.value }) })
+  return fetch(`image/${imageId}`, { method: 'PATCH', body: JSON.stringify({ filename: inputField.value }) })
 }
 
 const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
@@ -128,7 +128,7 @@ const getOrCreatePlaceholderElement = (imageId) => {
   placeholderElement.querySelector('.filename input').addEventListener('change', () => setImageFilename(placeholderElement, getImageIdFromElement()))
   placeholderElement.querySelector('.filename button').addEventListener('click', () => setImageFilename(placeholderElement, getImageIdFromElement()))
   placeholderElement.querySelector('button.button-start').addEventListener('click', () =>
-      fetch(`image/${getImageIdFromElement()}`, { method: 'PUT', body: JSON.stringify({ status: 'Inserting' }) })
+      fetch(`image/${getImageIdFromElement()}`, { method: 'PATCH', body: JSON.stringify({ status: 'Inserting' }) })
   )
   placeholderElement.querySelector('button.button-remove').addEventListener('click', () =>
     fetch(`image/${getImageIdFromElement()}`, { method: 'DELETE' })

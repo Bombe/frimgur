@@ -35,7 +35,7 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 			?: toadletContext.sendReplyHeaders(400, "Bad Request", MultiValueTable(), null, 0)
 	}
 
-	fun handleMethodPUT(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
+	fun handleMethodPATCH(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
 		val imageId = uri.path.removePrefix(path)
 		val imageMetadata = imageService.getImage(imageId)
 		if (imageMetadata == null) {

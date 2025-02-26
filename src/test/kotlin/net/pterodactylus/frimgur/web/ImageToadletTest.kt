@@ -139,35 +139,35 @@ class ImageToadletTest {
 	}
 
 	@Test
-	fun `PUT request for invalid image ID returns 404`() {
-		toadlet.handleMethodPUT(URI("/path/123"), httpRequest, toadletContext)
+	fun `PATCH request for invalid image ID returns 404`() {
+		toadlet.handleMethodPATCH(URI("/path/123"), httpRequest, toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(404), any(), isNull(), isNull(), anyLong())
 	}
 
 	@Test
-	fun `PUT request for valid image ID with empty JSON object as body returns 204`() {
+	fun `PATCH request for valid image ID with empty JSON object as body returns 204`() {
 		val imageService = object : ImageService {
 			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "123" }
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{}".toByteArray()))
-		toadlet.handleMethodPUT(URI("/path/123"), httpRequest, toadletContext)
+		toadlet.handleMethodPATCH(URI("/path/123"), httpRequest, toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(204), any(), isNull(), isNull(), anyLong())
 	}
 
 	@Test
-	fun `PUT request for valid image ID with new status as body returns 200`() {
+	fun `PATCH request for valid image ID with new status as body returns 200`() {
 		val imageService = object : ImageService {
 			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "123" }
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\"}".toByteArray()))
-		toadlet.handleMethodPUT(URI("/path/123"), httpRequest, toadletContext)
+		toadlet.handleMethodPATCH(URI("/path/123"), httpRequest, toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(200), any(), isNull(), isNull(), anyLong())
 	}
 
 	@Test
-	fun `PUT request for valid image ID with new status as body sets image status to Inserting`() {
+	fun `PATCH request for valid image ID with new status as body sets image status to Inserting`() {
 		val insertingImages = AtomicReference<String>()
 		val imageService = object : ImageService {
 			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "123" }
@@ -175,12 +175,12 @@ class ImageToadletTest {
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\"}".toByteArray()))
-		toadlet.handleMethodPUT(URI("/path/123"), httpRequest, toadletContext)
+		toadlet.handleMethodPATCH(URI("/path/123"), httpRequest, toadletContext)
 		assertThat(insertingImages.get(), equalTo("123"))
 	}
 
 	@Test
-	fun `PUT request for valid image ID with new filename as body sets image filename`() {
+	fun `PATCH request for valid image ID with new filename as body sets image filename`() {
 		data class Arguments(val id: String, val filename: String)
 		val imageFilenames = mutableListOf<Arguments>()
 		val imageService = object : ImageService {
@@ -189,7 +189,7 @@ class ImageToadletTest {
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"filename\":\"new-filename.png\"}".toByteArray()))
-		toadlet.handleMethodPUT(URI("/path/123"), httpRequest, toadletContext)
+		toadlet.handleMethodPATCH(URI("/path/123"), httpRequest, toadletContext)
 		assertThat(imageFilenames.single(), equalTo(Arguments("123", "new-filename.png")))
 	}
 

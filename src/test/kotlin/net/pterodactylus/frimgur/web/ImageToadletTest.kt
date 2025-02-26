@@ -28,6 +28,10 @@ import java.net.URI
 import kotlin.test.Test
 import net.pterodactylus.frimgur.image.ImageStatus
 import net.pterodactylus.frimgur.image.ImageStatus.Inserting
+import org.hamcrest.Matchers.allOf
+import org.hamcrest.Matchers.greaterThanOrEqualTo
+import org.hamcrest.Matchers.lessThan
+import org.mockito.hamcrest.MockitoHamcrest.intThat
 import org.mockito.kotlin.whenever
 import java.util.concurrent.atomic.AtomicReference
 
@@ -191,6 +195,78 @@ class ImageToadletTest {
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"filename\":\"new-filename.png\"}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/123"), httpRequest, toadletContext)
 		assertThat(imageFilenames.single(), equalTo(Arguments("123", "new-filename.png")))
+	}
+
+	@Test
+	fun `PATCH request with width will call image service with width only`() {
+		data class Arguments(val id: String, val mimeType: String?, val width: Int?, val height: Int?)
+		val receivedArguments = mutableListOf<Arguments>()
+		val imageService = createCloningImageServiceThatRecordsArguments(125) { id, mimeType, width, height -> receivedArguments.add(Arguments(id, mimeType, width, height)) }
+		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"width\":\"500\"}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/125"), httpRequest, toadletContext)
+		assertThat(receivedArguments.single(), equalTo(Arguments("125", null, 500, null)))
+	}
+
+	@Test
+	fun `PATCH request with width will respond with a success response code and the location of the new image`() {
+		val imageService = createCloningImageServiceReturningImageMetadataWidthId(126)
+		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"width\":\"500\"}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/126"), httpRequest, toadletContext)
+		verify(toadletContext).sendReplyHeaders(intThat(allOf(greaterThanOrEqualTo(200), lessThan(300))), any(), argThat(containsHeader("location", "126-2")), isNull(), anyLong())
+	}
+
+	@Test
+	fun `PATCH request with height will call image service with height only`() {
+		data class Arguments(val id: String, val mimeType: String?, val width: Int?, val height: Int?)
+		val receivedArguments = mutableListOf<Arguments>()
+		val imageService = createCloningImageServiceThatRecordsArguments(127) { id, mimeType, width, height -> receivedArguments.add(Arguments(id, mimeType, width, height)) }
+		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"height\":\"500\"}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/127"), httpRequest, toadletContext)
+		assertThat(receivedArguments.single(), equalTo(Arguments("127", null, null, 500)))
+	}
+
+	@Test
+	fun `PATCH request with height will respond with a success response code and the location of the new image`() {
+		val imageService = createCloningImageServiceReturningImageMetadataWidthId(128)
+		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"height\":\"500\"}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/128"), httpRequest, toadletContext)
+		verify(toadletContext).sendReplyHeaders(intThat(allOf(greaterThanOrEqualTo(200), lessThan(300))), any(), argThat(containsHeader("location", "128-2")), isNull(), anyLong())
+	}
+
+	@Test
+	fun `PATCH request with width and height will call image service with width and height`() {
+		data class Arguments(val id: String, val mimeType: String?, val width: Int?, val height: Int?)
+		val receivedArguments = mutableListOf<Arguments>()
+		val imageService = createCloningImageServiceThatRecordsArguments(129) { id, mimeType, width, height -> receivedArguments.add(Arguments(id, mimeType, width, height)) }
+		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"width\":\"400\",\"height\":\"600\"}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/129"), httpRequest, toadletContext)
+		assertThat(receivedArguments.single(), equalTo(Arguments("129", null, 400, 600)))
+	}
+
+	@Test
+	fun `PATCH request with width and height will respond with a success response code and the location of the new image`() {
+		val imageService = createCloningImageServiceReturningImageMetadataWidthId(130)
+		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"width\":\"400\",\"height\":\"600\"}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/130"), httpRequest, toadletContext)
+		verify(toadletContext).sendReplyHeaders(intThat(allOf(greaterThanOrEqualTo(200), lessThan(300))), any(), argThat(containsHeader("location", "130-2")), isNull(), anyLong())
+	}
+
+	private fun createCloningImageServiceThatRecordsArguments(imageId: Int, argumentsReceived: (id: String, mimeType: String?, width: Int?, height: Int?) -> Unit) = object : ImageService {
+		override fun getImage(id: String) = ImageMetadata("$imageId", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "$imageId" }
+		override fun cloneImage(id: String, mimeType: String?, width: Int?, height: Int?) =
+			argumentsReceived(id, mimeType, width, height).let { null }
+	}
+
+	private fun createCloningImageServiceReturningImageMetadataWidthId(imageId: Int) = object : ImageService {
+		override fun getImage(id: String) = ImageMetadata("$imageId", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "$imageId" }
+		override fun cloneImage(id: String, mimeType: String?, width: Int?, height: Int?) =
+			ImageMetadata("${imageId}-2", 1, 1, 1).takeIf { id == "$imageId" }
 	}
 
 	@Test

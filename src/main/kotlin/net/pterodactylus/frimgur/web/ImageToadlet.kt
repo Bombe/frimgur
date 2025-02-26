@@ -5,6 +5,7 @@ import freenet.clients.http.Toadlet
 import freenet.clients.http.ToadletContext
 import freenet.support.MultiValueTable
 import freenet.support.api.HTTPRequest
+import net.pterodactylus.frimgur.image.ImageMetadata
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus
 import net.pterodactylus.frimgur.image.ImageStatus.Inserting
@@ -60,6 +61,13 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 		if (changes.has("filename")) {
 			val filename = changes.get("filename").asText()
 			imageService.setImageFilename(imageId, filename)
+		}
+		if (changes.has("width") || changes.has("height")) {
+			val width = changes.get("width")?.asInt(-1)?.let { if (it <= 0) null else it }
+			val height = changes.get("height")?.asInt(-1)?.let { if (it <= 0) null else it }
+			val clonedMetadata = imageService.cloneImage(imageId, null, width, height)
+			toadletContext.sendReplyHeaders(201, "Created", MultiValueTable<String, String>().apply { put("Location", clonedMetadata?.id) }, null, 0)
+			return
 		}
 		toadletContext.sendReplyHeaders(200, "OK", null, null, 0)
 	}

@@ -37,6 +37,18 @@
     display: none;
 }
 
+.image-placeholder .change-dimensions {
+    display: none;
+}
+
+.image-placeholder.image-status-waiting .change-dimensions {
+    display: inherit;
+}
+
+.image-placeholder .change-width > *, .image-placeholder .change-height > * {
+    display: inline;
+}
+
 .image-placeholder .format > div {
     display: inline;
 }

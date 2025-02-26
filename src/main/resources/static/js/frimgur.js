@@ -27,6 +27,8 @@ const updatePlaceholderElement = (imageId, imageMetadata) => {
   if (imageMetadata.metadata != null) {
     updateImageStatusClassName(placeholderElement, imageMetadata.metadata.status)
     updateImageTypeClassName(placeholderElement.querySelector('.format'), imageMetadata.metadata.mimeType)
+    placeholderElement.querySelector('.change-width input').value = imageMetadata.metadata.width
+    placeholderElement.querySelector('.change-height input').value = imageMetadata.metadata.height
     const statusNode = document.createTextNode(`${imageMetadata.metadata.status}`)
     placeholderElement.querySelector('.filename input').value = imageMetadata.metadata.filename
     placeholderElement.querySelector('.status').replaceChildren(statusNode)
@@ -51,7 +53,12 @@ const refreshElementsForImage = (imageId) =>
         return response
       })
       .then(response => response.json())
-      .then(imageMetadata => updatePlaceholderElement(imageId, imageMetadata))
+      .then(imageMetadata => {
+        updatePlaceholderElement(imageId, imageMetadata)
+        fetchImageDataFromServer(imageId).then(imageBlob => {
+          showPlaceholder(imageId, imageMetadata, imageBlob)
+        })
+      })
       .catch(() => removePlaceholderElement(imageId))
 
 const replacePlaceholderId = (oldId, newId) => {
@@ -86,15 +93,12 @@ const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
   const canvasHeight = 150
   canvasElement.style.width = `${canvasWidth}px`
   canvasElement.style.height = `${canvasHeight}px`
-  drawImageToCanvas(imageBlob, canvasElement, canvasWidth, canvasHeight).then((image) => {
-    const dimensionsNode = document.createTextNode(`${image.width} × ${image.height}`)
-    placeholderElement.querySelector('.format .dimensions').replaceChildren(dimensionsNode)
-  })
+  drawImageToCanvas(imageBlob, canvasElement, canvasWidth, canvasHeight)
 }
 
 const drawImageToCanvas = (imageBlob, canvasElement, canvasWidth, canvasHeight) => {
   const canvas = canvasElement.getContext('2d')
-  return decodeImage(imageBlob).then(image => {
+  decodeImage(imageBlob).then(image => {
     const pixelRatio = window.devicePixelRatio
     canvasElement.width = Math.floor(canvasWidth * pixelRatio)
     canvasElement.height = Math.floor(canvasHeight * pixelRatio)
@@ -103,7 +107,6 @@ const drawImageToCanvas = (imageBlob, canvasElement, canvasWidth, canvasHeight) 
     const heightRatio = image.height / canvasHeight
     const downscaleFactor = Math.max(widthRatio, heightRatio)
     canvas.drawImage(image, (canvasWidth - (image.width / downscaleFactor)) / 2, (canvasHeight - (image.height / downscaleFactor)) / 2, image.width / downscaleFactor, image.height / downscaleFactor)
-    return Promise.resolve(image)
   })
 }
 
@@ -115,6 +118,24 @@ const decodeImage = (imageBlob) => {
 
 const createImageElementId = (imageId) => `image-${imageId}`
 
+const changeDimension = (placeholderElement, imageId, inputSelector, dimension) => {
+  const newValue = placeholderElement.querySelector(inputSelector).value
+  return fetch(`image/${imageId}`, { method: 'PATCH', body: JSON.stringify({ [dimension]: newValue }) })
+      .then(response => {
+        if ((response.status >= 200) && (response.status < 300)) {
+          return response.headers.get('location')
+        }
+      })
+      .then(newImageId =>
+          refreshElementsForImage(imageId)
+              .then(() => newImageId)
+      )
+      .then(newImageId => {
+        getOrCreatePlaceholderElement(newImageId)
+        return refreshElementsForImage(newImageId)
+      })
+}
+
 const getOrCreatePlaceholderElement = (imageId) => {
   const existingPlaceholderElement = document.getElementById(createImageElementId(imageId))
   if (existingPlaceholderElement != null) {
@@ -125,6 +146,8 @@ const getOrCreatePlaceholderElement = (imageId) => {
   placeholderElement.setAttribute('id', createImageElementId(imageId))
   const getImageIdFromElement = () => placeholderElement.getAttribute('id').replace(/^image-/, '')
   placeholderElement.querySelector('button.button-refresh').addEventListener('click', () => refreshElementsForImage(getImageIdFromElement()))
+  placeholderElement.querySelector('.change-width button').addEventListener('click', () => changeDimension(placeholderElement, getImageIdFromElement(), '.change-width input', 'width'))
+  placeholderElement.querySelector('.change-height button').addEventListener('click', () => changeDimension(placeholderElement, getImageIdFromElement(), '.change-height input', 'height'))
   placeholderElement.querySelector('.filename input').addEventListener('change', () => setImageFilename(placeholderElement, getImageIdFromElement()))
   placeholderElement.querySelector('.filename button').addEventListener('click', () => setImageFilename(placeholderElement, getImageIdFromElement()))
   placeholderElement.querySelector('button.button-start').addEventListener('click', () =>

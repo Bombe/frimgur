@@ -10,7 +10,22 @@
     <div class='image-overlay'>
         <button type='button' class='button-refresh'>🔄</button>
         <div class='format'>
-            <div class='dimensions'></div>
+            <div class='change-dimensions'>
+                <div class='change-width'>
+                    <label>
+                        {{ i18n('i18n.frimgur', 'Webpage.Main.Dimensions.NewWidth') }}
+                        <input type='text' name='width' size='5' value=''/>
+                    </label>
+                    <button type='button'>{{ i18n('i18n.frimgur', 'Webpage.Main.Dimensions.ChangeWidth') }}</button>
+                </div>
+                <div class='change-height'>
+                    <label>
+                        {{ i18n('i18n.frimgur', 'Webpage.Main.Dimensions.NewHeight') }}
+                        <input type='text' name='height' size='5' value=''/>
+                    </label>
+                    <button type='button'>{{ i18n('i18n.frimgur', 'Webpage.Main.Dimensions.ChangeHeight') }}</button>
+                </div>
+            </div>
             <div class='type png'>PNG</div>
             <div class='type jpeg'>JPEG</div>
             <div class='type other'>Other</div>

@@ -206,6 +206,30 @@ class ImageServiceTest {
 	}
 
 	@Test
+	fun `cloning an image that is inserting will result in an image that is waiting`() {
+		val imageMetadata = imageService.addImage(get1x1Png())!!
+		imageService.setImageStatus(imageMetadata.id, Inserting)
+		val clonedData = imageService.cloneImage(imageMetadata.id)!!
+		assertThat(clonedData.status, equalTo(Waiting))
+	}
+
+	@Test
+	fun `cloning an image that is inserted will result in an image that is waiting`() {
+		val imageMetadata = imageService.addImage(get1x1Png())!!
+		imageService.setImageStatus(imageMetadata.id, Inserted)
+		val clonedData = imageService.cloneImage(imageMetadata.id)!!
+		assertThat(clonedData.status, equalTo(Waiting))
+	}
+
+	@Test
+	fun `cloning an image that is failed will result in an image that is waiting`() {
+		val imageMetadata = imageService.addImage(get1x1Png())!!
+		imageService.setImageStatus(imageMetadata.id, Failed)
+		val clonedData = imageService.cloneImage(imageMetadata.id)!!
+		assertThat(clonedData.status, equalTo(Waiting))
+	}
+
+	@Test
 	fun `cloning a PNG image and changing its type to a JPEG will create a new JPEG image`() {
 		val imageMetadata = imageService.addImage(get1x1Png())!!
 		val clonedData = imageService.cloneImage(imageMetadata.id, "image/jpeg")!!

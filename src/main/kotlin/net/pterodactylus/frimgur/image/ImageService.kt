@@ -168,7 +168,7 @@ class DefaultImageService : ImageService {
 			ImageIO.write(renderedImage, (mimeType ?: it.metadata.mimeType).removePrefix("image/"), byteArrayOutputStream)
 			byteArrayOutputStream
 		}.toByteArray()
-		ImageData(it.metadata.copy(id = newId, width = renderedImage.width, height = renderedImage.height, mimeType = mimeType ?: it.metadata.mimeType), encodedImage).also { imageData[newId] = it }.metadata
+		ImageData(it.metadata.copy(id = newId, status = Waiting, width = renderedImage.width, height = renderedImage.height, mimeType = mimeType ?: it.metadata.mimeType), encodedImage).also { imageData[newId] = it }.metadata
 	}
 
 	override fun getImage(id: String): ImageMetadata? = imageData[id]?.metadata

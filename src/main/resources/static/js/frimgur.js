@@ -152,6 +152,7 @@ const getOrCreatePlaceholderElement = (imageId) => {
   placeholderElement.querySelector('.filename button').addEventListener('click', () => setImageFilename(placeholderElement, getImageIdFromElement()))
   placeholderElement.querySelector('button.button-start').addEventListener('click', () =>
       fetch(`image/${getImageIdFromElement()}`, { method: 'PATCH', body: JSON.stringify({ status: 'Inserting' }) })
+          .then(() => refreshElementsForImage(getImageIdFromElement()))
   )
   placeholderElement.querySelector('button.button-remove').addEventListener('click', () =>
     fetch(`image/${getImageIdFromElement()}`, { method: 'DELETE' })

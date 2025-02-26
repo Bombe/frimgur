@@ -1,5 +1,6 @@
 package net.pterodactylus.frimgur.image
 
+import javax.imageio.ImageIO
 import kotlin.test.Test
 import net.pterodactylus.frimgur.image.ImageStatus.Failed
 import net.pterodactylus.frimgur.image.ImageStatus.Inserted
@@ -12,6 +13,9 @@ import org.hamcrest.Matchers.emptyIterable
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.not
 import org.hamcrest.Matchers.nullValue
+import java.awt.image.BufferedImage
+import java.awt.image.DataBufferByte
+import java.awt.image.DataBufferInt
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
@@ -192,6 +196,64 @@ class ImageServiceTest {
 		assertThat(imageService.getImageData(imageId)!!.metadata.filename, not(equalTo("new-filename.png")))
 	}
 
+	@Test
+	fun `cloning an image without changing anything results in an identical image with a new ID`() {
+		val imageMetadata = imageService.addImage(get1x1Png())!!
+		val clonedData = imageService.cloneImage(imageMetadata.id)!!
+		assertThat(clonedData.id, not(equalTo(imageMetadata.id)))
+		assertThat(clonedData.copy(id = imageMetadata.id), equalTo(imageMetadata))
+		assertThat((imageService.getImageData(clonedData.id)!!.data.decodeImage().raster.dataBuffer as DataBufferByte).data, equalTo((imageService.getImageData(imageMetadata.id)!!.data.decodeImage().raster.dataBuffer as DataBufferByte).data))
+	}
+
+	@Test
+	fun `cloning a PNG image and changing its type to a JPEG will create a new JPEG image`() {
+		val imageMetadata = imageService.addImage(get1x1Png())!!
+		val clonedData = imageService.cloneImage(imageMetadata.id, "image/jpeg")!!
+		assertThat(clonedData.mimeType, equalTo("image/jpeg"))
+		assertThat(clonedData.copy(id = imageMetadata.id, mimeType = "image/png"), equalTo(imageMetadata))
+		assertThat((imageService.getImageData(clonedData.id)!!.data.decodeImage().asRGB().raster.dataBuffer as DataBufferInt).data, equalTo((imageService.getImageData(imageMetadata.id)!!.data.decodeImage().asRGB().raster.dataBuffer as DataBufferInt).data))
+	}
+
+	@Test
+	fun `cloning a JPEG image and changing its type to a PNG will create a new PNG image`() {
+		val imageMetadata = imageService.addImage(get1x1Jpeg())!!
+		val clonedData = imageService.cloneImage(imageMetadata.id, "image/png")!!
+		assertThat(clonedData.mimeType, equalTo("image/png"))
+		assertThat(clonedData.copy(id = imageMetadata.id, mimeType = "image/jpeg"), equalTo(imageMetadata))
+		assertThat((imageService.getImageData(clonedData.id)!!.data.decodeImage().asRGB().raster.dataBuffer as DataBufferInt).data, equalTo((imageService.getImageData(imageMetadata.id)!!.data.decodeImage().asRGB().raster.dataBuffer as DataBufferInt).data))
+	}
+
+	@Test
+	fun `cloning an image and scaling it to 8x8 returns an appropriately-sized image`() {
+		val imageMetadata = imageService.addImage(get1x1Png())!!
+		val clonedData = imageService.cloneImage(imageMetadata.id, width = 8, height = 16)!!
+		assertThat(clonedData.width, equalTo(8))
+		assertThat(clonedData.height, equalTo(16))
+	}
+
+	@Test
+	fun `cloning an image and scaling its width to 9 returns an image 9 pixels high`() {
+		val imageMetadata = imageService.addImage(get1x1Png())!!
+		val clonedData = imageService.cloneImage(imageMetadata.id, width = 9)!!
+		assertThat(clonedData.width, equalTo(9))
+		assertThat(clonedData.height, equalTo(9))
+	}
+
+	@Test
+	fun `cloning an image and scaling its height to 11 returns an image 11 pixels wide`() {
+		val imageMetadata = imageService.addImage(get1x1Png())!!
+		val clonedData = imageService.cloneImage(imageMetadata.id, height = 11)!!
+		assertThat(clonedData.width, equalTo(11))
+		assertThat(clonedData.height, equalTo(11))
+	}
+
 	private val imageService = DefaultImageService()
 
+}
+
+private fun ByteArray.decodeImage() = inputStream().use(ImageIO::read)
+private fun BufferedImage.asRGB() = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB).also { newImage ->
+	newImage.graphics.use { graphics ->
+		graphics.drawImage(this, 0, 0, null)
+	}
 }

@@ -6,6 +6,9 @@ import java.util.UUID
 import javax.imageio.ImageIO
 import net.pterodactylus.frimgur.image.ImageStatus.Inserted
 import net.pterodactylus.frimgur.image.ImageStatus.Waiting
+import java.awt.Graphics
+import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
 
 /**
  * Service for image-related functionality.
@@ -20,6 +23,23 @@ interface ImageService {
 	 * or `null` if the image cannot be parsed
 	 */
 	fun addImage(data: ByteArray): ImageMetadata? = null
+
+	/**
+	 * Creates a new image from the image with the given ID, optionally changing its encoding type or dimensions.
+	 * The dimensions are handled as follows:
+	 *
+	 * - If both [width] and [height] are non-`null`, they are used as is, ignoring the resulting aspect ratio.
+	 * - If both [width] and [height] are `null`, the dimensions of the image are not changed.
+	 * - Otherwise, the dimension that is `null` will be calculated from the given dimension and the aspect ratio of the original image.
+	 * E.g. when cloning an image that is 1920x1080 pixels giving a [width] of 640 and a [height] of `null`  will result in an image that is 640x360 pixels.
+	 *
+	 * @param id The ID of the image to clone
+	 * @param mimeType The new MIME type of the image (or `null` to not change the type)
+	 * @param width The new width of the image (or `null`)
+	 * @param height The new height of the image (or `null`)
+	 * @return The [ImageMetadata] of the newly created image, or `null` if no image was created
+	 */
+	fun cloneImage(id: String, mimeType: String? = null, width: Int? = null, height: Int? = null): ImageMetadata? = null;
 
 	/**
 	 * Returns metadata for the image with the given ID.
@@ -125,6 +145,30 @@ class DefaultImageService : ImageService {
 		"image/bmp" -> "image.bmp"
 		"image/gif" -> "image.gif"
 		else -> "image"
+	}
+
+	override fun cloneImage(id: String, mimeType: String?, width: Int?, height: Int?) = imageData[id]?.let {
+		val newId = UUID.randomUUID().toString()
+		val renderedImage = it.data.inputStream().use(ImageIO::read).let { sourceImage ->
+			if ((width == null) && (height == null)) {
+				sourceImage
+			} else {
+				val originalWidth = sourceImage.width
+				val originalHeight = sourceImage.height
+				val newWidth = width ?: (originalWidth * height!! / originalHeight)
+				val newHeight = height ?: (originalHeight * width!! / originalWidth)
+				BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB).also { image ->
+					image.graphics.use { graphics ->
+						graphics.drawImage(sourceImage, 0, 0, newWidth, newHeight, null)
+					}
+				}
+			}
+		}
+		val encodedImage = ByteArrayOutputStream().use { byteArrayOutputStream ->
+			ImageIO.write(renderedImage, (mimeType ?: it.metadata.mimeType).removePrefix("image/"), byteArrayOutputStream)
+			byteArrayOutputStream
+		}.toByteArray()
+		ImageData(it.metadata.copy(id = newId, width = renderedImage.width, height = renderedImage.height, mimeType = mimeType ?: it.metadata.mimeType), encodedImage).also { imageData[newId] = it }.metadata
 	}
 
 	override fun getImage(id: String): ImageMetadata? = imageData[id]?.metadata
@@ -233,3 +277,9 @@ enum class ImageStatus {
  * its content.
  */
 data class ImageData(val metadata: ImageMetadata, val data: ByteArray)
+
+fun <R> Graphics.use(action: (Graphics) -> R): R = try {
+	action(this)
+} finally {
+	dispose()
+}

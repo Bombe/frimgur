@@ -9,6 +9,7 @@ import net.pterodactylus.frimgur.image.ImageStatus.Waiting
 import java.awt.Graphics
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
+import java.io.IOException
 
 /**
  * Service for image-related functionality.
@@ -112,40 +113,25 @@ interface ImageService {
 class DefaultImageService : ImageService {
 
 	override fun addImage(data: ByteArray): ImageMetadata? =
-		detectImageType(data)
-			?.let { imageType ->
-				ByteArrayInputStream(data).use { byteArrayInputStream ->
-					ImageIO.read(byteArrayInputStream)
-						?.let { bufferedImage -> ImageMetadata(UUID.randomUUID().toString(), bufferedImage.width, bufferedImage.height, data.size, imageType, createFilenameForMimeType(imageType), Waiting) }
-						?.let { imageMetadata -> ImageData(imageMetadata, data) }
-						?.also { imageData -> this.imageData[imageData.metadata.id] = imageData }
-						?.also { imageData -> newImageListeners.forEach { listener -> listener(imageData) } }
-						?.metadata
-				}
-			}
-
-	private fun detectImageType(data: ByteArray): String? =
-		ByteArrayInputStream(data).use { inputStream ->
-			ImageIO.createImageInputStream(inputStream).use { imageInputStream ->
-				ImageIO.getImageReaders(imageInputStream).nextOrNull()?.formatName.let {
-					when (it) {
-						"gif" -> "image/gif"
-						"png" -> "image/png"
-						"JPEG" -> "image/jpeg"
-						"bmp" -> "image/bmp"
-						else -> null
-					}
-				}
+		imageCanBeDecoded(data).ifTrue {
+			ByteArrayInputStream(data).use { byteArrayInputStream ->
+				ImageIO.read(byteArrayInputStream)
+					?.let { bufferedImage -> ImageMetadata(UUID.randomUUID().toString(), bufferedImage.width, bufferedImage.height, data.size, "image.png", Waiting) }
+					?.let { imageMetadata -> ImageData(imageMetadata, data) }
+					?.also { imageData -> this.imageData[imageData.metadata.id] = imageData }
+					?.also { imageData -> newImageListeners.forEach { listener -> listener(imageData) } }
+					?.metadata
 			}
 		}
 
-	private fun createFilenameForMimeType(mimeType: String) = when (mimeType) {
-		"image/png" -> "image.png"
-		"image/jpeg" -> "image.jpg"
-		"image/bmp" -> "image.bmp"
-		"image/gif" -> "image.gif"
-		else -> "image"
-	}
+	private fun imageCanBeDecoded(data: ByteArray): Boolean =
+		ByteArrayInputStream(data).use { inputStream ->
+			try {
+				ImageIO.read(inputStream)
+			} catch (e: IOException) {
+				false
+			}?.let { true } ?: false
+		}
 
 	override fun cloneImage(id: String, mimeType: String?, width: Int?, height: Int?) = imageData[id]?.let {
 		val newId = UUID.randomUUID().toString()
@@ -165,10 +151,10 @@ class DefaultImageService : ImageService {
 			}
 		}
 		val encodedImage = ByteArrayOutputStream().use { byteArrayOutputStream ->
-			ImageIO.write(renderedImage, (mimeType ?: it.metadata.mimeType).removePrefix("image/"), byteArrayOutputStream)
+			ImageIO.write(renderedImage, "png", byteArrayOutputStream)
 			byteArrayOutputStream
 		}.toByteArray()
-		ImageData(it.metadata.copy(id = newId, status = Waiting, width = renderedImage.width, height = renderedImage.height, mimeType = mimeType ?: it.metadata.mimeType, key = null), encodedImage).also { imageData[newId] = it }.metadata
+		ImageData(it.metadata.copy(id = newId, status = Waiting, width = renderedImage.width, height = renderedImage.height, key = null), encodedImage).also { imageData[newId] = it }.metadata
 	}
 
 	override fun getImage(id: String): ImageMetadata? = imageData[id]?.metadata
@@ -223,8 +209,6 @@ class DefaultImageService : ImageService {
 
 }
 
-private fun <T> Iterator<T>.nextOrNull() = if (hasNext()) next() else null
-
 /**
  * Metadata of an image.
  */
@@ -241,9 +225,6 @@ data class ImageMetadata(
 
 	/** The size of the encoded image in bytes. */
 	val size: Int,
-
-	/** The MIME type of the image. */
-	val mimeType: String = "",
 
 	/** The name of the file to insert. */
 	val filename: String = "",
@@ -283,3 +264,5 @@ fun <R> Graphics.use(action: (Graphics) -> R): R = try {
 } finally {
 	dispose()
 }
+
+private fun <R> Boolean.ifTrue(action: () -> R): R? = if (this) action() else null

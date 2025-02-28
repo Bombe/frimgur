@@ -13,9 +13,7 @@ import org.hamcrest.Matchers.emptyIterable
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.not
 import org.hamcrest.Matchers.nullValue
-import java.awt.image.BufferedImage
 import java.awt.image.DataBufferByte
-import java.awt.image.DataBufferInt
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
@@ -27,25 +25,25 @@ class ImageServiceTest {
 	@Test
 	fun `image service can parse PNG files`() {
 		val metadata = imageService.addImage(get1x1Png())
-		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(67), equalTo("image/png"), equalTo("image.png")))
+		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(67), equalTo("image.png")))
 	}
 
 	@Test
 	fun `image service can parse JPEG files`() {
 		val metadata = imageService.addImage(get1x1Jpeg())
-		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(333), equalTo("image/jpeg"), equalTo("image.jpg")))
+		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(333), equalTo("image.png")))
 	}
 
 	@Test
 	fun `image service can parse GIF files`() {
 		val metadata = imageService.addImage(get1x1Gif())
-		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(35), equalTo("image/gif"), equalTo("image.gif")))
+		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(35), equalTo("image.png")))
 	}
 
 	@Test
 	fun `image service can parse BMP files`() {
 		val metadata = imageService.addImage(get1x1Bmp())
-		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(66), equalTo("image/bmp"), equalTo("image.bmp")))
+		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(66), equalTo("image.png")))
 	}
 
 	@Test
@@ -65,7 +63,7 @@ class ImageServiceTest {
 	fun `adding an image notifies listener`() {
 		val listenerCalled = AtomicBoolean(false)
 		imageService.onNewImage { (metadata, data) ->
-			if ((metadata.width == 1) && (metadata.height == 1) && (metadata.size == 67) && (metadata.mimeType == "image/png") && (data.contentEquals(get1x1Png()))) {
+			if ((metadata.width == 1) && (metadata.height == 1) && (metadata.size == 67) && (data.contentEquals(get1x1Png()))) {
 				listenerCalled.set(true)
 			}
 		}
@@ -140,7 +138,7 @@ class ImageServiceTest {
 	fun `image service can return image data for valid ID`() {
 		val id1 = imageService.addImage(get1x1Png())!!.id
 		val imageData = imageService.getImageData(id1)!!
-		assertThat(imageData.metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(67), equalTo("image/png")))
+		assertThat(imageData.metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(67)))
 		assertThat(imageData.data, equalTo(get1x1Png()))
 	}
 
@@ -238,24 +236,6 @@ class ImageServiceTest {
 	}
 
 	@Test
-	fun `cloning a PNG image and changing its type to a JPEG will create a new JPEG image`() {
-		val imageMetadata = imageService.addImage(get1x1Png())!!
-		val clonedData = imageService.cloneImage(imageMetadata.id, "image/jpeg")!!
-		assertThat(clonedData.mimeType, equalTo("image/jpeg"))
-		assertThat(clonedData.copy(id = imageMetadata.id, mimeType = "image/png"), equalTo(imageMetadata))
-		assertThat((imageService.getImageData(clonedData.id)!!.data.decodeImage().asRGB().raster.dataBuffer as DataBufferInt).data, equalTo((imageService.getImageData(imageMetadata.id)!!.data.decodeImage().asRGB().raster.dataBuffer as DataBufferInt).data))
-	}
-
-	@Test
-	fun `cloning a JPEG image and changing its type to a PNG will create a new PNG image`() {
-		val imageMetadata = imageService.addImage(get1x1Jpeg())!!
-		val clonedData = imageService.cloneImage(imageMetadata.id, "image/png")!!
-		assertThat(clonedData.mimeType, equalTo("image/png"))
-		assertThat(clonedData.copy(id = imageMetadata.id, mimeType = "image/jpeg"), equalTo(imageMetadata))
-		assertThat((imageService.getImageData(clonedData.id)!!.data.decodeImage().asRGB().raster.dataBuffer as DataBufferInt).data, equalTo((imageService.getImageData(imageMetadata.id)!!.data.decodeImage().asRGB().raster.dataBuffer as DataBufferInt).data))
-	}
-
-	@Test
 	fun `cloning an image and scaling it to 8x8 returns an appropriately-sized image`() {
 		val imageMetadata = imageService.addImage(get1x1Png())!!
 		val clonedData = imageService.cloneImage(imageMetadata.id, width = 8, height = 16)!!
@@ -284,8 +264,3 @@ class ImageServiceTest {
 }
 
 private fun ByteArray.decodeImage() = inputStream().use(ImageIO::read)
-private fun BufferedImage.asRGB() = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB).also { newImage ->
-	newImage.graphics.use { graphics ->
-		graphics.drawImage(this, 0, 0, null)
-	}
-}

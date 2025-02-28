@@ -50,7 +50,7 @@ class ListImagesToadletTest {
 	fun `list with images is transferred correctly`() {
 		val imageService = object : ImageService {
 			override fun getImage(id: String) = when (id) {
-				"id1" -> ImageMetadata("id1", 11, 12, 13, "image/test", "image1", Inserting)
+				"id1" -> ImageMetadata("id1", 11, 12, 13, "image1", Inserting)
 				"id2" -> ImageMetadata("id2", 21, 22, 23, filename = "image2", status = Inserted, key = "CHK@Test")
 				else -> null
 			}

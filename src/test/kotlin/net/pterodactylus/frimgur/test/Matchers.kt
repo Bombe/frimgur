@@ -4,7 +4,6 @@ import freenet.support.HTMLNode
 import net.pterodactylus.frimgur.image.ImageMetadata
 import org.hamcrest.Description
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers
 import org.hamcrest.Matchers.any
 import org.hamcrest.TypeSafeDiagnosingMatcher
 
@@ -18,7 +17,7 @@ import org.hamcrest.TypeSafeDiagnosingMatcher
  * @param mimeType A matcher for the MIME type
  * @return A matcher for use with Hamcrest’s `assertThat`
  */
-fun isMetadataWith(width: Matcher<Int> = any(Int::class.java), height: Matcher<Int> = any(Int::class.java), size: Matcher<Int> = any(Int::class.java), mimeType: Matcher<String> = any(String::class.java), filename: Matcher<String> = any<String>()): Matcher<ImageMetadata?> = object : TypeSafeDiagnosingMatcher<ImageMetadata>() {
+fun isMetadataWith(width: Matcher<Int> = any(Int::class.java), height: Matcher<Int> = any(Int::class.java), size: Matcher<Int> = any(Int::class.java), filename: Matcher<String> = any<String>()): Matcher<ImageMetadata?> = object : TypeSafeDiagnosingMatcher<ImageMetadata>() {
 
 	override fun matchesSafely(imageMetadata: ImageMetadata, mismatchDescription: Description): Boolean {
 		if (!width.matches(imageMetadata.width)) {
@@ -33,10 +32,6 @@ fun isMetadataWith(width: Matcher<Int> = any(Int::class.java), height: Matcher<I
 			mismatchDescription.appendText("size is ").appendValue(imageMetadata.size)
 			return false
 		}
-		if (!mimeType.matches(imageMetadata.mimeType)) {
-			mismatchDescription.appendText("MIME type is ").appendValue(imageMetadata.mimeType)
-			return false
-		}
 		if (!filename.matches(imageMetadata.filename)) {
 			mismatchDescription.appendText("Filename is ").appendValue(imageMetadata.filename)
 			return false
@@ -48,7 +43,6 @@ fun isMetadataWith(width: Matcher<Int> = any(Int::class.java), height: Matcher<I
 		description.appendText("image metadata with width ").appendDescriptionOf(width)
 			.appendText(", height ").appendDescriptionOf(height)
 			.appendText(", size ").appendDescriptionOf(size)
-			.appendText(", MIME type ").appendDescriptionOf(mimeType)
 			.appendText(", and filename ").appendDescriptionOf(filename)
 	}
 

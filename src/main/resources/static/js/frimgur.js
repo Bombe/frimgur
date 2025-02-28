@@ -26,7 +26,6 @@ const updatePlaceholderElement = (imageId, imageMetadata) => {
   const placeholderElement = getOrCreatePlaceholderElement(imageId)
   if (imageMetadata.metadata != null) {
     updateImageStatusClassName(placeholderElement, imageMetadata.metadata.status)
-    updateImageTypeClassName(placeholderElement.querySelector('.format'), imageMetadata.metadata.mimeType)
     placeholderElement.querySelector('.change-width input').value = imageMetadata.metadata.width
     placeholderElement.querySelector('.change-height input').value = imageMetadata.metadata.height
     const statusNode = document.createTextNode(`${imageMetadata.metadata.status}`)
@@ -70,14 +69,6 @@ const replacePlaceholderId = (oldId, newId) => {
 
 const updateImageStatusClassName = (element, newClassName) => {
   element.className = element.className.replaceAll(/\bimage-status-[^ ]*\b/g, "") + " " + ("image-status-" + newClassName.toLowerCase())
-}
-
-const updateImageTypeClassName = (element, mimeType) => {
-  let format = mimeType.split(/\//).findLast(() => true)
-  if ((format !== 'png') && (format !== 'jpeg')) {
-    format = 'other'
-  }
-  element.className = element.className.replaceAll(/\bimage-type-[^ ]*\b/g, "") + " " + ("image-type-" + format)
 }
 
 const setImageFilename = (placeholderElement, imageId) => {

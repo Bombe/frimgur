@@ -48,7 +48,7 @@ class ImageToadletTest {
 	@Test
 	fun `GET request with image ID returns data about that image`() {
 		val imageService = object : ImageService {
-			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", "image.tst", Inserted, "CHK@Test").takeIf { id == "123" }
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image.tst", Inserted, "CHK@Test").takeIf { id == "123" }
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)
@@ -67,7 +67,6 @@ class ImageToadletTest {
 							.where("status", jsonText("Inserted"))
 							.where("key", jsonText("CHK@Test"))
 							.where("filename", jsonText("image.tst"))
-							.where("mimeType", jsonText("image/test"))
 					)
 			)
 		)
@@ -76,7 +75,7 @@ class ImageToadletTest {
 	@Test
 	fun `unset key in image metadata is rendered as JSON null`() {
 		val imageService = object : ImageService {
-			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "123" }
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image", Inserted).takeIf { id == "123" }
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)
@@ -151,7 +150,7 @@ class ImageToadletTest {
 	@Test
 	fun `PATCH request for valid image ID with empty JSON object as body returns 204`() {
 		val imageService = object : ImageService {
-			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "123" }
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image", Inserted).takeIf { id == "123" }
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{}".toByteArray()))
@@ -162,7 +161,7 @@ class ImageToadletTest {
 	@Test
 	fun `PATCH request for valid image ID with new status as body returns 200`() {
 		val imageService = object : ImageService {
-			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "123" }
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image", Inserted).takeIf { id == "123" }
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\"}".toByteArray()))
@@ -174,7 +173,7 @@ class ImageToadletTest {
 	fun `PATCH request for valid image ID with new status as body sets image status to Inserting`() {
 		val insertingImages = AtomicReference<String>()
 		val imageService = object : ImageService {
-			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "123" }
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image", Inserted).takeIf { id == "123" }
 			override fun setImageStatus(id: String, status: ImageStatus) = if (status == Inserting) { insertingImages.set(id) } else {}
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
@@ -188,7 +187,7 @@ class ImageToadletTest {
 		data class Arguments(val id: String, val filename: String)
 		val imageFilenames = mutableListOf<Arguments>()
 		val imageService = object : ImageService {
-			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "123" }
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image", Inserted).takeIf { id == "123" }
 			override fun setImageFilename(id: String, filename: String) = imageFilenames.add(Arguments(id, filename)).let { }
 		}
 		val toadlet = ImageToadlet("/path/", imageService, highLevelSimpleClient)
@@ -258,13 +257,13 @@ class ImageToadletTest {
 	}
 
 	private fun createCloningImageServiceThatRecordsArguments(imageId: Int, argumentsReceived: (id: String, mimeType: String?, width: Int?, height: Int?) -> Unit) = object : ImageService {
-		override fun getImage(id: String) = ImageMetadata("$imageId", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "$imageId" }
+		override fun getImage(id: String) = ImageMetadata("$imageId", 12, 23, 34, "image", Inserted).takeIf { id == "$imageId" }
 		override fun cloneImage(id: String, mimeType: String?, width: Int?, height: Int?) =
 			argumentsReceived(id, mimeType, width, height).let { null }
 	}
 
 	private fun createCloningImageServiceReturningImageMetadataWidthId(imageId: Int) = object : ImageService {
-		override fun getImage(id: String) = ImageMetadata("$imageId", 12, 23, 34, "image/test", "image", Inserted).takeIf { id == "$imageId" }
+		override fun getImage(id: String) = ImageMetadata("$imageId", 12, 23, 34, "image", Inserted).takeIf { id == "$imageId" }
 		override fun cloneImage(id: String, mimeType: String?, width: Int?, height: Int?) =
 			ImageMetadata("${imageId}-2", 1, 1, 1).takeIf { id == "$imageId" }
 	}

@@ -138,6 +138,9 @@ const changeDimension = (placeholderElement, imageId, inputSelector, dimension) 
       })
 }
 
+const copyKeyToClipboard = (placeholderElement) =>
+  navigator.clipboard.writeText(placeholderElement.querySelector('.key a').textContent)
+
 const getOrCreatePlaceholderElement = (imageId) => {
   const existingPlaceholderElement = document.getElementById(createImageElementId(imageId))
   if (existingPlaceholderElement != null) {
@@ -160,6 +163,7 @@ const getOrCreatePlaceholderElement = (imageId) => {
     fetch(`image/${getImageIdFromElement()}`, { method: 'DELETE' })
         .then(() => placeholderElement.remove())
   )
+  placeholderElement.querySelector('.key button').addEventListener('click', () => copyKeyToClipboard(placeholderElement))
   document.getElementById('inserted-images').appendChild(placeholderElement)
   return placeholderElement
 }

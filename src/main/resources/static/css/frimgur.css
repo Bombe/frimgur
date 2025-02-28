@@ -61,6 +61,14 @@
     display: inherit;
 }
 
+.key button {
+    display: none;
+}
+
+.image-status-inserted .key button {
+    display: inline;
+}
+
 .image-placeholder .format.image-type-png .type.png {
     display: inline;
 }

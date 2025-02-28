@@ -23,6 +23,7 @@ class InjectionTest {
 		val injector = createInjector(
 			FreenetModule(mock(), pluginRespirator),
 			ImageModule(),
+			InsertModule(),
 			WebInterfaceModule("/prefix/", "Menu.Test", "Menu.Tooltip"),
 			bind<Locale>().toProvider { ENGLISH }
 		)

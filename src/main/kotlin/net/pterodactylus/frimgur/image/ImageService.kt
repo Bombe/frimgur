@@ -94,20 +94,6 @@ interface ImageService {
 	 */
 	fun removeImage(id: String) = Unit
 
-	/**
-	 * Adds a listener that gets notified when an image has been [added][addImage].
-	 *
-	 * @param listener The listener to notifies on new images
-	 */
-	fun onNewImage(listener: (imageMetadata: ImageData) -> Unit) = Unit
-
-	/**
-	 * Adds a listener that gets notified when an image’s status has been set to [Inserting].
-	 *
-	 * @param listener The listener to notifies on images changing status to [Inserting]
-	 */
-	fun onImageInserting(listener: (imageData: ImageData) -> Unit) = Unit
-
 }
 
 class DefaultImageService : ImageService {
@@ -119,7 +105,6 @@ class DefaultImageService : ImageService {
 					?.let { bufferedImage -> ImageMetadata(UUID.randomUUID().toString(), bufferedImage.width, bufferedImage.height, data.size, "image.png", Waiting) }
 					?.let { imageMetadata -> ImageData(imageMetadata, data) }
 					?.also { imageData -> this.imageData[imageData.metadata.id] = imageData }
-					?.also { imageData -> newImageListeners.forEach { listener -> listener(imageData) } }
 					?.metadata
 			}
 		}
@@ -171,11 +156,7 @@ class DefaultImageService : ImageService {
 
 	override fun setImageStatus(id: String, status: ImageStatus) {
 		imageData[id]?.let { oldImageData ->
-			imageData[id] = oldImageData.copy(metadata = oldImageData.metadata.copy(status = status)).also { newImageData ->
-				if (status == Inserting) {
-					insertingImageListeners.forEach { it(newImageData) }
-				}
-			}
+			imageData[id] = oldImageData.copy(metadata = oldImageData.metadata.copy(status = status))
 		}
 	}
 
@@ -195,16 +176,6 @@ class DefaultImageService : ImageService {
 		imageData.remove(id)
 	}
 
-	override fun onNewImage(listener: (imageMetadata: ImageData) -> Unit) {
-		newImageListeners += listener
-	}
-
-	override fun onImageInserting(listener: (imageData: ImageData) -> Unit) {
-		insertingImageListeners += listener
-	}
-
-	private val newImageListeners = mutableListOf<(ImageData) -> Unit>()
-	private val insertingImageListeners = mutableListOf<(ImageData) -> Unit>()
 	private val imageData = mutableMapOf<String, ImageData>()
 
 }

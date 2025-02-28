@@ -23,6 +23,7 @@ import net.pterodactylus.frimgur.web.WebInterface
 import java.util.Locale
 import javax.inject.Named
 import javax.inject.Provider
+import net.pterodactylus.frimgur.insert.InsertService
 
 /**
  * Guice [module][com.google.inject.Module] for creating [WebInterface] instances.
@@ -95,7 +96,7 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 
 	@Provides
 	@Named("Upload")
-	fun getUploadToadlet(imageService: ImageService, highLevelSimpleClient: HighLevelSimpleClient): Toadlet =
-		ImageToadlet(prefix + "image/", imageService, highLevelSimpleClient)
+	fun getUploadToadlet(imageService: ImageService, insertService: InsertService, highLevelSimpleClient: HighLevelSimpleClient): Toadlet =
+		ImageToadlet(prefix + "image/", imageService, insertService, highLevelSimpleClient)
 
 }

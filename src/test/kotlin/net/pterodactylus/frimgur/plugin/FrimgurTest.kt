@@ -117,40 +117,6 @@ class FrimgurTest {
 	}
 
 	@Test
-	fun `insert service is wired up as event listener for images that are inserting`() {
-		data class Arguments(val id: String, val data: ByteArray, val mimeType: String, val filename: String)
-		val insertImageArguments = mutableListOf<Arguments>()
-		val insertService = object : InsertService {
-			override fun insertImage(id: String, data: ByteArray, mimeType: String, filename: String) {
-				insertImageArguments += Arguments(id, data, mimeType, filename)
-			}
-		}
-		runPlugin(bind<InsertService>().toInstance(insertService)) { injector ->
-			val imageService = injector.getInstance<ImageService>()
-			val metadata = imageService.addImage(testImage)!!
-			imageService.setImageStatus(metadata.id, Inserting)
-			assertThat(insertImageArguments, contains(Arguments(metadata.id, testImage, "image/png", "image.png")))
-		}
-	}
-
-	@Test
-	fun `insert service called with name of file when a name has been set on the image`() {
-		data class Arguments(val id: String, val data: ByteArray, val mimeType: String, val filename: String)
-		val insertImageArguments = mutableListOf<Arguments>()
-		val insertService = object : InsertService {
-			override fun insertImage(id: String, data: ByteArray, mimeType: String, filename: String) =
-				insertImageArguments.add(Arguments(id, data, mimeType, filename)).let {}
-		}
-		runPlugin(bind<InsertService>().toInstance(insertService)) { injector ->
-			val imageService = injector.getInstance<ImageService>()
-			val metadata = imageService.addImage(testImage)!!
-			imageService.setImageFilename(metadata.id, "test.image")
-			imageService.setImageStatus(metadata.id, Inserting)
-			assertThat(insertImageArguments, contains(Arguments(metadata.id, testImage, "image/png", "test.image")))
-		}
-	}
-
-	@Test
 	fun `image service is called to set key when insert generates uri`() {
 		val clientPutCallbacks = mutableListOf<ClientPutCallback>()
 		val highLevelSimpleClient = captureClientPutCallback { clientPutCallback -> clientPutCallbacks += clientPutCallback }
@@ -165,6 +131,19 @@ class FrimgurTest {
 			insertService.insertImage("id1", byteArrayOf(), "image/test", "image")
 			clientPutCallbacks.first().onGeneratedURI(FreenetURI("KSK@Test"), mock())
 			assertThat(imageKeys, contains(equalTo("id1" to "KSK@Test")))
+		}
+	}
+
+	@Test
+	fun `image service is called to set status when insert starts`() {
+		val clientPutCallbacks = mutableListOf<ClientPutCallback>()
+		val highLevelSimpleClient = captureClientPutCallback { clientPutCallback -> clientPutCallbacks += clientPutCallback }
+		val imageStatus = mutableListOf<Pair<String, ImageStatus>>()
+		val imageService = captureImageStatus { id, status -> imageStatus += id to status }
+		runPlugin(bind<HighLevelSimpleClient>().toInstance(highLevelSimpleClient), bind<ImageService>().toInstance(imageService)) { injector ->
+			val insertService: InsertService = injector.getInstance()
+			insertService.insertImage("id1", byteArrayOf(), "image/test", "image")
+			assertThat(imageStatus, hasItem(equalTo("id1" to Inserting)))
 		}
 	}
 

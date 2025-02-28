@@ -9,12 +9,13 @@ import net.pterodactylus.frimgur.image.ImageMetadata
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus
 import net.pterodactylus.frimgur.image.ImageStatus.Inserting
+import net.pterodactylus.frimgur.insert.InsertService
 import java.net.URI
 
 /**
  * [Toadlet] that takes an encoded image and stores it together with some metadata.
  */
-class ImageToadlet(private val path: String, private val imageService: ImageService, highLevelSimpleClient: HighLevelSimpleClient) : Toadlet(highLevelSimpleClient) {
+class ImageToadlet(private val path: String, private val imageService: ImageService, private val insertService: InsertService, highLevelSimpleClient: HighLevelSimpleClient) : Toadlet(highLevelSimpleClient) {
 
 	override fun handleMethodGET(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
 		val imageId = uri.path.removePrefix(path)
@@ -55,6 +56,8 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 				null
 			}
 			if (newStatus == Inserting) {
+				val type = changes.get("type")?.asText()?.takeIf { it in setOf("jpeg") } ?: "png"
+				insertService.insertImage(imageId, imageService.getImageData(imageId)!!.data, "image/${type}", imageMetadata.filename)
 				imageService.setImageStatus(imageId, Inserting)
 			}
 		}

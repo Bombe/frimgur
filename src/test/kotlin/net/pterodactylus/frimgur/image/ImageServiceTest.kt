@@ -14,8 +14,6 @@ import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.not
 import org.hamcrest.Matchers.nullValue
 import java.awt.image.DataBufferByte
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Unit test for [DefaultImageService].
@@ -57,26 +55,6 @@ class ImageServiceTest {
 		val originalMetadata = imageService.addImage(get1x1Png())
 		val storedMetadata = imageService.getImage(originalMetadata!!.id)
 		assertThat(storedMetadata, equalTo(originalMetadata))
-	}
-
-	@Test
-	fun `adding an image notifies listener`() {
-		val listenerCalled = AtomicBoolean(false)
-		imageService.onNewImage { (metadata, data) ->
-			if ((metadata.width == 1) && (metadata.height == 1) && (metadata.size == 67) && (data.contentEquals(get1x1Png()))) {
-				listenerCalled.set(true)
-			}
-		}
-		imageService.addImage(get1x1Png())
-		assertThat(listenerCalled.get(), equalTo(true))
-	}
-
-	@Test
-	fun `adding an invalid image does not notify listener`() {
-		val listenerCalled = AtomicBoolean(false)
-		imageService.onNewImage { _ -> listenerCalled.set(true) }
-		imageService.addImage(byteArrayOf(0, 1, 2, 3))
-		assertThat(listenerCalled.get(), equalTo(false))
 	}
 
 	@Test
@@ -154,15 +132,6 @@ class ImageServiceTest {
 		val id2 = imageService.addImage(get1x1Gif())!!.id
 		imageService.removeImage(id1)
 		assertThat(imageService.getImageIds(), contains(id2))
-	}
-
-	@Test
-	fun `image service notifies listener if image status has been changed to inserting`() {
-		val insertingImage = AtomicReference<ImageData>()
-		imageService.onImageInserting(insertingImage::set)
-		val imageId = imageService.addImage(get1x1Png())!!.id
-		imageService.setImageStatus(imageId, Inserting)
-		assertThat(insertingImage.get().metadata.id, equalTo(imageId))
 	}
 
 	@Test

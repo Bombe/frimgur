@@ -15,6 +15,7 @@ import org.hamcrest.Matchers.notNullValue
 import java.util.Locale
 import java.util.Locale.ENGLISH
 import kotlin.test.Test
+import net.pterodactylus.frimgur.insert.InsertService
 
 /**
  * Unit test for [WebInterfaceModule].
@@ -43,6 +44,7 @@ class WebInterfaceModuleTest {
 		bind<ToadletContainer>().toMock(),
 		bind<HighLevelSimpleClient>().toMock(),
 		bind<ImageService>().toMock(),
+		bind<InsertService>().toMock(),
 		bind<String>().toNamedInstance("FormPassword", "secret"),
 		bind<Locale>().toProvider { ENGLISH }
 	)

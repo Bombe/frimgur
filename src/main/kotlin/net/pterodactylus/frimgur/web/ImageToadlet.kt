@@ -58,7 +58,6 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 			if (newStatus == Inserting) {
 				val type = changes.get("type")?.asText()?.takeIf { it in setOf("jpeg") } ?: "png"
 				insertService.insertImage(imageId, imageService.getImageData(imageId)!!.data, "image/${type}", imageMetadata.filename)
-				imageService.setImageStatus(imageId, Inserting)
 			}
 		}
 		if (changes.has("filename")) {

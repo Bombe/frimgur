@@ -174,20 +174,6 @@ class ImageToadletTest {
 	}
 
 	@Test
-	fun `PATCH request for valid image ID with new status as body sets image status to Inserting`() {
-		val insertingImages = AtomicReference<String>()
-		val imageService = object : ImageService {
-			override fun getImage(id: String) = ImageMetadata("123", 12, 23, 34, "image", Inserted).takeIf { id == "123" }
-			override fun getImageData(id: String) = if (id == "123") ImageData(getImage(id)!!, ByteArray(5) { i -> i.toByte()}) else null
-			override fun setImageStatus(id: String, status: ImageStatus) = if (status == Inserting) { insertingImages.set(id) } else {}
-		}
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
-		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\"}".toByteArray()))
-		toadlet.handleMethodPATCH(URI("/path/123"), httpRequest, toadletContext)
-		assertThat(insertingImages.get(), equalTo("123"))
-	}
-
-	@Test
 	fun `PATCH request with status 'Inserting' and without type starts image insert as PNG`() {
 		val imageData = ByteArray(5) { i -> i.toByte() }
 		val imageService = createImageServiceDeliveringImage("124", imageData)

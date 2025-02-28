@@ -13,6 +13,9 @@ import freenet.node.RequestClientBuilder
 import freenet.node.RequestStarter.MAXIMUM_PRIORITY_CLASS
 import freenet.support.api.Bucket
 import freenet.support.io.ArrayBucket
+import javax.imageio.ImageIO
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 
 /**
  * Service that inserts images into Freenet.
@@ -51,7 +54,8 @@ interface InsertService {
 class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleClient) : InsertService {
 
 	override fun insertImage(id: String, data: ByteArray, mimeType: String, filename: String) {
-		val insertBlock = InsertBlock(data.toBucket(), ClientMetadata(mimeType), FreenetURI("CHK@"))
+		val encodedImage = encodeImage(data, mimeType)
+		val insertBlock = InsertBlock(encodedImage.toBucket(), ClientMetadata(mimeType), FreenetURI("CHK@"))
 		val insertContext = highLevelSimpleClient.getInsertContext(false)
 		insertStartingListeners.forEach { listener -> listener(id) }
 		highLevelSimpleClient.insert(insertBlock, filename, false, insertContext, object : ClientPutCallback by getEmptyClientPutCallback(requestClient) {
@@ -68,6 +72,22 @@ class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleCli
 			}
 		}, MAXIMUM_PRIORITY_CLASS)
 	}
+
+	private fun encodeImage(data: ByteArray, mimeType: String) = data.imageFormat?.let { originalImageType ->
+		when (mimeType) {
+			"image/png" ->
+				if (originalImageType == "png")
+					data
+				else
+					ByteArrayOutputStream().use { outputStream -> ImageIO.write(ImageIO.read(ByteArrayInputStream(data)), "PNG", outputStream); outputStream }.toByteArray()
+			"image/jpeg" ->
+				if (originalImageType == "JPEG")
+					data
+				else
+					ByteArrayOutputStream().use { outputStream -> ImageIO.write(ImageIO.read(ByteArrayInputStream(data)), "JPEG", outputStream); outputStream }.toByteArray()
+			else -> null
+		}
+	} ?: data
 
 	override fun onInsertStarting(listener: (id: String) -> Unit) {
 		insertStartingListeners += listener
@@ -94,6 +114,14 @@ class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleCli
 }
 
 private fun ByteArray.toBucket() = ArrayBucket(this)
+
+val ByteArray.imageFormat get() = ByteArrayInputStream(this).use { inputStream ->
+	ImageIO.createImageInputStream(inputStream).use { imageInputStream ->
+		ImageIO.getImageReaders(imageInputStream).asSequence()
+			.map { it.formatName }
+			.firstOrNull()
+	}
+}
 
 private fun getEmptyClientPutCallback(requestClient: RequestClient) = object : ClientPutCallback {
 	override fun onResume(clientContext: ClientContext) = Unit

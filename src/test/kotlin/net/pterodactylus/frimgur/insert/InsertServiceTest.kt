@@ -23,6 +23,9 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import kotlin.test.Test
+import net.pterodactylus.frimgur.image.get1x1Bmp
+import net.pterodactylus.frimgur.image.get1x1Jpeg
+import net.pterodactylus.frimgur.image.get1x1Png
 
 /**
  * Unit test for [InsertService].
@@ -36,11 +39,43 @@ class InsertServiceTest {
 	}
 
 	@Test
-	fun `insert service sets correct data for insert`() {
+	fun `insert service sets uses given data for unknown MIME type`() {
 		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "image")
 		val insertBlock = argumentCaptor<InsertBlock>()
 		verify(highLevelSimpleClient).insert(insertBlock.capture(), anyOrNull(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
 		assertThat(insertBlock.firstValue.data.toByteArray(), equalTo(byteArrayOf(0, 1, 2, 3)))
+	}
+
+	@Test
+	fun `insert service converts image to PNG if mime type is PNG`() {
+		insertService.insertImage("id1", get1x1Jpeg(), "image/png", "image")
+		val insertBlock = argumentCaptor<InsertBlock>()
+		verify(highLevelSimpleClient).insert(insertBlock.capture(), anyOrNull(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
+		assertThat(insertBlock.firstValue.data.toByteArray().imageFormat, equalTo("png"))
+	}
+
+	@Test
+	fun `insert service converts image to JPEG if mime type is JPEG`() {
+		insertService.insertImage("id1", get1x1Bmp(), "image/jpeg", "image")
+		val insertBlock = argumentCaptor<InsertBlock>()
+		verify(highLevelSimpleClient).insert(insertBlock.capture(), anyOrNull(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
+		assertThat(insertBlock.firstValue.data.toByteArray().imageFormat, equalTo("JPEG"))
+	}
+
+	@Test
+	fun `insert service does not re-encode PNG if original file is PNG`() {
+		insertService.insertImage("id1", get1x1Png(), "image/png", "image")
+		val insertBlock = argumentCaptor<InsertBlock>()
+		verify(highLevelSimpleClient).insert(insertBlock.capture(), anyOrNull(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
+		assertThat(insertBlock.firstValue.data.toByteArray(), equalTo(get1x1Png()))
+	}
+
+	@Test
+	fun `insert service does not re-encode JPEG if original file is JPEG`() {
+		insertService.insertImage("id1", get1x1Jpeg(), "image/jpeg", "image")
+		val insertBlock = argumentCaptor<InsertBlock>()
+		verify(highLevelSimpleClient).insert(insertBlock.capture(), anyOrNull(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
+		assertThat(insertBlock.firstValue.data.toByteArray(), equalTo(get1x1Jpeg()))
 	}
 
 	@Test
@@ -61,7 +96,7 @@ class InsertServiceTest {
 
 	@Test
 	fun `insert service uses given filename for insert`() {
-		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/jpeg", "test-image.jpg")
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "test-image.jpg")
 		val filenameHint = argumentCaptor<String>()
 		verify(highLevelSimpleClient).insert(anyOrNull(), filenameHint.capture(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
 		assertThat(filenameHint.firstValue, equalTo("test-image.jpg"))

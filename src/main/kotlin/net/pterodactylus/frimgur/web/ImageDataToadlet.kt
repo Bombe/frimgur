@@ -15,7 +15,7 @@ class ImageDataToadlet(private val path: String, private val imageService: Image
 	override fun handleMethodGET(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
 		val imageId = uri.path.removePrefix(path)
 		imageService.getImageData(imageId)
-			?.also { (metadata, data) ->
+			?.also { (_, data) ->
 				writeReply(toadletContext, 200, "image/png", "OK", data, 0, data.size)
 			}
 			?: writeReply(toadletContext, 404, null, "Not Found", "")

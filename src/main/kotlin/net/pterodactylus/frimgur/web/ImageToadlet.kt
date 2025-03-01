@@ -26,7 +26,7 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 		writeReply(toadletContext, 200, "application/json", "OK", imageMetadata.toJson().toString())
 	}
 
-	fun handleMethodPOST(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
+	fun handleMethodPOST(@Suppress("UNUSED_PARAMETER") uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
 		httpRequest.getPartAsBytesFailsafe("image-data", 20.millions())
 			.takeIf { it.isNotEmpty() }
 			?.let(imageService::addImage)
@@ -73,7 +73,7 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 		toadletContext.sendReplyHeaders(200, "OK", null, null, 0)
 	}
 
-	fun handleMethodDELETE(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
+	fun handleMethodDELETE(uri: URI, @Suppress("UNUSED_PARAMETER") httpRequest: HTTPRequest, toadletContext: ToadletContext) {
 		val imageId = uri.path.removePrefix(path)
 		imageService.removeImage(imageId)
 		toadletContext.sendReplyHeaders(204, "No Content", null, null, 0)

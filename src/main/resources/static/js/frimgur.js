@@ -130,9 +130,15 @@ const changeDimension = (placeholderElement, imageId, inputSelector, dimension) 
           refreshElementsForImage(imageId)
               .then(() => newImageId)
       )
-      .then(newImageId => {
-        getOrCreatePlaceholderElement(newImageId)
-        return refreshElementsForImage(newImageId)
+      .then(newImageId => [newImageId, getOrCreatePlaceholderElement(newImageId)])
+      .then(([newImageId, placeholderElement]) =>
+          refreshElementsForImage(newImageId)
+              .then(() => placeholderElement)
+      )
+      .then(placeholderElement => placeholderElement.querySelector('.filename input'))
+      .then(inputElement => {
+        inputElement.focus()
+        inputElement.select()
       })
 }
 

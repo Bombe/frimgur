@@ -46,7 +46,8 @@ class WebInterfaceModuleTest {
 		bind<ImageService>().toMock(),
 		bind<InsertService>().toMock(),
 		bind<String>().toNamedInstance("FormPassword", "secret"),
-		bind<Locale>().toProvider { ENGLISH }
+		bind<Locale>().toProvider { ENGLISH },
+		bind<Boolean>().toNamedProvider("NodeRequiresConfigChange") { false }
 	)
 
 }

@@ -25,7 +25,8 @@ class InjectionTest {
 			ImageModule(),
 			InsertModule(),
 			WebInterfaceModule("/prefix/", "Menu.Test", "Menu.Tooltip"),
-			bind<Locale>().toProvider { ENGLISH }
+			bind<Locale>().toProvider { ENGLISH },
+			bind<Boolean>().toNamedProvider("NodeRequiresConfigChange") { false }
 		)
 		assertThat(injector.getInstance(WebInterface::class.java), notNullValue())
 	}

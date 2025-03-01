@@ -1,6 +1,7 @@
 package net.pterodactylus.frimgur.plugin
 
 import com.google.inject.Injector
+import com.google.inject.Key
 import com.google.inject.Module
 import com.google.inject.util.Modules.override
 import freenet.client.HighLevelSimpleClient
@@ -15,6 +16,7 @@ import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.FredPluginThreadless
 import freenet.pluginmanager.FredPluginVersioned
 import freenet.pluginmanager.PluginRespirator
+import javax.inject.Named
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus
 import net.pterodactylus.frimgur.image.ImageStatus.Failed
@@ -190,6 +192,17 @@ class FrimgurTest {
 	@Test
 	fun `plugin main class returns its version`() {
 		assertThat(frimgur.version, equalTo("unknown"))
+	}
+
+	@Test
+	fun `provider for node-requires-configuration-change setting returns correct false value`() {
+		runPlugin { assertThat(it.getInstance(Key.get(Boolean::class.java, Named("NodeRequiresConfigChange"))), equalTo(true)) }
+	}
+
+	@Test
+	fun `provider for node-requires-configuration-change setting returns correct true value`() {
+		whenever(pluginRespirator.node.getConfig().get("fproxy").getBoolean("enableExtendedMethodHandling")).thenReturn(true)
+		runPlugin { assertThat(it.getInstance(Key.get(Boolean::class.java, Named("NodeRequiresConfigChange"))), equalTo(false)) }
 	}
 
 	private fun captureImageStatus(action: (id: String, status: ImageStatus) -> Unit) = object : ImageService {

@@ -3,12 +3,14 @@ package net.pterodactylus.frimgur.plugin
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Module
+import com.google.inject.name.Names
 import freenet.l10n.BaseL10n.LANGUAGE
 import freenet.pluginmanager.FredPlugin
 import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.FredPluginThreadless
 import freenet.pluginmanager.FredPluginVersioned
 import freenet.pluginmanager.PluginRespirator
+import javax.inject.Named
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus.Failed
 import net.pterodactylus.frimgur.image.ImageStatus.Inserted
@@ -53,7 +55,8 @@ open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless, FredPlugi
 		ImageModule(),
 		InsertModule(),
 		WebInterfaceModule("/frimgur/", "Navigation.Menu.Title", "Navigation.Menu.Tooltip"),
-		Module { binder -> binder.bind(Locale::class.java).toProvider { Locale.forLanguageTag(language.shortCode) } }
+		Module { binder -> binder.bind(Locale::class.java).toProvider { Locale.forLanguageTag(language.shortCode) } },
+		Module { binder -> binder.bind(Boolean::class.java).annotatedWith(Names.named("NodeRequiresConfigChange")).toProvider { !pluginRespirator.node.getConfig().get("fproxy").getBoolean("enableExtendedMethodHandling") }}
 	)
 
 	override fun terminate() {

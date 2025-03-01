@@ -1,6 +1,10 @@
 <div id='form-password'>{{ formPassword }}</div>
 <h2>Frimgur</h2>
+{% if nodeRequiresConfigChange %}
+<p class='alert node-requires-config-change'>{{ i18n('i18n.frimgur', 'Webpage.Main.NodeRequiresConfigurationChange') | raw }}</p>
+{% else %}
 <div id='usage'>{{ i18n('i18n.frimgur', 'Webpage.Main.ShortInstruction') | raw }}</div>
+{% endif %}
 <div id='inserted-images'>
 </div>
 <div id='image-template' class='image-placeholder'>

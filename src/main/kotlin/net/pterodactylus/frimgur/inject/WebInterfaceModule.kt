@@ -62,8 +62,8 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 
 	@Provides
 	@Named("Main")
-	fun getMainToadlet(freenetToadletFactory: FreenetToadletFactory, @Named("FormPassword") formPassword: String, localeProvider: Provider<Locale>): Toadlet =
-		freenetToadletFactory.createFreenetToadlet(MainPageProcessor(formPassword, localeProvider::get))
+	fun getMainToadlet(freenetToadletFactory: FreenetToadletFactory, @Named("FormPassword") formPassword: String, localeProvider: Provider<Locale>, @Named("NodeRequiresConfigChange") nodeRequiresConfigChange: Provider<Boolean>): Toadlet =
+		freenetToadletFactory.createFreenetToadlet(MainPageProcessor(formPassword, localeProvider::get, nodeRequiresConfigChange::get))
 
 	@Provides
 	@Named("StaticJavascript")

@@ -6,6 +6,12 @@
     display: none;
 }
 
+#content .alert {
+    border: solid 1ex red;
+    padding: 1ex;
+    font-size: large;
+}
+
 .image-placeholder {
     display: grid;
     grid-template: 1fr / min-content auto;

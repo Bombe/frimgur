@@ -74,6 +74,7 @@ const updateImageStatusClassName = (element, newClassName) => {
 const setImageFilename = (placeholderElement, imageId) => {
   const inputField = placeholderElement.querySelector('.filename input')
   return fetch(`image/${imageId}`, { method: 'PATCH', body: JSON.stringify({ filename: inputField.value }) })
+      .then(() => inputField.blur())
 }
 
 const showPlaceholder = (imageId, imageMetadata, imageBlob) => {

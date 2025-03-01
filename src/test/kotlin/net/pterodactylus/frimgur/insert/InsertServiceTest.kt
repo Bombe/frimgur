@@ -95,8 +95,48 @@ class InsertServiceTest {
 	}
 
 	@Test
-	fun `insert service uses given filename for insert`() {
-		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "test-image.jpg")
+	fun `insert service uses given filename for insert if MIME type is unknown`() {
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "test-image.dat")
+		val filenameHint = argumentCaptor<String>()
+		verify(highLevelSimpleClient).insert(anyOrNull(), filenameHint.capture(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
+		assertThat(filenameHint.firstValue, equalTo("test-image.dat"))
+	}
+
+	@Test
+	fun `insert service uses given filename for insert if MIME type is PNG and image name ends in png`() {
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/png", "test-image.png")
+		val filenameHint = argumentCaptor<String>()
+		verify(highLevelSimpleClient).insert(anyOrNull(), filenameHint.capture(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
+		assertThat(filenameHint.firstValue, equalTo("test-image.png"))
+	}
+
+	@Test
+	fun `insert service appends png to the given filename for insert if MIME type is PNG and image name does not end in png`() {
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/png", "test-image")
+		val filenameHint = argumentCaptor<String>()
+		verify(highLevelSimpleClient).insert(anyOrNull(), filenameHint.capture(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
+		assertThat(filenameHint.firstValue, equalTo("test-image.png"))
+	}
+
+	@Test
+	fun `insert service uses given filename for insert if MIME type is JPEG and image name ends in jpg`() {
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/jpeg", "test-image.jpg")
+		val filenameHint = argumentCaptor<String>()
+		verify(highLevelSimpleClient).insert(anyOrNull(), filenameHint.capture(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
+		assertThat(filenameHint.firstValue, equalTo("test-image.jpg"))
+	}
+
+	@Test
+	fun `insert service uses given filename for insert if MIME type is JPEG and image name ends in jpeg`() {
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/jpeg", "test-image.jpeg")
+		val filenameHint = argumentCaptor<String>()
+		verify(highLevelSimpleClient).insert(anyOrNull(), filenameHint.capture(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
+		assertThat(filenameHint.firstValue, equalTo("test-image.jpeg"))
+	}
+
+	@Test
+	fun `insert service appends jpg to the given filename for insert if MIME type is JPEG and image name does not end in jpg`() {
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/jpeg", "test-image")
 		val filenameHint = argumentCaptor<String>()
 		verify(highLevelSimpleClient).insert(anyOrNull(), filenameHint.capture(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
 		assertThat(filenameHint.firstValue, equalTo("test-image.jpg"))

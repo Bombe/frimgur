@@ -40,7 +40,7 @@ class RedirectToadletTest {
 }
 
 fun containsHeader(name: String, value: String) = ArgumentMatcher<MultiValueTable<String, String>> { headers ->
-	headers.keys().asSequence().firstOrNull { it.equals(name, ignoreCase = true) }
-		?.let { headers[it].equals(value) }
+	headers.keySet().firstOrNull { it.equals(name, ignoreCase = true) }
+		?.let { headers.getFirst(it).equals(value) }
 		?: false
 }

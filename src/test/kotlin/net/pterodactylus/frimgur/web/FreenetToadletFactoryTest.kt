@@ -1,11 +1,11 @@
 package net.pterodactylus.frimgur.web
 
 import freenet.client.HighLevelSimpleClient
+import kotlin.test.Test
 import net.pterodactylus.frimgur.web.annotations.ToadletName
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.mockito.kotlin.mock
-import kotlin.test.Test
 
 /**
  * Unit test for [FreenetToadletFactory].

@@ -5,16 +5,17 @@ import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.PageMaker
 import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
+import java.util.Locale
+import java.util.Locale.ENGLISH
+import kotlin.test.Test
 import net.pterodactylus.frimgur.image.ImageService
+import net.pterodactylus.frimgur.insert.InsertService
 import net.pterodactylus.frimgur.test.bind
 import net.pterodactylus.frimgur.web.FreenetToadletFactory
 import net.pterodactylus.frimgur.web.ToadletRegistry
 import net.pterodactylus.frimgur.web.WebInterface
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.notNullValue
-import java.util.Locale
-import java.util.Locale.ENGLISH
-import kotlin.test.Test
 
 /**
  * Unit test for [WebInterfaceModule].
@@ -43,8 +44,10 @@ class WebInterfaceModuleTest {
 		bind<ToadletContainer>().toMock(),
 		bind<HighLevelSimpleClient>().toMock(),
 		bind<ImageService>().toMock(),
+		bind<InsertService>().toMock(),
 		bind<String>().toNamedInstance("FormPassword", "secret"),
-		bind<Locale>().toProvider { ENGLISH }
+		bind<Locale>().toProvider { ENGLISH },
+		bind<Boolean>().toNamedProvider("NodeRequiresConfigChange") { false }
 	)
 
 }

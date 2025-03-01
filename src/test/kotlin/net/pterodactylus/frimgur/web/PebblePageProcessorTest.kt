@@ -1,12 +1,12 @@
 package net.pterodactylus.frimgur.web
 
+import java.util.Locale.ENGLISH
+import java.util.Locale.GERMAN
+import kotlin.test.Test
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.emptyIterable
 import org.hamcrest.Matchers.equalTo
-import java.util.Locale.ENGLISH
-import java.util.Locale.GERMAN
-import kotlin.test.Test
 
 /**
  * Unit test for [PebblePageProcessor].
@@ -44,6 +44,15 @@ class PebblePageProcessorTest {
 	fun `page processor can access resource bundle`() {
 		val pageProcessor = object : PebblePageProcessor("static/html/test-i18n.html", "", { GERMAN }) {}
 		assertThat(pageProcessor.processPage(PageRequest()).content, equalTo("Testnachricht"))
+	}
+
+	@Test
+	fun `page processor includes context variables when rendering`() {
+		val pageProcessor = object : PebblePageProcessor("static/html/test-variables.html", "", { ENGLISH }) {
+			override fun getContextVariables(pageRequest: PageRequest) =
+				mapOf("foo" to "bar", "baz" to 17)
+		}
+		assertThat(pageProcessor.processPage(PageRequest()).content, equalTo("Test. bar, 17.\n"))
 	}
 
 	private val scriptLinks = mutableListOf<String>()

@@ -1,28 +1,31 @@
 plugins {
-	id("org.jetbrains.kotlin.jvm") version "1.7.10"
+	id("org.jetbrains.kotlin.jvm") version "1.7.22"
 
 	// 0.13.0 is the latest version still working with Java 8
 	id("com.palantir.git-version") version "0.13.0"
+	id("jacoco")
 }
 
 repositories {
 	mavenCentral()
 	maven {
-		setUrl("https://mvn.freenetproject.org/")
+		setUrl("https://maven.pterodactylus.net/")
 	}
 }
 
 dependencies {
-	compileOnly(group = "org.freenetproject", name = "fred", version = "build01491")
+	compileOnly(group = "org.freenetproject", name = "fred", version = "0.7.5.1501")
 	implementation(kotlin("reflect"))
 	implementation(group = "com.google.inject", name = "guice", version = "5.1.0")
 	implementation(group = "io.pebbletemplates", name = "pebble", version = "3.1.6")
 	implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version = "2.14.1")
 
-	testImplementation(group = "org.freenetproject", name = "fred", version = "build01491")
-	testImplementation(group = "org.jetbrains.kotlin", name = "kotlin-test-junit5")
+	testImplementation(group = "org.freenetproject", name = "fred", version = "0.7.5.1501")
+	testImplementation(platform("org.junit:junit-bom:5.12.0"))
+	testRuntimeOnly(group = "org.junit.platform", name = "junit-platform-launcher", version = "1.12.0")
+	testImplementation(group = "org.jetbrains.kotlin", name = "kotlin-test")
 	testImplementation(group = "org.hamcrest", name = "hamcrest", version = "2.2")
-	testImplementation(group = "org.mockito", name = "mockito-junit-jupiter", version = "4.11.0")
+	testImplementation(group = "org.mockito", name = "mockito-inline", version = "4.11.0")
 	testImplementation(group = "org.mockito.kotlin", name = "mockito-kotlin", version = "4.1.0")
 	testImplementation(group = "com.spotify", name = "hamcrest-jackson", version = "1.3.1")
 }
@@ -47,7 +50,7 @@ val createVersionProperties by tasks.registering {
 tasks["processResources"].dependsOn(createVersionProperties)
 
 tasks.create("fatJar", Jar::class) {
-	archiveFileName.set(project.name.toLowerCase() + "-" + gitVersion() + "-jar-with-dependencies.jar")
+	archiveFileName.set(project.name.toLowerCase() + "-jar-with-dependencies.jar")
 	from((configurations.runtimeClasspath.get()).map { if (it.isDirectory) it else zipTree(it) })
 	from(createVersionProperties.get().outputs)
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
@@ -55,4 +58,10 @@ tasks.create("fatJar", Jar::class) {
 		attributes("Plugin-Main-Class" to "net.pterodactylus.frimgur.plugin.Frimgur")
 	}
 	with(tasks.named<Jar>("jar").get())
+}
+
+tasks.jacocoTestReport {
+	reports {
+		xml.required.set(true)
+	}
 }

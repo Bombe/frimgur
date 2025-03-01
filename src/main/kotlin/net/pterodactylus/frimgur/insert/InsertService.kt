@@ -13,6 +13,12 @@ import freenet.node.RequestClientBuilder
 import freenet.node.RequestStarter.MAXIMUM_PRIORITY_CLASS
 import freenet.support.api.Bucket
 import freenet.support.io.ArrayBucket
+import java.awt.image.BufferedImage
+import java.awt.image.BufferedImage.TYPE_INT_RGB
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import javax.imageio.ImageIO
+import net.pterodactylus.frimgur.image.use
 
 /**
  * Service that inserts images into Freenet.
@@ -25,8 +31,9 @@ interface InsertService {
 	 * @param id The ID of the image
 	 * @param data The data of the image
 	 * @param mimeType The MIME type of the image
+	 * @param filename The name of the file
 	 */
-	fun insertImage(id: String, data: ByteArray, mimeType: String) = Unit
+	fun insertImage(id: String, data: ByteArray, mimeType: String, filename: String) = Unit
 
 	/**
 	 * Adds a listener that will be notified when the insert of the image
@@ -49,11 +56,12 @@ interface InsertService {
  */
 class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleClient) : InsertService {
 
-	override fun insertImage(id: String, data: ByteArray, mimeType: String) {
-		val insertBlock = InsertBlock(data.toBucket(), ClientMetadata(mimeType), FreenetURI("CHK@"))
+	override fun insertImage(id: String, data: ByteArray, mimeType: String, filename: String) {
+		val encodedImage = encodeImage(data, mimeType)
+		val insertBlock = InsertBlock(encodedImage.toBucket(), ClientMetadata(mimeType), FreenetURI("CHK@"))
 		val insertContext = highLevelSimpleClient.getInsertContext(false)
 		insertStartingListeners.forEach { listener -> listener(id) }
-		highLevelSimpleClient.insert(insertBlock, createFilenameForMimeType(mimeType), false, insertContext, object : ClientPutCallback by getEmptyClientPutCallback(requestClient) {
+		highLevelSimpleClient.insert(insertBlock, filename.maybeAppendExtension(mimeType), false, insertContext, object : ClientPutCallback by getEmptyClientPutCallback(requestClient) {
 			override fun onGeneratedURI(freenetURI: FreenetURI, p1: BaseClientPutter) {
 				insertGeneratingUriListeners.forEach { listener -> listener(id, freenetURI.toString()) }
 			}
@@ -68,12 +76,26 @@ class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleCli
 		}, MAXIMUM_PRIORITY_CLASS)
 	}
 
-	private fun createFilenameForMimeType(mimeType: String) = when (mimeType) {
-		"image/png" -> "image.png"
-		"image/jpeg" -> "image.jpg"
-		"image/bmp" -> "image.bmp"
-		"image/gif" -> "image.gif"
-		else -> "image"
+	private fun encodeImage(data: ByteArray, mimeType: String) = data.imageFormat?.let { originalImageType ->
+		when (mimeType) {
+			"image/png" ->
+				if (originalImageType == "png")
+					data
+				else
+					ByteArrayOutputStream().use { outputStream -> ImageIO.write(ImageIO.read(ByteArrayInputStream(data)), "PNG", outputStream); outputStream }.toByteArray()
+			"image/jpeg" ->
+				if (originalImageType == "JPEG")
+					data
+				else
+					ByteArrayOutputStream().use { outputStream -> ImageIO.write(ImageIO.read(ByteArrayInputStream(data)).removeTransparency(), "JPEG", outputStream); outputStream }.toByteArray()
+			else -> null
+		}
+	} ?: data
+
+	private fun String.maybeAppendExtension(mimeType: String) = when (mimeType) {
+		"image/png" -> if (!endsWith(".png")) "$this.png" else this
+		"image/jpeg" -> if (!endsWith(".jpg") && !endsWith(".jpeg")) "$this.jpg" else this
+		else -> this
 	}
 
 	override fun onInsertStarting(listener: (id: String) -> Unit) {
@@ -101,6 +123,20 @@ class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleCli
 }
 
 private fun ByteArray.toBucket() = ArrayBucket(this)
+
+val ByteArray.imageFormat get() = ByteArrayInputStream(this).use { inputStream ->
+	ImageIO.createImageInputStream(inputStream).use { imageInputStream ->
+		ImageIO.getImageReaders(imageInputStream).asSequence()
+			.map { it.formatName }
+			.firstOrNull()
+	}
+}
+
+private fun BufferedImage.removeTransparency() = BufferedImage(width, height, TYPE_INT_RGB).apply {
+	graphics.use {
+		it.drawImage(this@removeTransparency, 0, 0, width, height, null)
+	}
+}
 
 private fun getEmptyClientPutCallback(requestClient: RequestClient) = object : ClientPutCallback {
 	override fun onResume(clientContext: ClientContext) = Unit

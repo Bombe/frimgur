@@ -4,7 +4,7 @@ import freenet.support.HTMLNode
 import net.pterodactylus.frimgur.image.ImageMetadata
 import org.hamcrest.Description
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers
+import org.hamcrest.Matchers.any
 import org.hamcrest.TypeSafeDiagnosingMatcher
 
 /**
@@ -13,11 +13,10 @@ import org.hamcrest.TypeSafeDiagnosingMatcher
  *
  * @param width A matcher for the width
  * @param height A matcher for the height
- * @param size A matcher for the size
  * @param mimeType A matcher for the MIME type
  * @return A matcher for use with Hamcrest’s `assertThat`
  */
-fun isMetadataWith(width: Matcher<Int> = Matchers.any(Int::class.java), height: Matcher<Int> = Matchers.any(Int::class.java), size: Matcher<Int> = Matchers.any(Int::class.java), mimeType: Matcher<String> = Matchers.any(String::class.java)): Matcher<ImageMetadata?> = object : TypeSafeDiagnosingMatcher<ImageMetadata>() {
+fun isMetadataWith(width: Matcher<Int> = any(Int::class.java), height: Matcher<Int> = any(Int::class.java), filename: Matcher<String> = any<String>()): Matcher<ImageMetadata?> = object : TypeSafeDiagnosingMatcher<ImageMetadata>() {
 
 	override fun matchesSafely(imageMetadata: ImageMetadata, mismatchDescription: Description): Boolean {
 		if (!width.matches(imageMetadata.width)) {
@@ -28,12 +27,8 @@ fun isMetadataWith(width: Matcher<Int> = Matchers.any(Int::class.java), height: 
 			mismatchDescription.appendText("height is ").appendValue(imageMetadata.height)
 			return false
 		}
-		if (!size.matches(imageMetadata.size)) {
-			mismatchDescription.appendText("size is ").appendValue(imageMetadata.size)
-			return false
-		}
-		if (!mimeType.matches(imageMetadata.mimeType)) {
-			mismatchDescription.appendText("MIME type is ").appendValue(imageMetadata.mimeType)
+		if (!filename.matches(imageMetadata.filename)) {
+			mismatchDescription.appendText("Filename is ").appendValue(imageMetadata.filename)
 			return false
 		}
 		return true
@@ -42,8 +37,7 @@ fun isMetadataWith(width: Matcher<Int> = Matchers.any(Int::class.java), height: 
 	override fun describeTo(description: Description) {
 		description.appendText("image metadata with width ").appendDescriptionOf(width)
 			.appendText(", height ").appendDescriptionOf(height)
-			.appendText(", size ").appendDescriptionOf(size)
-			.appendText(", and MIME type ").appendDescriptionOf(mimeType)
+			.appendText(", and filename ").appendDescriptionOf(filename)
 	}
 
 }
@@ -109,3 +103,5 @@ fun isHtmlNode(name: Matcher<String>, attributes: Matcher<Iterable<Pair<String, 
 	}
 
 }
+
+inline fun <reified T> any(): Matcher<T> = any(T::class.java)

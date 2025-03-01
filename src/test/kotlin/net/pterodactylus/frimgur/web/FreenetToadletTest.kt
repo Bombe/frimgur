@@ -5,6 +5,8 @@ import freenet.clients.http.PageMaker
 import freenet.clients.http.PageNode
 import freenet.clients.http.ToadletContext
 import freenet.support.HTMLNode
+import java.net.URI
+import kotlin.test.Test
 import net.pterodactylus.frimgur.test.isHtmlNode
 import net.pterodactylus.frimgur.web.annotations.ToadletName
 import org.hamcrest.MatcherAssert.assertThat
@@ -18,8 +20,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import java.net.URI
-import kotlin.test.Test
 
 /**
  * Unit test for [FreenetToadlet].

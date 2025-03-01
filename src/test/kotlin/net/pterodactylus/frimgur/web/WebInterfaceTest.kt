@@ -2,12 +2,12 @@ package net.pterodactylus.frimgur.web
 
 import freenet.clients.http.PageMaker
 import freenet.pluginmanager.FredPluginL10n
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.test.Test
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.test.Test
 
 /**
  * Unit test for [DefaultWebInterface].
@@ -54,4 +54,3 @@ class WebInterfaceTest {
 	private val webInterface = DefaultWebInterface("Menu.Test.Title", "Menu.Test.Tooltip", pageMaker, pluginL10n, toadletRegistry)
 
 }
-

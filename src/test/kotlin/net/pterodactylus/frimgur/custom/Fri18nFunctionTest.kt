@@ -1,13 +1,13 @@
 package net.pterodactylus.frimgur.custom
 
 import com.mitchellbosecke.pebble.PebbleEngine
+import java.io.StringWriter
+import java.util.Locale.ENGLISH
+import kotlin.test.Test
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.sameInstance
-import java.io.StringWriter
-import java.util.Locale.ENGLISH
-import kotlin.test.Test
 
 /**
  * Unit test for [Fri18nFunction].

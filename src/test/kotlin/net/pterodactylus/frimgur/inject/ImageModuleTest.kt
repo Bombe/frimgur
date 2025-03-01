@@ -1,12 +1,12 @@
 package net.pterodactylus.frimgur.inject
 
 import com.google.inject.Guice.createInjector
+import kotlin.test.Test
 import net.pterodactylus.frimgur.image.DefaultImageService
 import net.pterodactylus.frimgur.image.ImageService
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.instanceOf
 import org.hamcrest.Matchers.sameInstance
-import kotlin.test.Test
 
 /**
  * Unit test for [ImageModule].

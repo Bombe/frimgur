@@ -3,12 +3,15 @@ package net.pterodactylus.frimgur.plugin
 import com.google.inject.Guice
 import com.google.inject.Injector
 import com.google.inject.Module
+import com.google.inject.name.Names
 import freenet.l10n.BaseL10n.LANGUAGE
 import freenet.pluginmanager.FredPlugin
 import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.FredPluginThreadless
 import freenet.pluginmanager.FredPluginVersioned
 import freenet.pluginmanager.PluginRespirator
+import java.util.Locale
+import java.util.ResourceBundle
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus.Failed
 import net.pterodactylus.frimgur.image.ImageStatus.Inserted
@@ -21,8 +24,6 @@ import net.pterodactylus.frimgur.insert.InsertService
 import net.pterodactylus.frimgur.util.getInstance
 import net.pterodactylus.frimgur.util.versionProperties
 import net.pterodactylus.frimgur.web.WebInterface
-import java.util.Locale
-import java.util.ResourceBundle
 
 /**
  * Frimgur main plugin class.
@@ -40,7 +41,6 @@ open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless, FredPlugi
 	private fun wireUpListeners(injector: Injector) {
 		val imageService: ImageService = injector.getInstance()
 		val insertService: InsertService = injector.getInstance()
-		imageService.onNewImage { imageData -> insertService.insertImage(imageData.metadata.id, imageData.data, imageData.metadata.mimeType) }
 		insertService.onInsertStarting { id -> imageService.setImageStatus(id, Inserting) }
 		insertService.onInsertGeneratingUri(imageService::setImageKey)
 		insertService.onInsertFailed { id -> imageService.setImageStatus(id, Failed) }
@@ -54,7 +54,8 @@ open class Frimgur : FredPlugin, FredPluginL10n, FredPluginThreadless, FredPlugi
 		ImageModule(),
 		InsertModule(),
 		WebInterfaceModule("/frimgur/", "Navigation.Menu.Title", "Navigation.Menu.Tooltip"),
-		Module { binder -> binder.bind(Locale::class.java).toProvider { Locale.forLanguageTag(language.shortCode) } }
+		Module { binder -> binder.bind(Locale::class.java).toProvider { Locale.forLanguageTag(language.shortCode) } },
+		Module { binder -> binder.bind(Boolean::class.java).annotatedWith(Names.named("NodeRequiresConfigChange")).toProvider { !pluginRespirator.node.getConfig().get("fproxy").getBoolean("enableExtendedMethodHandling") }}
 	)
 
 	override fun terminate() {

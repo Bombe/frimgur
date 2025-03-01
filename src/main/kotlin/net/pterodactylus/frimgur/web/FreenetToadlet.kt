@@ -5,8 +5,8 @@ import freenet.clients.http.Toadlet
 import freenet.clients.http.ToadletContext
 import freenet.support.MultiValueTable
 import freenet.support.api.HTTPRequest
-import net.pterodactylus.frimgur.web.annotations.toadletName
 import java.net.URI
+import net.pterodactylus.frimgur.web.annotations.toadletName
 
 /**
  * [Toadlet][freenet.clients.http.Toadlet] implementation that renders Freenet’s web interface around a [PageProcessor].

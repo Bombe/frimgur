@@ -2,13 +2,13 @@ package net.pterodactylus.frimgur.inject
 
 import com.google.inject.Guice.createInjector
 import freenet.client.HighLevelSimpleClient
+import kotlin.test.Test
 import net.pterodactylus.frimgur.insert.InsertService
 import net.pterodactylus.frimgur.test.bind
 import net.pterodactylus.frimgur.util.getInstance
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.notNullValue
 import org.hamcrest.Matchers.sameInstance
-import kotlin.test.Test
 
 /**
  * Unit test for [InsertModule].

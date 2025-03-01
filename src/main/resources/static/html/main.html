@@ -1,6 +1,10 @@
 <div id='form-password'>{{ formPassword }}</div>
 <h2>Frimgur</h2>
+{% if nodeRequiresConfigChange %}
+<p class='alert node-requires-config-change'>{{ i18n('i18n.frimgur', 'Webpage.Main.NodeRequiresConfigurationChange') | raw }}</p>
+{% else %}
 <div id='usage'>{{ i18n('i18n.frimgur', 'Webpage.Main.ShortInstruction') | raw }}</div>
+{% endif %}
 <div id='inserted-images'>
 </div>
 <div id='image-template' class='image-placeholder'>
@@ -8,8 +12,41 @@
         <canvas class='canvas'></canvas>
     </div>
     <div class='image-overlay'>
-        <div class='dimensions'></div>
-        <div class='key'></div>
+        <button type='button' class='button-refresh'>🔄</button>
+        <div class='format'>
+            <div class='change-dimensions'>
+                <div class='change-width'>
+                    <label>
+                        {{ i18n('i18n.frimgur', 'Webpage.Main.Dimensions.NewWidth') }}
+                        <input type='text' name='width' size='5' value=''/>
+                    </label>
+                    <button type='button'>{{ i18n('i18n.frimgur', 'Webpage.Main.Dimensions.ChangeWidth') }}</button>
+                </div>
+                <div class='change-height'>
+                    <label>
+                        {{ i18n('i18n.frimgur', 'Webpage.Main.Dimensions.NewHeight') }}
+                        <input type='text' name='height' size='5' value=''/>
+                    </label>
+                    <button type='button'>{{ i18n('i18n.frimgur', 'Webpage.Main.Dimensions.ChangeHeight') }}</button>
+                </div>
+            </div>
+        </div>
+        <div class='filename'>
+            <label>
+                {{ i18n('i18n.frimgur', 'Webpage.Main.Filename.NewFilename') }}
+                <input type='text' value=''/>
+            </label>
+            <button type='button'>{{ i18n('i18n.frimgur', 'Webpage.Main.Filename.Change') }}</button>
+        </div>
+        <div class='key'>
+            <a href=""></a>
+            <button type='button'>{{ i18n('i18n.frimgur', 'Webpage.Main.Button.CopyToClipboard.Label') }}</button>
+        </div>
         <div class='status'></div>
+        <div class='start-insert'>
+            <button type='button' class='button-start-png'>{{ i18n('i18n.frimgur', 'Webpage.Main.Button.InsertAsPng.Label') }}</button>
+            <button type='button' class='button-start-jpeg'>{{ i18n('i18n.frimgur', 'Webpage.Main.Button.InsertAsJpeg.Label') }}</button>
+        </div>
+        <button type='button' class='button-remove'>{{ i18n('i18n.frimgur', 'Webpage.Main.Button.Remove.Label') }}</button>
     </div>
 </div>

@@ -1,12 +1,13 @@
 package net.pterodactylus.frimgur.web
 
+import java.util.Locale.ENGLISH
+import kotlin.test.Test
 import net.pterodactylus.frimgur.web.annotations.toadletName
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
-import java.util.Locale.ENGLISH
-import kotlin.test.Test
+import org.hamcrest.Matchers.not
 
 /**
  * Unit test for [MainPageProcessor].
@@ -33,6 +34,14 @@ class MainPageProcessorTest {
 		assertThat(mainPageProcessor.processPage(PageRequest()).javascriptLinks, contains("static/js/frimgur.js"))
 	}
 
-	private val mainPageProcessor = MainPageProcessor("", { ENGLISH })
+	@Test
+	fun `main page reacts on change in variable`() {
+		assertThat(mainPageProcessor.processPage(PageRequest()).content, not(containsString("node-requires-config-change")))
+		nodeRequiresConfigChange = true
+		assertThat(mainPageProcessor.processPage(PageRequest()).content, containsString("node-requires-config-change"))
+	}
+
+	private var nodeRequiresConfigChange = false
+	private val mainPageProcessor = MainPageProcessor("", { ENGLISH }, { nodeRequiresConfigChange })
 
 }

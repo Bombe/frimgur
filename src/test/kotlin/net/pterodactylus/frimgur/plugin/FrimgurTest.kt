@@ -1,6 +1,7 @@
 package net.pterodactylus.frimgur.plugin
 
 import com.google.inject.Injector
+import com.google.inject.Key
 import com.google.inject.Module
 import com.google.inject.util.Modules.override
 import freenet.client.HighLevelSimpleClient
@@ -15,6 +16,11 @@ import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.FredPluginThreadless
 import freenet.pluginmanager.FredPluginVersioned
 import freenet.pluginmanager.PluginRespirator
+import java.util.Locale
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
+import javax.inject.Named
+import kotlin.test.Test
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus
 import net.pterodactylus.frimgur.image.ImageStatus.Failed
@@ -23,7 +29,6 @@ import net.pterodactylus.frimgur.image.ImageStatus.Inserting
 import net.pterodactylus.frimgur.image.get1x1Png
 import net.pterodactylus.frimgur.insert.InsertService
 import net.pterodactylus.frimgur.test.bind
-import net.pterodactylus.frimgur.test.isTriple
 import net.pterodactylus.frimgur.util.getInstance
 import net.pterodactylus.frimgur.web.WebInterface
 import org.hamcrest.MatcherAssert.assertThat
@@ -35,10 +40,6 @@ import org.hamcrest.Matchers.notNullValue
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import java.util.Locale
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
-import kotlin.test.Test
 
 /**
  * Unit test for [Frimgur].
@@ -118,32 +119,6 @@ class FrimgurTest {
 	}
 
 	@Test
-	fun `insert service is wired up as event listener for new images`() {
-		val insertImageArguments = mutableListOf<Triple<String, ByteArray, String>>()
-		val insertService = object : InsertService {
-			override fun insertImage(id: String, data: ByteArray, mimeType: String) {
-				insertImageArguments += Triple(id, data, mimeType)
-			}
-		}
-		runPlugin(bind<InsertService>().toInstance(insertService)) { injector ->
-			val imageService = injector.getInstance<ImageService>()
-			val metadata = imageService.addImage(testImage)!!
-			assertThat(insertImageArguments, contains(isTriple(equalTo(metadata.id), equalTo(testImage), equalTo("image/png"))))
-		}
-	}
-
-	@Test
-	fun `image service is called to set status to inserting when insert starts`() {
-		val imageStatusSet = mutableListOf<Pair<String, ImageStatus>>()
-		val imageService = captureImageStatus { id, status -> imageStatusSet += id to status }
-		runPlugin(bind<ImageService>().toInstance(imageService)) { injector ->
-			val insertService: InsertService = injector.getInstance()
-			insertService.insertImage("id1", byteArrayOf(), "image/test")
-			assertThat(imageStatusSet, contains("id1" to Inserting))
-		}
-	}
-
-	@Test
 	fun `image service is called to set key when insert generates uri`() {
 		val clientPutCallbacks = mutableListOf<ClientPutCallback>()
 		val highLevelSimpleClient = captureClientPutCallback { clientPutCallback -> clientPutCallbacks += clientPutCallback }
@@ -155,9 +130,22 @@ class FrimgurTest {
 		}
 		runPlugin(bind<HighLevelSimpleClient>().toInstance(highLevelSimpleClient), bind<ImageService>().toInstance(imageService)) { injector ->
 			val insertService: InsertService = injector.getInstance()
-			insertService.insertImage("id1", byteArrayOf(), "image/test")
+			insertService.insertImage("id1", byteArrayOf(), "image/test", "image")
 			clientPutCallbacks.first().onGeneratedURI(FreenetURI("KSK@Test"), mock())
 			assertThat(imageKeys, contains(equalTo("id1" to "KSK@Test")))
+		}
+	}
+
+	@Test
+	fun `image service is called to set status when insert starts`() {
+		val clientPutCallbacks = mutableListOf<ClientPutCallback>()
+		val highLevelSimpleClient = captureClientPutCallback { clientPutCallback -> clientPutCallbacks += clientPutCallback }
+		val imageStatus = mutableListOf<Pair<String, ImageStatus>>()
+		val imageService = captureImageStatus { id, status -> imageStatus += id to status }
+		runPlugin(bind<HighLevelSimpleClient>().toInstance(highLevelSimpleClient), bind<ImageService>().toInstance(imageService)) { injector ->
+			val insertService: InsertService = injector.getInstance()
+			insertService.insertImage("id1", byteArrayOf(), "image/test", "image")
+			assertThat(imageStatus, hasItem(equalTo("id1" to Inserting)))
 		}
 	}
 
@@ -169,7 +157,7 @@ class FrimgurTest {
 		val imageService = captureImageStatus { id, status -> imageStatus += id to status }
 		runPlugin(bind<HighLevelSimpleClient>().toInstance(highLevelSimpleClient), bind<ImageService>().toInstance(imageService)) { injector ->
 			val insertService: InsertService = injector.getInstance()
-			insertService.insertImage("id1", byteArrayOf(), "image/test")
+			insertService.insertImage("id1", byteArrayOf(), "image/test", "image")
 			clientPutCallbacks.first().onFailure(mock(), mock())
 			assertThat(imageStatus, hasItem(equalTo("id1" to Failed)))
 		}
@@ -183,7 +171,7 @@ class FrimgurTest {
 		val imageService = captureImageStatus { id, status -> imageStatus += id to status }
 		runPlugin(bind<HighLevelSimpleClient>().toInstance(highLevelSimpleClient), bind<ImageService>().toInstance(imageService)) { injector ->
 			val insertService: InsertService = injector.getInstance()
-			insertService.insertImage("id1", byteArrayOf(), "image/test")
+			insertService.insertImage("id1", byteArrayOf(), "image/test", "image")
 			clientPutCallbacks.first().onSuccess(mock())
 			assertThat(imageStatus, hasItem(equalTo("id1" to Inserted)))
 		}
@@ -204,6 +192,17 @@ class FrimgurTest {
 	@Test
 	fun `plugin main class returns its version`() {
 		assertThat(frimgur.version, equalTo("unknown"))
+	}
+
+	@Test
+	fun `provider for node-requires-configuration-change setting returns correct false value`() {
+		runPlugin { assertThat(it.getInstance(Key.get(Boolean::class.java, Named("NodeRequiresConfigChange"))), equalTo(true)) }
+	}
+
+	@Test
+	fun `provider for node-requires-configuration-change setting returns correct true value`() {
+		whenever(pluginRespirator.node.getConfig().get("fproxy").getBoolean("enableExtendedMethodHandling")).thenReturn(true)
+		runPlugin { assertThat(it.getInstance(Key.get(Boolean::class.java, Named("NodeRequiresConfigChange"))), equalTo(false)) }
 	}
 
 	private fun captureImageStatus(action: (id: String, status: ImageStatus) -> Unit) = object : ImageService {

@@ -3,7 +3,8 @@ package net.pterodactylus.frimgur.web
 import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.ToadletContext
 import freenet.support.MultiValueTable
-import org.hamcrest.MatcherAssert
+import java.net.URI
+import kotlin.test.Test
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
 import org.mockito.ArgumentMatcher
@@ -13,8 +14,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import java.net.URI
-import kotlin.test.Test
 
 /**
  * Unit test for [RedirectToadlet].
@@ -40,7 +39,7 @@ class RedirectToadletTest {
 }
 
 fun containsHeader(name: String, value: String) = ArgumentMatcher<MultiValueTable<String, String>> { headers ->
-	headers.keys().asSequence().firstOrNull { it.equals(name, ignoreCase = true) }
-		?.let { headers[it].equals(value) }
+	headers.keySet().firstOrNull { it.equals(name, ignoreCase = true) }
+		?.let { headers.getFirst(it).equals(value) }
 		?: false
 }

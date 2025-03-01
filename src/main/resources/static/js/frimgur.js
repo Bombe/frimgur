@@ -132,6 +132,10 @@ const changeDimension = (placeholderElement, imageId, inputSelector, dimension) 
 const copyKeyToClipboard = (placeholderElement) =>
   navigator.clipboard.writeText(placeholderElement.querySelector('.key a').textContent)
 
+const startInsertAsType = (imageId, type) =>
+    fetch(`image/${imageId}`, { method: 'PATCH', body: JSON.stringify({ status: 'Inserting', type: type }) })
+        .then(() => refreshElementsForImage(imageId))
+
 const getOrCreatePlaceholderElement = (imageId) => {
   const existingPlaceholderElement = document.getElementById(createImageElementId(imageId))
   if (existingPlaceholderElement != null) {
@@ -146,10 +150,8 @@ const getOrCreatePlaceholderElement = (imageId) => {
   placeholderElement.querySelector('.change-height button').addEventListener('click', () => changeDimension(placeholderElement, getImageIdFromElement(), '.change-height input', 'height'))
   placeholderElement.querySelector('.filename input').addEventListener('change', () => setImageFilename(placeholderElement, getImageIdFromElement()))
   placeholderElement.querySelector('.filename button').addEventListener('click', () => setImageFilename(placeholderElement, getImageIdFromElement()))
-  placeholderElement.querySelector('button.button-start').addEventListener('click', () =>
-      fetch(`image/${getImageIdFromElement()}`, { method: 'PATCH', body: JSON.stringify({ status: 'Inserting' }) })
-          .then(() => refreshElementsForImage(getImageIdFromElement()))
-  )
+  placeholderElement.querySelector('button.button-start-png').addEventListener('click', () => startInsertAsType(getImageIdFromElement(), 'png'))
+  placeholderElement.querySelector('button.button-start-jpeg').addEventListener('click', () => startInsertAsType(getImageIdFromElement(), 'jpeg'))
   placeholderElement.querySelector('button.button-remove').addEventListener('click', () =>
     fetch(`image/${getImageIdFromElement()}`, { method: 'DELETE' })
         .then(() => placeholderElement.remove())

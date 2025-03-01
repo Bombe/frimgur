@@ -21,14 +21,6 @@
     display: block;
 }
 
-.image-placeholder .image-overlay .button-start {
-    display: none;
-}
-
-.image-placeholder.image-status-waiting .image-overlay .button-start {
-    display: inherit;
-}
-
 .image-status-inserting .image-overlay .button-remove {
     display: none;
 }
@@ -51,6 +43,18 @@
 
 .image-status-inserted .key button {
     display: inline;
+}
+
+.start-insert > div {
+    display: inline;
+}
+
+.start-insert {
+    display: none;
+}
+
+.image-status-waiting .start-insert {
+    display: inherit;
 }
 
 #image-template {

@@ -102,7 +102,7 @@ class DefaultImageService : ImageService {
 		imageCanBeDecoded(data).ifTrue {
 			ByteArrayInputStream(data).use { byteArrayInputStream ->
 				ImageIO.read(byteArrayInputStream)
-					?.let { bufferedImage -> ImageMetadata(UUID.randomUUID().toString(), bufferedImage.width, bufferedImage.height, data.size, "image.png", Waiting) }
+					?.let { bufferedImage -> ImageMetadata(UUID.randomUUID().toString(), bufferedImage.width, bufferedImage.height, data.size, "image", Waiting) }
 					?.let { imageMetadata -> ImageData(imageMetadata, data) }
 					?.also { imageData -> this.imageData[imageData.metadata.id] = imageData }
 					?.metadata

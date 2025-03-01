@@ -14,6 +14,9 @@ import freenet.node.RequestStarter.MAXIMUM_PRIORITY_CLASS
 import freenet.support.api.Bucket
 import freenet.support.io.ArrayBucket
 import javax.imageio.ImageIO
+import net.pterodactylus.frimgur.image.use
+import java.awt.image.BufferedImage
+import java.awt.image.BufferedImage.TYPE_INT_RGB
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
@@ -84,7 +87,7 @@ class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleCli
 				if (originalImageType == "JPEG")
 					data
 				else
-					ByteArrayOutputStream().use { outputStream -> ImageIO.write(ImageIO.read(ByteArrayInputStream(data)), "JPEG", outputStream); outputStream }.toByteArray()
+					ByteArrayOutputStream().use { outputStream -> ImageIO.write(ImageIO.read(ByteArrayInputStream(data)).removeTransparency(), "JPEG", outputStream); outputStream }.toByteArray()
 			else -> null
 		}
 	} ?: data
@@ -120,6 +123,12 @@ val ByteArray.imageFormat get() = ByteArrayInputStream(this).use { inputStream -
 		ImageIO.getImageReaders(imageInputStream).asSequence()
 			.map { it.formatName }
 			.firstOrNull()
+	}
+}
+
+private fun BufferedImage.removeTransparency() = BufferedImage(width, height, TYPE_INT_RGB).apply {
+	graphics.use {
+		it.drawImage(this@removeTransparency, 0, 0, width, height, null)
 	}
 }
 

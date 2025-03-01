@@ -14,12 +14,18 @@ const addClipboardListener = () => {
                 replacePlaceholderId(temporaryImageId, realImageId)
                 return realImageId
               })
-              .then(imageId => refreshElementsForImage(imageId))
-          })
-        }
+              .then(imageId => {
+                return refreshElementsForImage(imageId)
+                    .then(() => getOrCreatePlaceholderElement(imageId).querySelector('.filename input'))
+                    .then(inputElement => {
+                      inputElement.focus()
+                      inputElement.select()
+                    })
+              })
+        })
       }
     }
-  )
+  })
 }
 
 const updatePlaceholderElement = (imageId, imageMetadata) => {

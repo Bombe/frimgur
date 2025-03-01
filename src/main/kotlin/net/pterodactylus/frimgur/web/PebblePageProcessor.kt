@@ -13,16 +13,17 @@ import java.util.Locale
 open class PebblePageProcessor(templateName: String, private val formPassword: String, private val localeProvider: () -> Locale) : PageProcessor {
 
 	override fun processPage(pageRequest: PageRequest) =
-		PageResponse(getTitle(pageRequest), pebbleTemplate.render()).apply {
+		PageResponse(getTitle(pageRequest), pebbleTemplate.render(pageRequest)).apply {
 			addCssLink("static/css/frimgur.css")
 			getScriptLinks(pageRequest).forEach(this::addJavascriptLink)
 		}
 
 	protected open fun getTitle(pageRequest: PageRequest) = ""
 	protected open fun getScriptLinks(pageRequest: PageRequest): List<String> = emptyList()
+	protected open fun getContextVariables(pageRequest: PageRequest): Map<String, Any> = emptyMap()
 
-	private fun PebbleTemplate.render() = StringWriter()
-		.also { evaluate(it, mapOf("formPassword" to formPassword), localeProvider()) }
+	private fun PebbleTemplate.render(pageRequest: PageRequest) = StringWriter()
+		.also { evaluate(it, getContextVariables(pageRequest) + ("formPassword" to formPassword), localeProvider()) }
 		.toString()
 
 	private val pebbleTemplate = pebbleEngine.getTemplate(templateName)

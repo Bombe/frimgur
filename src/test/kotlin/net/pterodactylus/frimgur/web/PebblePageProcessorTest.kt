@@ -46,6 +46,15 @@ class PebblePageProcessorTest {
 		assertThat(pageProcessor.processPage(PageRequest()).content, equalTo("Testnachricht"))
 	}
 
+	@Test
+	fun `page processor includes context variables when rendering`() {
+		val pageProcessor = object : PebblePageProcessor("static/html/test-variables.html", "", { ENGLISH }) {
+			override fun getContextVariables(pageRequest: PageRequest) =
+				mapOf("foo" to "bar", "baz" to 17)
+		}
+		assertThat(pageProcessor.processPage(PageRequest()).content, equalTo("Test. bar, 17.\n"))
+	}
+
 	private val scriptLinks = mutableListOf<String>()
 	private val pebblePageProcessor = object : PebblePageProcessor("static/html/test.html", "", { ENGLISH }) {
 		override fun getTitle(pageRequest: PageRequest) = "Test Title"

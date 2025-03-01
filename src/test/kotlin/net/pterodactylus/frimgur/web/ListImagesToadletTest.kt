@@ -50,8 +50,8 @@ class ListImagesToadletTest {
 	fun `list with images is transferred correctly`() {
 		val imageService = object : ImageService {
 			override fun getImage(id: String) = when (id) {
-				"id1" -> ImageMetadata("id1", 11, 12, 13, "image1", Inserting)
-				"id2" -> ImageMetadata("id2", 21, 22, 23, filename = "image2", status = Inserted, key = "CHK@Test")
+				"id1" -> ImageMetadata("id1", 11, 12, "image1", Inserting)
+				"id2" -> ImageMetadata("id2", 21, 22, filename = "image2", status = Inserted, key = "CHK@Test")
 				else -> null
 			}
 
@@ -72,7 +72,6 @@ class ListImagesToadletTest {
 								"metadata", jsonObject()
 									.where("width", jsonInt(11))
 									.where("height", jsonInt(12))
-									.where("size", jsonInt(13))
 									.where("status", jsonText("Inserting"))
 									.where("key", jsonNull())
 									.where("filename", jsonText("image1"))
@@ -83,7 +82,6 @@ class ListImagesToadletTest {
 								"metadata", jsonObject()
 									.where("width", jsonInt(21))
 									.where("height", jsonInt(22))
-									.where("size", jsonInt(23))
 									.where("status", jsonText("Inserted"))
 									.where("key", jsonText("CHK@Test"))
 									.where("filename", jsonText("image2"))

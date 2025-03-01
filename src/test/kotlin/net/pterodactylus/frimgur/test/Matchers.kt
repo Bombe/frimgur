@@ -13,11 +13,10 @@ import org.hamcrest.TypeSafeDiagnosingMatcher
  *
  * @param width A matcher for the width
  * @param height A matcher for the height
- * @param size A matcher for the size
  * @param mimeType A matcher for the MIME type
  * @return A matcher for use with Hamcrest’s `assertThat`
  */
-fun isMetadataWith(width: Matcher<Int> = any(Int::class.java), height: Matcher<Int> = any(Int::class.java), size: Matcher<Int> = any(Int::class.java), filename: Matcher<String> = any<String>()): Matcher<ImageMetadata?> = object : TypeSafeDiagnosingMatcher<ImageMetadata>() {
+fun isMetadataWith(width: Matcher<Int> = any(Int::class.java), height: Matcher<Int> = any(Int::class.java), filename: Matcher<String> = any<String>()): Matcher<ImageMetadata?> = object : TypeSafeDiagnosingMatcher<ImageMetadata>() {
 
 	override fun matchesSafely(imageMetadata: ImageMetadata, mismatchDescription: Description): Boolean {
 		if (!width.matches(imageMetadata.width)) {
@@ -26,10 +25,6 @@ fun isMetadataWith(width: Matcher<Int> = any(Int::class.java), height: Matcher<I
 		}
 		if (!height.matches(imageMetadata.height)) {
 			mismatchDescription.appendText("height is ").appendValue(imageMetadata.height)
-			return false
-		}
-		if (!size.matches(imageMetadata.size)) {
-			mismatchDescription.appendText("size is ").appendValue(imageMetadata.size)
 			return false
 		}
 		if (!filename.matches(imageMetadata.filename)) {
@@ -42,7 +37,6 @@ fun isMetadataWith(width: Matcher<Int> = any(Int::class.java), height: Matcher<I
 	override fun describeTo(description: Description) {
 		description.appendText("image metadata with width ").appendDescriptionOf(width)
 			.appendText(", height ").appendDescriptionOf(height)
-			.appendText(", size ").appendDescriptionOf(size)
 			.appendText(", and filename ").appendDescriptionOf(filename)
 	}
 

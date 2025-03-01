@@ -54,7 +54,7 @@ class ImageDataToadletTest {
 	private val toadletContext = mock<ToadletContext>()
 	private val imageService = object : ImageService {
 		override fun getImageData(id: String) =
-			ImageData(ImageMetadata("123", 12, 23, 34, "image/png"), byteArrayOf(0, 1, 2, 3))
+			ImageData(ImageMetadata("123", 12, 23, "image/png"), byteArrayOf(0, 1, 2, 3))
 				.takeIf { id == "123" }
 	}
 	private val toadlet = ImageDataToadlet("/path/test/", imageService, highLevelSimpleClient)

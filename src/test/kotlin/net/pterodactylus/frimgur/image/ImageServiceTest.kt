@@ -23,25 +23,25 @@ class ImageServiceTest {
 	@Test
 	fun `image service can parse PNG files`() {
 		val metadata = imageService.addImage(get1x1Png())
-		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(67), equalTo("image")))
+		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo("image")))
 	}
 
 	@Test
 	fun `image service can parse JPEG files`() {
 		val metadata = imageService.addImage(get1x1Jpeg())
-		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(333), equalTo("image")))
+		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo("image")))
 	}
 
 	@Test
 	fun `image service can parse GIF files`() {
 		val metadata = imageService.addImage(get1x1Gif())
-		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(35), equalTo("image")))
+		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo("image")))
 	}
 
 	@Test
 	fun `image service can parse BMP files`() {
 		val metadata = imageService.addImage(get1x1Bmp())
-		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(66), equalTo("image")))
+		assertThat(metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo("image")))
 	}
 
 	@Test
@@ -116,7 +116,7 @@ class ImageServiceTest {
 	fun `image service can return image data for valid ID`() {
 		val id1 = imageService.addImage(get1x1Png())!!.id
 		val imageData = imageService.getImageData(id1)!!
-		assertThat(imageData.metadata, isMetadataWith(equalTo(1), equalTo(1), equalTo(67)))
+		assertThat(imageData.metadata, isMetadataWith(equalTo(1), equalTo(1)))
 		assertThat(imageData.data, equalTo(get1x1Png()))
 	}
 

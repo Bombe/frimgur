@@ -2,13 +2,13 @@ let formPassword
 
 const addClipboardListener = () => {
   document.addEventListener('paste', event => {
-      for (const file of event.clipboardData.files) {
-        if (file.type.startsWith('image/')) {
-          file.arrayBuffer().then(arrayBuffer => {
-            const imageBlob = new Blob([ arrayBuffer ], { type: file.type })
-            let temporaryImageId = crypto.randomUUID()
-            showPlaceholder(temporaryImageId, {}, imageBlob)
-            sendImageDataToServer(imageBlob)
+    for (const file of event.clipboardData.files) {
+      if (file.type.startsWith('image/')) {
+        file.arrayBuffer().then(arrayBuffer => {
+          const imageBlob = new Blob([arrayBuffer], { type: file.type })
+          let temporaryImageId = crypto.randomUUID()
+          showPlaceholder(temporaryImageId, {}, imageBlob)
+          sendImageDataToServer(imageBlob)
               .then(response => {
                 const realImageId = response.headers.get('Location')
                 replacePlaceholderId(temporaryImageId, realImageId)

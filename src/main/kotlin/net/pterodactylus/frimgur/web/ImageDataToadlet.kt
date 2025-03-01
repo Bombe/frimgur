@@ -4,8 +4,8 @@ import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.Toadlet
 import freenet.clients.http.ToadletContext
 import freenet.support.api.HTTPRequest
-import net.pterodactylus.frimgur.image.ImageService
 import java.net.URI
+import net.pterodactylus.frimgur.image.ImageService
 
 /**
  * [Toadlet] that can deliver image data.

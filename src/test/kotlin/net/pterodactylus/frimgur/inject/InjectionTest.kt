@@ -2,6 +2,9 @@ package net.pterodactylus.frimgur.inject
 
 import com.google.inject.Guice.createInjector
 import freenet.pluginmanager.PluginRespirator
+import java.util.Locale
+import java.util.Locale.ENGLISH
+import kotlin.test.Test
 import net.pterodactylus.frimgur.test.bind
 import net.pterodactylus.frimgur.web.WebInterface
 import org.hamcrest.MatcherAssert.assertThat
@@ -9,9 +12,6 @@ import org.hamcrest.Matchers.notNullValue
 import org.mockito.Mockito
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import java.util.Locale
-import java.util.Locale.ENGLISH
-import kotlin.test.Test
 
 /**
  * Unit test for cross-[module][com.google.inject.Module] functionality.

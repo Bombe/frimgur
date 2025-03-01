@@ -1,15 +1,16 @@
 package net.pterodactylus.frimgur.image
 
-import net.pterodactylus.frimgur.image.ImageStatus.Inserting
-import java.io.ByteArrayInputStream
-import java.util.UUID
-import javax.imageio.ImageIO
-import net.pterodactylus.frimgur.image.ImageStatus.Inserted
-import net.pterodactylus.frimgur.image.ImageStatus.Waiting
 import java.awt.Graphics
 import java.awt.image.BufferedImage
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.util.UUID
+import javax.imageio.ImageIO
+import net.pterodactylus.frimgur.image.ImageStatus.Failed
+import net.pterodactylus.frimgur.image.ImageStatus.Inserted
+import net.pterodactylus.frimgur.image.ImageStatus.Inserting
+import net.pterodactylus.frimgur.image.ImageStatus.Waiting
 
 /**
  * Service for image-related functionality.

@@ -1,7 +1,7 @@
 package net.pterodactylus.frimgur.web
 
-import net.pterodactylus.frimgur.web.annotations.ToadletName
 import java.util.Locale
+import net.pterodactylus.frimgur.web.annotations.ToadletName
 
 /**
  * Frimgur main page.

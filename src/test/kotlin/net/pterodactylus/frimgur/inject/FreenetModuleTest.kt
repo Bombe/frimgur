@@ -6,12 +6,12 @@ import freenet.clients.http.PageMaker
 import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.PluginRespirator
+import kotlin.test.Test
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.notNullValue
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import kotlin.test.Test
 
 /**
  * Unit test for [FreenetModule].

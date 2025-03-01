@@ -1,12 +1,12 @@
 package net.pterodactylus.frimgur.web
 
+import java.util.Locale.ENGLISH
+import kotlin.test.Test
 import net.pterodactylus.frimgur.web.annotations.toadletName
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
-import java.util.Locale.ENGLISH
-import kotlin.test.Test
 import org.hamcrest.Matchers.not
 
 /**

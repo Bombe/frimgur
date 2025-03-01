@@ -13,12 +13,12 @@ import freenet.node.RequestClientBuilder
 import freenet.node.RequestStarter.MAXIMUM_PRIORITY_CLASS
 import freenet.support.api.Bucket
 import freenet.support.io.ArrayBucket
-import javax.imageio.ImageIO
-import net.pterodactylus.frimgur.image.use
 import java.awt.image.BufferedImage
 import java.awt.image.BufferedImage.TYPE_INT_RGB
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import javax.imageio.ImageIO
+import net.pterodactylus.frimgur.image.use
 
 /**
  * Service that inserts images into Freenet.

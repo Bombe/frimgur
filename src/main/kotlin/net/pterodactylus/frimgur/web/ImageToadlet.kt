@@ -5,12 +5,11 @@ import freenet.clients.http.Toadlet
 import freenet.clients.http.ToadletContext
 import freenet.support.MultiValueTable
 import freenet.support.api.HTTPRequest
-import net.pterodactylus.frimgur.image.ImageMetadata
+import java.net.URI
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus
 import net.pterodactylus.frimgur.image.ImageStatus.Inserting
 import net.pterodactylus.frimgur.insert.InsertService
-import java.net.URI
 
 /**
  * [Toadlet] that takes an encoded image and stores it together with some metadata.

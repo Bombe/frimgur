@@ -5,17 +5,17 @@ import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.PageMaker
 import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
+import java.util.Locale
+import java.util.Locale.ENGLISH
+import kotlin.test.Test
 import net.pterodactylus.frimgur.image.ImageService
+import net.pterodactylus.frimgur.insert.InsertService
 import net.pterodactylus.frimgur.test.bind
 import net.pterodactylus.frimgur.web.FreenetToadletFactory
 import net.pterodactylus.frimgur.web.ToadletRegistry
 import net.pterodactylus.frimgur.web.WebInterface
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.notNullValue
-import java.util.Locale
-import java.util.Locale.ENGLISH
-import kotlin.test.Test
-import net.pterodactylus.frimgur.insert.InsertService
 
 /**
  * Unit test for [WebInterfaceModule].

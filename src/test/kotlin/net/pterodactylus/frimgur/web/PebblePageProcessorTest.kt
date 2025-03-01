@@ -1,12 +1,12 @@
 package net.pterodactylus.frimgur.web
 
+import java.util.Locale.ENGLISH
+import java.util.Locale.GERMAN
+import kotlin.test.Test
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.emptyIterable
 import org.hamcrest.Matchers.equalTo
-import java.util.Locale.ENGLISH
-import java.util.Locale.GERMAN
-import kotlin.test.Test
 
 /**
  * Unit test for [PebblePageProcessor].

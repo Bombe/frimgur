@@ -4,9 +4,9 @@ import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.Toadlet
 import freenet.clients.http.ToadletContext
 import freenet.support.api.HTTPRequest
+import java.net.URI
 import net.pterodactylus.frimgur.image.ImageMetadata
 import net.pterodactylus.frimgur.image.ImageService
-import java.net.URI
 
 /**
  * [Toadlet] that can list all images of an [image service][ImageService].

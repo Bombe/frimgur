@@ -16,7 +16,11 @@ import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.FredPluginThreadless
 import freenet.pluginmanager.FredPluginVersioned
 import freenet.pluginmanager.PluginRespirator
+import java.util.Locale
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Named
+import kotlin.test.Test
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus
 import net.pterodactylus.frimgur.image.ImageStatus.Failed
@@ -36,10 +40,6 @@ import org.hamcrest.Matchers.notNullValue
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import java.util.Locale
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
-import kotlin.test.Test
 
 /**
  * Unit test for [Frimgur].

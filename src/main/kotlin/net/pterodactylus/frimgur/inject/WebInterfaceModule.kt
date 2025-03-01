@@ -7,7 +7,11 @@ import freenet.clients.http.PageMaker
 import freenet.clients.http.Toadlet
 import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
+import java.util.Locale
+import javax.inject.Named
+import javax.inject.Provider
 import net.pterodactylus.frimgur.image.ImageService
+import net.pterodactylus.frimgur.insert.InsertService
 import net.pterodactylus.frimgur.web.ClasspathFileToadlet
 import net.pterodactylus.frimgur.web.DefaultToadletRegistry
 import net.pterodactylus.frimgur.web.DefaultWebInterface
@@ -20,10 +24,6 @@ import net.pterodactylus.frimgur.web.RedirectToadlet
 import net.pterodactylus.frimgur.web.ToadletRegistry
 import net.pterodactylus.frimgur.web.ToadletSpec
 import net.pterodactylus.frimgur.web.WebInterface
-import java.util.Locale
-import javax.inject.Named
-import javax.inject.Provider
-import net.pterodactylus.frimgur.insert.InsertService
 
 /**
  * Guice [module][com.google.inject.Module] for creating [WebInterface] instances.

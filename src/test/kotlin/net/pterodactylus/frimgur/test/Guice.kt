@@ -1,8 +1,8 @@
 package net.pterodactylus.frimgur.test
 
 import com.google.inject.Module
-import org.mockito.Mockito.mock
 import javax.inject.Named
+import org.mockito.Mockito.mock
 
 class Binding<T>(private val c: Class<T>) {
 	fun toNamedInstance(name: String, instance: T) = Module { binder -> binder.bind(c).annotatedWith(Named(name)).toInstance(instance) }

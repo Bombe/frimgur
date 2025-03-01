@@ -3,6 +3,7 @@ package net.pterodactylus.frimgur.web
 import freenet.clients.http.Toadlet
 import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
+import kotlin.test.Test
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -12,7 +13,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import kotlin.test.Test
 
 /**
  * Unit test for [DefaultToadletRegistry].

@@ -2,6 +2,8 @@ package net.pterodactylus.frimgur.web
 
 import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.ToadletContext
+import java.net.URI
+import kotlin.test.Test
 import net.pterodactylus.frimgur.image.ImageData
 import net.pterodactylus.frimgur.image.ImageMetadata
 import net.pterodactylus.frimgur.image.ImageService
@@ -16,8 +18,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import java.net.URI
-import kotlin.test.Test
 
 /**
  * Unit test for [ImageDataToadlet].

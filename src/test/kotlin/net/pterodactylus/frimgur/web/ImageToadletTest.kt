@@ -9,14 +9,23 @@ import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.ToadletContext
 import freenet.support.api.HTTPRequest
 import freenet.support.io.ArrayBucket
+import java.net.URI
+import kotlin.test.Test
+import net.pterodactylus.frimgur.image.ImageData
 import net.pterodactylus.frimgur.image.ImageMetadata
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus.Inserted
+import net.pterodactylus.frimgur.insert.InsertService
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.allOf
+import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.greaterThanOrEqualTo
+import org.hamcrest.Matchers.lessThan
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
+import org.mockito.hamcrest.MockitoHamcrest.intThat
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
@@ -24,19 +33,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import java.net.URI
-import kotlin.test.Test
-import net.pterodactylus.frimgur.image.ImageData
-import net.pterodactylus.frimgur.image.ImageStatus
-import net.pterodactylus.frimgur.image.ImageStatus.Inserting
-import net.pterodactylus.frimgur.insert.InsertService
-import org.hamcrest.Matchers.allOf
-import org.hamcrest.Matchers.contains
-import org.hamcrest.Matchers.greaterThanOrEqualTo
-import org.hamcrest.Matchers.lessThan
-import org.mockito.hamcrest.MockitoHamcrest.intThat
 import org.mockito.kotlin.whenever
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Unit test for [ImageToadlet].

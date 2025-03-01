@@ -2,14 +2,14 @@ package net.pterodactylus.frimgur.web
 
 import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.ToadletContext
+import java.net.URI
+import kotlin.test.Test
 import org.mockito.AdditionalMatchers.or
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import java.net.URI
-import kotlin.test.Test
 
 /**
  * Unit test for [ClasspathFileToadlet].

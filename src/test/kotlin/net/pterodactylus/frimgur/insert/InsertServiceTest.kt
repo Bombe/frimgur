@@ -9,6 +9,10 @@ import freenet.keys.FreenetURI.EMPTY_CHK_URI
 import freenet.node.RequestStarter.MAXIMUM_PRIORITY_CLASS
 import freenet.support.api.Bucket
 import freenet.support.io.BucketTools
+import kotlin.test.Test
+import net.pterodactylus.frimgur.image.get1x1Bmp
+import net.pterodactylus.frimgur.image.get1x1Jpeg
+import net.pterodactylus.frimgur.image.get1x1Png
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.equalTo
@@ -22,10 +26,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import kotlin.test.Test
-import net.pterodactylus.frimgur.image.get1x1Bmp
-import net.pterodactylus.frimgur.image.get1x1Jpeg
-import net.pterodactylus.frimgur.image.get1x1Png
 
 /**
  * Unit test for [InsertService].

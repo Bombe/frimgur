@@ -1,8 +1,8 @@
 package net.pterodactylus.frimgur.util
 
+import kotlin.test.Test
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.equalTo
-import kotlin.test.Test
 
 /**
  * Unit test for [VersionProperties].

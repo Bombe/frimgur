@@ -7,8 +7,8 @@ import freenet.clients.http.PageMaker
 import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.PluginRespirator
-import net.pterodactylus.frimgur.plugin.Frimgur
 import javax.inject.Named
+import net.pterodactylus.frimgur.plugin.Frimgur
 
 /**
  * Guice [module][com.google.inject.Module] that can provide Freenet-related objects.

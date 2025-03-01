@@ -1,5 +1,6 @@
 package net.pterodactylus.frimgur.image
 
+import java.awt.image.DataBufferByte
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import net.pterodactylus.frimgur.image.ImageStatus.Failed
@@ -13,7 +14,6 @@ import org.hamcrest.Matchers.emptyIterable
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.not
 import org.hamcrest.Matchers.nullValue
-import java.awt.image.DataBufferByte
 
 /**
  * Unit test for [DefaultImageService].

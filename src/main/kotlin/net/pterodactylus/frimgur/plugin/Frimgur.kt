@@ -10,7 +10,8 @@ import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.FredPluginThreadless
 import freenet.pluginmanager.FredPluginVersioned
 import freenet.pluginmanager.PluginRespirator
-import javax.inject.Named
+import java.util.Locale
+import java.util.ResourceBundle
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus.Failed
 import net.pterodactylus.frimgur.image.ImageStatus.Inserted
@@ -23,8 +24,6 @@ import net.pterodactylus.frimgur.insert.InsertService
 import net.pterodactylus.frimgur.util.getInstance
 import net.pterodactylus.frimgur.util.versionProperties
 import net.pterodactylus.frimgur.web.WebInterface
-import java.util.Locale
-import java.util.ResourceBundle
 
 /**
  * Frimgur main plugin class.

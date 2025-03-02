@@ -1,5 +1,6 @@
 <div id='form-password'>{{ formPassword }}</div>
 <h2>Frimgur</h2>
+<p class='hidden alert not-secure-context'>{{ i18n('i18n.frimgur', 'Webpage.Main.WindowNotSecure') | raw }}</p>
 {% if nodeRequiresConfigChange %}
 <p class='alert node-requires-config-change'>{{ i18n('i18n.frimgur', 'Webpage.Main.NodeRequiresConfigurationChange') | raw }}</p>
 {% else %}

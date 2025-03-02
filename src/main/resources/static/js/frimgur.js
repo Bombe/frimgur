@@ -210,6 +210,9 @@ const checkIfOnMacOsAndChangeShortcut = () => {
 }
 
 window.onload = () => {
+  if (!window.isSecureContext) {
+    document.querySelector('.not-secure-context').classList.remove('hidden')
+  }
   formPassword = document.getElementById('form-password').textContent
   checkIfOnMacOsAndChangeShortcut()
   populateWithExistingImages()

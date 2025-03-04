@@ -77,12 +77,6 @@ const updateImageStatusClassName = (element, newClassName) => {
   element.className = element.className.replaceAll(/\bimage-status-[^ ]*\b/g, "") + " " + ("image-status-" + newClassName.toLowerCase())
 }
 
-const setImageFilename = (placeholderElement, imageId) => {
-  const inputField = placeholderElement.querySelector('.filename input')
-  return fetch(`image/${imageId}`, { method: 'PATCH', body: JSON.stringify({ filename: inputField.value }) })
-      .then(() => inputField.blur())
-}
-
 const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
   const placeholderElement = getOrCreatePlaceholderElement(imageId)
   if (imageMetadata.metadata != null) {
@@ -118,29 +112,29 @@ const decodeImage = (imageBlob) => {
 
 const createImageElementId = (imageId) => `image-${imageId}`
 
-const changeDimension = (placeholderElement, imageId, inputSelector, dimension) => {
-  const newValue = placeholderElement.querySelector(inputSelector).value
-  return fetch(`image/${imageId}`, { method: 'PATCH', body: JSON.stringify({ [dimension]: newValue }) })
-      .then(response => {
-        if ((response.status >= 200) && (response.status < 300)) {
-          return response.headers.get('location')
-        }
-      })
-      .then(newImageId =>
-          refreshElementsForImage(imageId)
-              .then(() => newImageId)
-      )
-      .then(newImageId => [newImageId, getOrCreatePlaceholderElement(newImageId)])
-      .then(([newImageId, placeholderElement]) =>
-          refreshElementsForImage(newImageId)
-              .then(() => placeholderElement)
-      )
-      .then(placeholderElement => placeholderElement.querySelector('.filename input'))
-      .then(inputElement => {
-        inputElement.focus()
-        inputElement.select()
-      })
-}
+const changeDimension = (placeholderElement, imageId, inputSelector, dimension) =>
+    getFilename(imageId)
+        .then(filename => [filename, placeholderElement.querySelector(inputSelector).value])
+        .then(([filename, size]) => fetch(`image/${imageId}`, { method: 'PATCH', body: JSON.stringify({ filename: filename, [dimension]: size }) }))
+        .then(response => {
+          if ((response.status >= 200) && (response.status < 300)) {
+            return response.headers.get('location')
+          }
+        })
+        .then(newImageId =>
+            refreshElementsForImage(imageId)
+                .then(() => newImageId)
+        )
+        .then(newImageId => [newImageId, getOrCreatePlaceholderElement(newImageId)])
+        .then(([newImageId, placeholderElement]) =>
+            refreshElementsForImage(newImageId)
+                .then(() => placeholderElement)
+        )
+        .then(placeholderElement => placeholderElement.querySelector('.filename input'))
+        .then(inputElement => {
+          inputElement.focus()
+          inputElement.select()
+        })
 
 const copyKeyToClipboard = (placeholderElement) =>
   navigator.clipboard.writeText(placeholderElement.querySelector('.key a').textContent)
@@ -166,8 +160,6 @@ const getOrCreatePlaceholderElement = (imageId) => {
   placeholderElement.querySelector('button.button-refresh').addEventListener('click', () => refreshElementsForImage(getImageIdFromElement()))
   placeholderElement.querySelector('.change-width button').addEventListener('click', () => changeDimension(placeholderElement, getImageIdFromElement(), '.change-width input', 'width'))
   placeholderElement.querySelector('.change-height button').addEventListener('click', () => changeDimension(placeholderElement, getImageIdFromElement(), '.change-height input', 'height'))
-  placeholderElement.querySelector('.filename input').addEventListener('change', () => setImageFilename(placeholderElement, getImageIdFromElement()))
-  placeholderElement.querySelector('.filename button').addEventListener('click', () => setImageFilename(placeholderElement, getImageIdFromElement()))
   placeholderElement.querySelector('button.button-start-png').addEventListener('click', () => startInsertAsType(getImageIdFromElement(), 'png'))
   placeholderElement.querySelector('button.button-start-jpeg').addEventListener('click', () => startInsertAsType(getImageIdFromElement(), 'jpeg'))
   placeholderElement.querySelector('button.button-remove').addEventListener('click', () =>

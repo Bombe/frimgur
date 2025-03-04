@@ -145,8 +145,13 @@ const changeDimension = (placeholderElement, imageId, inputSelector, dimension) 
 const copyKeyToClipboard = (placeholderElement) =>
   navigator.clipboard.writeText(placeholderElement.querySelector('.key a').textContent)
 
+const getFilename = imageId => Promise.resolve(getOrCreatePlaceholderElement(imageId))
+    .then(placeholderElement => placeholderElement.querySelector('.filename input'))
+    .then(inputField => inputField.value)
+
 const startInsertAsType = (imageId, type) =>
-    fetch(`image/${imageId}`, { method: 'PATCH', body: JSON.stringify({ status: 'Inserting', type: type }) })
+    getFilename(imageId)
+        .then(filename => fetch(`image/${imageId}`, { method: 'PATCH', body: JSON.stringify({ filename: filename, status: 'Inserting', type: type }) }))
         .then(() => refreshElementsForImage(imageId))
 
 const getOrCreatePlaceholderElement = (imageId) => {

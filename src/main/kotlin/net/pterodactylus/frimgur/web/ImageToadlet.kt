@@ -48,6 +48,10 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 			toadletContext.sendReplyHeaders(204, "No Content", null, null, 0)
 			return
 		}
+		if (changes.has("filename")) {
+			val filename = changes.get("filename").asText()
+			imageService.setImageFilename(imageId, filename)
+		}
 		if (changes.has("status")) {
 			val newStatus = try {
 				ImageStatus.valueOf(changes.get("status").asText())
@@ -56,12 +60,8 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 			}
 			if (newStatus == Inserting) {
 				val type = changes.get("type")?.asText()?.takeIf { it in setOf("jpeg") } ?: "png"
-				insertService.insertImage(imageId, imageService.getImageData(imageId)!!.data, "image/${type}", imageMetadata.filename)
+				insertService.insertImage(imageId, imageService.getImageData(imageId)!!.data, "image/${type}", imageService.getImageData(imageId)!!.metadata.filename)
 			}
-		}
-		if (changes.has("filename")) {
-			val filename = changes.get("filename").asText()
-			imageService.setImageFilename(imageId, filename)
 		}
 		if (changes.has("width") || changes.has("height")) {
 			val width = changes.get("width")?.asInt(-1)?.let { if (it <= 0) null else it }

@@ -183,6 +183,19 @@ class ImageToadletTest {
 	}
 
 	@Test
+	fun `PATCH request with status 'Inserting' and filename and without type starts image insert as PNG`() {
+		val imageData = ByteArray(5) { i -> i.toByte() }
+		val imageService = createImageServiceDeliveringImageAndStoringFilename("124", imageData)
+		data class Arguments(val id: String, val data: ByteArray, val mimeType: String, val filename: String)
+		val receivedArguments = mutableListOf<Arguments>()
+		val insertService = createInsertServiceThatRecordsArguments(::Arguments, receivedArguments::add)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\",\"filename\":\"file.name\"}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/124"), httpRequest, toadletContext)
+		assertThat(receivedArguments, contains(Arguments("124", imageData, "image/png", "file.name")))
+	}
+
+	@Test
 	fun `PATCH request with status 'Inserting' and with type 'png' starts image insert as PNG`() {
 		val imageData = ByteArray(5) { i -> i.toByte() }
 		val imageService = createImageServiceDeliveringImage("125", imageData)
@@ -211,6 +224,13 @@ class ImageToadletTest {
 	private fun createImageServiceDeliveringImage(imageId: String, data: ByteArray) = object : ImageService {
 		override fun getImage(id: String) = ImageMetadata(imageId, 12, 23, "image", Inserted).takeIf { id == imageId }
 		override fun getImageData(id: String) = if (id == imageId) ImageData(getImage(id)!!, data) else null
+	}
+
+	private fun createImageServiceDeliveringImageAndStoringFilename(imageId: String, data: ByteArray) = object : ImageService {
+		private var filename: String = "image"
+		override fun getImage(id: String) = ImageMetadata(imageId, 12, 23, filename, Inserted).takeIf { id == imageId }
+		override fun getImageData(id: String) = if (id == imageId) ImageData(getImage(id)!!, data) else null
+		override fun setImageFilename(id: String, filename: String) = if (id == imageId) this.filename = filename else {}
 	}
 
 	private fun <A> createInsertServiceThatRecordsArguments(argumentCreator: (id: String, data: ByteArray, mimeType: String, filename: String) -> A, argumentRecorder: (argument: A) -> Unit) = object : InsertService {

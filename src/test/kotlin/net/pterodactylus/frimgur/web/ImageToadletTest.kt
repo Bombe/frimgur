@@ -14,11 +14,13 @@ import kotlin.test.Test
 import net.pterodactylus.frimgur.image.ImageData
 import net.pterodactylus.frimgur.image.ImageMetadata
 import net.pterodactylus.frimgur.image.ImageService
+import net.pterodactylus.frimgur.image.ImageStatus
 import net.pterodactylus.frimgur.image.ImageStatus.Inserted
 import net.pterodactylus.frimgur.insert.InsertService
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.containsInRelativeOrder
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.greaterThanOrEqualTo
 import org.hamcrest.Matchers.lessThan
@@ -264,6 +266,15 @@ class ImageToadletTest {
 	}
 
 	@Test
+	fun `PATCH request with width and filename will set the filename before cloning`() {
+		val imageService = recordOrderOfCalls(createCloningImageServiceThatRecordsArguments(125) { _, _, _, _ -> })
+		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"width\":\"500\",\"filename\":\"file.name\"}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/125"), httpRequest, toadletContext)
+		assertThat(imageService.calledMethods, containsInRelativeOrder("setImageFilename", "cloneImage"))
+	}
+
+	@Test
 	fun `PATCH request with width will respond with a success response code and the location of the new image`() {
 		val imageService = createCloningImageServiceReturningImageMetadataWidthId(126)
 		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
@@ -281,6 +292,15 @@ class ImageToadletTest {
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"height\":\"500\"}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/127"), httpRequest, toadletContext)
 		assertThat(receivedArguments.single(), equalTo(Arguments("127", null, null, 500)))
+	}
+
+	@Test
+	fun `PATCH request with height and filename will set the filename before cloning`() {
+		val imageService = recordOrderOfCalls(createCloningImageServiceThatRecordsArguments(125) { _, _, _, _ -> })
+		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"height\":\"600\",\"filename\":\"file.name\"}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/125"), httpRequest, toadletContext)
+		assertThat(imageService.calledMethods, containsInRelativeOrder("setImageFilename", "cloneImage"))
 	}
 
 	@Test
@@ -304,6 +324,15 @@ class ImageToadletTest {
 	}
 
 	@Test
+	fun `PATCH request with width and height and filename will set the filename before cloning`() {
+		val imageService = recordOrderOfCalls(createCloningImageServiceThatRecordsArguments(125) { _, _, _, _ -> })
+		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"width\":\"400\",\"height\":\"600\",\"filename\":\"file.name\"}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/125"), httpRequest, toadletContext)
+		assertThat(imageService.calledMethods, containsInRelativeOrder("setImageFilename", "cloneImage"))
+	}
+
+	@Test
 	fun `PATCH request with width and height will respond with a success response code and the location of the new image`() {
 		val imageService = createCloningImageServiceReturningImageMetadataWidthId(130)
 		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
@@ -322,6 +351,19 @@ class ImageToadletTest {
 		override fun getImage(id: String) = ImageMetadata("$imageId", 12, 23, "image", Inserted).takeIf { id == "$imageId" }
 		override fun cloneImage(id: String, mimeType: String?, width: Int?, height: Int?) =
 			ImageMetadata("${imageId}-2", 1, 1).takeIf { id == "$imageId" }
+	}
+
+	private fun recordOrderOfCalls(imageService: ImageService) = object : ImageService {
+		val calledMethods = mutableListOf<String>()
+		override fun addImage(data: ByteArray): ImageMetadata? = imageService.addImage(data).also { calledMethods.add("addImage") }
+		override fun cloneImage(id: String, mimeType: String?, width: Int?, height: Int?) = imageService.cloneImage(id, mimeType, width, height).also { calledMethods.add("cloneImage") }
+		override fun getImage(id: String): ImageMetadata? = imageService.getImage(id).also { calledMethods.add("getImage") }
+		override fun getImageData(id: String): ImageData? = imageService.getImageData(id).also { calledMethods.add("getImageData") }
+		override fun setImageStatus(id: String, status: ImageStatus) = imageService.setImageStatus(id, status).also { calledMethods.add("setImageStatus") }
+		override fun setImageFilename(id: String, filename: String) = imageService.setImageFilename(id, filename).also { calledMethods.add("setImageFilename") }
+		override fun setImageKey(id: String, key: String) = imageService.setImageKey(id, key).also { calledMethods.add("setImageKey") }
+		override fun getImageIds(): List<String> = imageService.getImageIds().also { calledMethods.add("getImageIds") }
+		override fun removeImage(id: String) = imageService.removeImage(id).also { calledMethods.add("removeImage") }
 	}
 
 	@Test

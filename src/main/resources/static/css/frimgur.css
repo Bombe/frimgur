@@ -43,6 +43,18 @@
     display: inline;
 }
 
+.inserting-as {
+    display: none;
+}
+
+.inserting-as > * {
+    display: inline;
+}
+
+.image-status-inserting .inserting-as, .image-status-inserting .inserting-as .filename {
+    display: inherit;
+}
+
 .key button {
     display: none;
 }

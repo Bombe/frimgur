@@ -75,6 +75,16 @@
     display: inherit;
 }
 
+.button-remove {
+    background-color: red;
+    color: yellow;
+    font-weight: bold;
+}
+
+.button-remove:hover {
+    background-color: lch(from #ff0000 calc(l - 15) c h);
+}
+
 #image-template {
     display: none;
 }

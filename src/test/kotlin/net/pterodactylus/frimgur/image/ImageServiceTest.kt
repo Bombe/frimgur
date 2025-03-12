@@ -113,6 +113,13 @@ class ImageServiceTest {
 	}
 
 	@Test
+	fun `generated filename of image can be set`() {
+		val id = imageService.addImage(get1x1Png())!!.id
+		imageService.setImageInsertFilename(id, "image.sfx")
+		assertThat(imageService.getImage(id)!!.generatedImageMetadata.insertFilename, equalTo("image.sfx"))
+	}
+
+	@Test
 	fun `image service can return image data for valid ID`() {
 		val id1 = imageService.addImage(get1x1Png())!!.id
 		val imageData = imageService.getImageData(id1)!!

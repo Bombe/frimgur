@@ -37,7 +37,7 @@ const updatePlaceholderElement = (imageId, imageMetadata) => {
     const statusNode = document.createTextNode(`${imageMetadata.metadata.status}`)
     placeholderElement.querySelector('.filename input').value = imageMetadata.metadata.filename
     placeholderElement.querySelector('.status').replaceChildren(statusNode)
-    placeholderElement.querySelector('.inserting-as .filename').textContent = imageMetadata.metadata.filename
+    placeholderElement.querySelector('.inserting-as .filename').textContent = imageMetadata.metadata.insertFilename
     let linkToKey = placeholderElement.querySelector('.key a')
     linkToKey.setAttribute('href', `/${imageMetadata.metadata.key}`)
     linkToKey.textContent = imageMetadata.metadata.key ? imageMetadata.metadata.key : ''

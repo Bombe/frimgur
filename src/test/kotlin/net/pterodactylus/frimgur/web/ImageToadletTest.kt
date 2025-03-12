@@ -51,7 +51,7 @@ class ImageToadletTest {
 	@Test
 	fun `GET request with image ID returns data about that image`() {
 		val imageService = object : ImageService {
-			override fun getImage(id: String) = ImageMetadata("123", 12, 23, "image.tst", Inserted, GeneratedImageMetadata("CHK@Test")).takeIf { id == "123" }
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, "image.tst", Inserted, GeneratedImageMetadata("CHK@Test", "image.tst.jpg")).takeIf { id == "123" }
 		}
 		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
 		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)
@@ -69,13 +69,14 @@ class ImageToadletTest {
 							.where("status", jsonText("Inserted"))
 							.where("key", jsonText("CHK@Test"))
 							.where("filename", jsonText("image.tst"))
+							.where("insertFilename", jsonText("image.tst.jpg"))
 					)
 			)
 		)
 	}
 
 	@Test
-	fun `unset key in image metadata is rendered as JSON null`() {
+	fun `unset generated metadata in image metadata is rendered as JSON null`() {
 		val imageService = object : ImageService {
 			override fun getImage(id: String) = ImageMetadata("123", 12, 23, "image", Inserted).takeIf { id == "123" }
 		}
@@ -90,6 +91,7 @@ class ImageToadletTest {
 					.where(
 						"metadata", jsonObject()
 							.where("key", jsonNull())
+							.where("insertFilename", jsonNull())
 					)
 			)
 		)

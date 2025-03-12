@@ -80,6 +80,14 @@ interface ImageService {
 	fun setImageKey(id: String, key: String) = Unit
 
 	/**
+	 * Sets the filename used for inserting the image.
+	 *
+	 * @param id The ID of the image to set the filename of
+	 * @param filename The insert filename of the image
+	 */
+	fun setImageInsertFilename(id: String, filename: String) = Unit
+
+	/**
 	 * Returns the IDs of all images that are currently stored in this image service.
 	 * The returned list is sorted by time of [image addition][addImage], oldest
 	 * image ID first.
@@ -167,6 +175,12 @@ class DefaultImageService : ImageService {
 		}
 	}
 
+	override fun setImageInsertFilename(id: String, filename: String) {
+		imageData[id]?.let { oldImageData ->
+			imageData[id] = oldImageData.copy(metadata = oldImageData.metadata.copy(generatedImageMetadata = oldImageData.metadata.generatedImageMetadata.copy(insertFilename = filename)))
+		}
+	}
+
 	override fun getImageIds() = imageData
 		.map(Map.Entry<String, ImageData>::value)
 		.map(ImageData::metadata)
@@ -220,9 +234,12 @@ data class ImageMetadata(
 data class GeneratedImageMetadata(
 
 	/** The key of the image. */
-	val key: String? = null
+	val key: String? = null,
 
-)
+	/** The complete filename for the insert. */
+	val insertFilename: String? = null,
+
+	)
 
 /**
  * The current state of an image. Some of the states are mutually exclusive

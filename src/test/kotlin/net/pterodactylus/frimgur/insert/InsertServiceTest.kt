@@ -205,7 +205,7 @@ class InsertServiceTest {
 	}
 	private val insertStartedIds = mutableListOf<String>()
 	private val insertService = DefaultInsertService(highLevelSimpleClient).apply {
-		onInsertStarting(insertStartedIds::add)
+		onInsertStarting { id, _ -> insertStartedIds.add(id) }
 	}
 
 }

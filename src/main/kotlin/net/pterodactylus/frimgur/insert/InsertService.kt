@@ -37,11 +37,11 @@ interface InsertService {
 
 	/**
 	 * Adds a listener that will be notified when the insert of the image
-	 * with the given ID is started.
+	 * with the given ID is started, and what its filename is.
 	 *
 	 * @param listener Listener for image-insertion-started events
 	 */
-	fun onInsertStarting(listener: (id: String) -> Unit) = Unit
+	fun onInsertStarting(listener: (id: String, filename: String) -> Unit) = Unit
 
 	fun onInsertGeneratingUri(listener: (id: String, uri: String) -> Unit) = Unit
 
@@ -60,8 +60,9 @@ class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleCli
 		val encodedImage = encodeImage(data, mimeType)
 		val insertBlock = InsertBlock(encodedImage.toBucket(), ClientMetadata(mimeType), FreenetURI("CHK@"))
 		val insertContext = highLevelSimpleClient.getInsertContext(false)
-		insertStartingListeners.forEach { listener -> listener(id) }
-		highLevelSimpleClient.insert(insertBlock, filename.maybeAppendExtension(mimeType), false, insertContext, object : ClientPutCallback by getEmptyClientPutCallback(requestClient) {
+		val filenameWithExtension = filename.maybeAppendExtension(mimeType)
+		insertStartingListeners.forEach { listener -> listener(id, filenameWithExtension) }
+		highLevelSimpleClient.insert(insertBlock, filenameWithExtension, false, insertContext, object : ClientPutCallback by getEmptyClientPutCallback(requestClient) {
 			override fun onGeneratedURI(freenetURI: FreenetURI, p1: BaseClientPutter) {
 				insertGeneratingUriListeners.forEach { listener -> listener(id, freenetURI.toString()) }
 			}
@@ -98,7 +99,7 @@ class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleCli
 		else -> this
 	}
 
-	override fun onInsertStarting(listener: (id: String) -> Unit) {
+	override fun onInsertStarting(listener: (id: String, filename: String) -> Unit) {
 		insertStartingListeners += listener
 	}
 
@@ -114,7 +115,7 @@ class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleCli
 		insertFailedListeners += listener
 	}
 
-	private val insertStartingListeners = mutableListOf<(String) -> Unit>()
+	private val insertStartingListeners = mutableListOf<(String, String) -> Unit>()
 	private val insertGeneratingUriListeners = mutableListOf<(String, String) -> Unit>()
 	private val insertFinishedListeners = mutableListOf<(String) -> Unit>()
 	private val insertFailedListeners = mutableListOf<(String) -> Unit>()

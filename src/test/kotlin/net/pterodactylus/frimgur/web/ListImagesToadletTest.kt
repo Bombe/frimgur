@@ -10,6 +10,7 @@ import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.ToadletContext
 import java.net.URI
 import kotlin.test.Test
+import net.pterodactylus.frimgur.image.GeneratedImageMetadata
 import net.pterodactylus.frimgur.image.ImageMetadata
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus.Inserted
@@ -51,7 +52,7 @@ class ListImagesToadletTest {
 		val imageService = object : ImageService {
 			override fun getImage(id: String) = when (id) {
 				"id1" -> ImageMetadata("id1", 11, 12, "image1", Inserting)
-				"id2" -> ImageMetadata("id2", 21, 22, filename = "image2", status = Inserted, key = "CHK@Test")
+				"id2" -> ImageMetadata("id2", 21, 22, filename = "image2", status = Inserted, GeneratedImageMetadata("CHK@Test"))
 				else -> null
 			}
 

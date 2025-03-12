@@ -11,6 +11,7 @@ import freenet.support.api.HTTPRequest
 import freenet.support.io.ArrayBucket
 import java.net.URI
 import kotlin.test.Test
+import net.pterodactylus.frimgur.image.GeneratedImageMetadata
 import net.pterodactylus.frimgur.image.ImageData
 import net.pterodactylus.frimgur.image.ImageMetadata
 import net.pterodactylus.frimgur.image.ImageService
@@ -50,7 +51,7 @@ class ImageToadletTest {
 	@Test
 	fun `GET request with image ID returns data about that image`() {
 		val imageService = object : ImageService {
-			override fun getImage(id: String) = ImageMetadata("123", 12, 23, "image.tst", Inserted, "CHK@Test").takeIf { id == "123" }
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, "image.tst", Inserted, GeneratedImageMetadata("CHK@Test")).takeIf { id == "123" }
 		}
 		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
 		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)

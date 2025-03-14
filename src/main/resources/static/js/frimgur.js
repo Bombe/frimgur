@@ -7,7 +7,7 @@ const addClipboardListener = () => {
         file.arrayBuffer().then(arrayBuffer => {
           const imageBlob = new Blob([arrayBuffer], { type: file.type })
           let temporaryImageId = crypto.randomUUID()
-          showPlaceholder(temporaryImageId, {}, imageBlob)
+          getOrCreatePlaceholderElement(temporaryImageId)
           sendImageDataToServer(imageBlob)
               .then(response => {
                 const realImageId = response.headers.get('Location')
@@ -59,11 +59,10 @@ const refreshElementsForImage = (imageId) =>
       })
       .then(response => response.json())
       .then(imageMetadata => {
-        updatePlaceholderElement(imageId, imageMetadata)
-        fetchImageDataFromServer(imageId).then(imageBlob => {
-          showPlaceholder(imageId, imageMetadata, imageBlob)
-        })
+          updatePlaceholderElement(imageId, imageMetadata)
       })
+      .then(() => getOrCreatePlaceholderElement(imageId))
+      .then(placeholderElement => placeholderElement.querySelector('.image-container .image').src = `image-data/${imageId}`)
       .catch(() => removePlaceholderElement(imageId))
 
 const replacePlaceholderId = (oldId, newId) => {
@@ -73,39 +72,6 @@ const replacePlaceholderId = (oldId, newId) => {
 
 const updateImageStatusClassName = (element, newClassName) => {
   element.className = element.className.replaceAll(/\bimage-status-[^ ]*\b/g, "") + " " + ("image-status-" + newClassName.toLowerCase())
-}
-
-const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
-  const placeholderElement = getOrCreatePlaceholderElement(imageId)
-  if (imageMetadata.metadata != null) {
-    updatePlaceholderElement(imageId, imageMetadata)
-  }
-  const canvasElement = placeholderElement.querySelector('canvas')
-  const canvasWidth = 300
-  const canvasHeight = 150
-  canvasElement.style.width = `${canvasWidth}px`
-  canvasElement.style.height = `${canvasHeight}px`
-  drawImageToCanvas(imageBlob, canvasElement, canvasWidth, canvasHeight)
-}
-
-const drawImageToCanvas = (imageBlob, canvasElement, canvasWidth, canvasHeight) => {
-  const canvas = canvasElement.getContext('2d')
-  decodeImage(imageBlob).then(image => {
-    const pixelRatio = window.devicePixelRatio
-    canvasElement.width = Math.floor(canvasWidth * pixelRatio)
-    canvasElement.height = Math.floor(canvasHeight * pixelRatio)
-    canvas.scale(pixelRatio, pixelRatio)
-    const widthRatio = image.width / canvasWidth
-    const heightRatio = image.height / canvasHeight
-    const downscaleFactor = Math.max(widthRatio, heightRatio)
-    canvas.drawImage(image, (canvasWidth - (image.width / downscaleFactor)) / 2, (canvasHeight - (image.height / downscaleFactor)) / 2, image.width / downscaleFactor, image.height / downscaleFactor)
-  })
-}
-
-const decodeImage = (imageBlob) => {
-  const image = new Image()
-  image.src = URL.createObjectURL(imageBlob)
-  return image.decode().then(() => Promise.resolve(image))
 }
 
 const createImageElementId = (imageId) => `image-${imageId}`
@@ -155,6 +121,7 @@ const getOrCreatePlaceholderElement = (imageId) => {
   const placeholderElement = placeholderTemplateElement.cloneNode(true)
   placeholderElement.setAttribute('id', createImageElementId(imageId))
   const getImageIdFromElement = () => placeholderElement.getAttribute('id').replace(/^image-/, '')
+  placeholderElement.querySelector('.image-container .image').src = `image-data/${imageId}`
   placeholderElement.querySelector('button.button-refresh').addEventListener('click', () => refreshElementsForImage(getImageIdFromElement()))
   placeholderElement.querySelector('.change-width button').addEventListener('click', () => changeDimension(placeholderElement, getImageIdFromElement(), '.change-width input', 'width'))
   placeholderElement.querySelector('.change-height button').addEventListener('click', () => changeDimension(placeholderElement, getImageIdFromElement(), '.change-height input', 'height'))
@@ -176,23 +143,12 @@ const sendImageDataToServer = (imageBlob) => {
   return fetch('image/', { method: 'POST', body: formData })
 }
 
-const fetchImageDataFromServer = (imageId) =>
-  fetch(`image-data/${imageId}`)
-    .then(response => ({ data: response.arrayBuffer(), contentType: response.headers.get('Content-Type') }))
-    .then(({ data, contentType }) => data.then(arrayBuffer => ({ data: arrayBuffer, contentType })))
-    .then(({ data, contentType }) => new Blob([ data ], { type: contentType }))
-
 const populateWithExistingImages = () => {
   fetch('images/')
     .then(response => response.json())
     .then(response => {
       for (const imageMetadata of response) {
-        getOrCreatePlaceholderElement(imageMetadata.id)
-      }
-      for (const imageMetadata of response) {
-        fetchImageDataFromServer(imageMetadata.id).then(imageBlob => {
-          showPlaceholder(imageMetadata.id, imageMetadata, imageBlob)
-        })
+        updatePlaceholderElement(imageMetadata.id, imageMetadata)
       }
     })
 }

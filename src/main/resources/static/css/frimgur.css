@@ -14,17 +14,21 @@
 
 .image-placeholder {
     display: grid;
-    grid-template: 1fr / min-content auto;
+    grid-template: 1fr / minmax(auto, 25em) 1fr;
     margin-top: 1em;
     gap: 1em;
 }
 
-.image-placeholder .canvas-container {
+.image-placeholder .image-container {
     border: 1px solid #000;
+    overflow: auto;
+    resize: both;
 }
 
-.image-placeholder canvas {
-    display: block;
+.image-container .image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
 .image-status-inserting .image-overlay .button-remove {

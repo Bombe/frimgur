@@ -175,65 +175,68 @@ class ImageToadletTest {
 	}
 
 	@Test
-	fun `PATCH request with status 'Inserting' and without type starts image insert as PNG`() {
-		val imageData = ByteArray(5) { i -> i.toByte() }
-		val imageService = createImageServiceDeliveringImage("124", imageData)
-		data class Arguments(val id: String, val data: ByteArray, val mimeType: String, val filename: String)
-		val receivedArguments = mutableListOf<Arguments>()
-		val insertService = createInsertServiceThatRecordsArguments(::Arguments, receivedArguments::add)
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
-		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\"}".toByteArray()))
-		toadlet.handleMethodPATCH(URI("/path/124"), httpRequest, toadletContext)
-		assertThat(receivedArguments, contains(Arguments("124", imageData, "image/png", "image")))
+	fun `PATCH request with status 'Inserting' and without type and filename without suffix starts image insert as PNG`() {
+		handlePatchWithPreviouslySetFilename("134", "image", "image/png", "image.png")
 	}
 
 	@Test
-	fun `PATCH request with status 'Inserting' and filename and without type starts image insert as PNG`() {
-		val imageData = ByteArray(5) { i -> i.toByte() }
-		val imageService = createImageServiceDeliveringImageAndStoringFilename("124", imageData)
-		data class Arguments(val id: String, val data: ByteArray, val mimeType: String, val filename: String)
-		val receivedArguments = mutableListOf<Arguments>()
-		val insertService = createInsertServiceThatRecordsArguments(::Arguments, receivedArguments::add)
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
-		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\",\"filename\":\"file.name\"}".toByteArray()))
-		toadlet.handleMethodPATCH(URI("/path/124"), httpRequest, toadletContext)
-		assertThat(receivedArguments, contains(Arguments("124", imageData, "image/png", "file.name")))
+	fun `PATCH request with status 'Inserting' and filename without suffix starts image insert as PNG`() {
+		handlePatchWithExplicitFilename("130", "file.name", "image/png", "file.name.png")
 	}
 
 	@Test
-	fun `PATCH request with status 'Inserting' and with type 'png' starts image insert as PNG`() {
-		val imageData = ByteArray(5) { i -> i.toByte() }
-		val imageService = createImageServiceDeliveringImage("125", imageData)
-		data class Arguments(val id: String, val data: ByteArray, val mimeType: String, val filename: String)
-		val receivedArguments = mutableListOf<Arguments>()
-		val insertService = createInsertServiceThatRecordsArguments(::Arguments, receivedArguments::add)
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
-		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\",\"type\":\"png\"}".toByteArray()))
-		toadlet.handleMethodPATCH(URI("/path/125"), httpRequest, toadletContext)
-		assertThat(receivedArguments, contains(Arguments("125", imageData, "image/png", "image")))
+	fun `PATCH request with status 'Inserting' and previously-set filename with png suffix starts image insert as PNG`() {
+		handlePatchWithPreviouslySetFilename("133", "image.png", "image/png", "image.png")
 	}
 
 	@Test
-	fun `PATCH request with status 'Inserting' and with type 'jpeg' starts image insert as JPEG`() {
+	fun `PATCH request with status 'Inserting' and filename with png suffix starts image insert as PNG`() {
+		handlePatchWithExplicitFilename("129", "image.png", "image/png", "image.png")
+	}
+
+	@Test
+	fun `PATCH request with status 'Inserting' and previously-set filename with jpg suffix starts image insert as JPEG`() {
+		handlePatchWithPreviouslySetFilename("132", "image.jpg", "image/jpeg", "image.jpg")
+	}
+
+	@Test
+	fun `PATCH request with status 'Inserting' and filename with jpg suffix starts image insert as JPEG`() {
+		handlePatchWithExplicitFilename("128", "image.jpg", "image/jpeg", "image.jpg")
+	}
+
+	@Test
+	fun `PATCH request with status 'Inserting' and previously-set filename with jpeg suffix starts image insert as JPEG`() {
+		handlePatchWithPreviouslySetFilename("131", "image.jpeg", "image/jpeg", "image.jpeg")
+	}
+
+	@Test
+	fun `PATCH request with status 'Inserting' and filename with jpeg suffix starts image insert as JPEG`() {
+		handlePatchWithExplicitFilename("127", "image.jpeg", "image/jpeg", "image.jpeg")
+	}
+
+	private fun handlePatchWithPreviouslySetFilename(id: String, givenFilename: String, expectedMimeType: String, expectedFilename: String) {
+		handlePatchWithFilename(id, givenFilename, null, expectedMimeType, expectedFilename)
+	}
+
+	private fun handlePatchWithExplicitFilename(id: String, givenFilename: String, expectedMimeType: String, expectedFilename: String) {
+		handlePatchWithFilename(id, null, givenFilename, expectedMimeType, expectedFilename)
+	}
+
+	private fun handlePatchWithFilename(id: String, previouslySetFilename: String?, explicitFilename: String?, expectedMimeType: String, expectedFilename: String) {
 		val imageData = ByteArray(5) { i -> i.toByte() }
-		val imageService = createImageServiceDeliveringImage("126", imageData)
+		val imageService = createImageServiceDeliveringImageAndStoringFilename(id, imageData, previouslySetFilename ?: "image")
 		data class Arguments(val id: String, val data: ByteArray, val mimeType: String, val filename: String)
 		val receivedArguments = mutableListOf<Arguments>()
 		val insertService = createInsertServiceThatRecordsArguments(::Arguments, receivedArguments::add)
 		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
-		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\",\"type\":\"jpeg\"}".toByteArray()))
-		toadlet.handleMethodPATCH(URI("/path/126"), httpRequest, toadletContext)
-		assertThat(receivedArguments, contains(Arguments("126", imageData, "image/jpeg", "image")))
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\"${explicitFilename?.let { ",\"filename\":\"$it\"" } ?: ""}}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/$id"), httpRequest, toadletContext)
+		assertThat(receivedArguments, contains(Arguments(id, imageData, expectedMimeType, expectedFilename)))
 	}
 
-	private fun createImageServiceDeliveringImage(imageId: String, data: ByteArray) = object : ImageService {
-		override fun getImage(id: String) = ImageMetadata(imageId, 12, 23, "image", Inserted).takeIf { id == imageId }
-		override fun getImageData(id: String) = if (id == imageId) ImageData(getImage(id)!!, data) else null
-	}
-
-	private fun createImageServiceDeliveringImageAndStoringFilename(imageId: String, data: ByteArray) = object : ImageService {
-		private var filename: String = "image"
-		override fun getImage(id: String) = ImageMetadata(imageId, 12, 23, filename, Inserted).takeIf { id == imageId }
+	private fun createImageServiceDeliveringImageAndStoringFilename(imageId: String, data: ByteArray, filename: String = "image") = object : ImageService {
+		private var filename: String = filename
+		override fun getImage(id: String) = ImageMetadata(imageId, 12, 23, this.filename, Inserted).takeIf { id == imageId }
 		override fun getImageData(id: String) = if (id == imageId) ImageData(getImage(id)!!, data) else null
 		override fun setImageFilename(id: String, filename: String) = if (id == imageId) this.filename = filename else {}
 	}

@@ -67,18 +67,6 @@
     display: inline;
 }
 
-.start-insert > div {
-    display: inline;
-}
-
-.start-insert {
-    display: none;
-}
-
-.image-status-waiting .start-insert {
-    display: inherit;
-}
-
 .button-remove {
     background-color: red;
     color: yellow;

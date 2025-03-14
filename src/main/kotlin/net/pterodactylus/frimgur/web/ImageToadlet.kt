@@ -59,8 +59,8 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 				null
 			}
 			if (newStatus == Inserting) {
-				val type = changes.get("type")?.asText()?.takeIf { it in setOf("jpeg") } ?: "png"
-				insertService.insertImage(imageId, imageService.getImageData(imageId)!!.data, "image/${type}", imageService.getImageData(imageId)!!.metadata.filename)
+				val (type, filename) = detectTypeFromFilename(imageService.getImage(imageId)!!.filename)
+				insertService.insertImage(imageId, imageService.getImageData(imageId)!!.data, "image/${type}", filename)
 			}
 		}
 		if (changes.has("width") || changes.has("height")) {
@@ -84,3 +84,11 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 }
 
 private fun Int.millions() = this * 1_000_000
+
+private fun detectTypeFromFilename(filename: String) = when (filename.split(Regex("\\.")).last().lowercase()) {
+	"jpg", "jpeg" -> TypeAndFilename("jpeg", filename)
+	"png" -> TypeAndFilename("png", filename)
+	else -> TypeAndFilename("png", "$filename.png")
+}
+
+typealias TypeAndFilename = Pair<String, String>

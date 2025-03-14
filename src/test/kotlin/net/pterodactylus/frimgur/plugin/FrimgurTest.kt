@@ -149,7 +149,7 @@ class FrimgurTest {
 			val insertService: InsertService = injector.getInstance()
 			insertService.insertImage("id1", byteArrayOf(), "image/jpeg", "image")
 			assertThat(imageStatus, hasItem(equalTo("id1" to Inserting)))
-			assertThat(imageInsertFilename, hasItem(equalTo("id1" to "image.jpg")))
+			assertThat(imageInsertFilename, hasItem(equalTo("id1" to "image")))
 		}
 	}
 

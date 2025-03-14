@@ -107,9 +107,9 @@ const getFilename = imageId => Promise.resolve(getOrCreatePlaceholderElement(ima
     .then(placeholderElement => placeholderElement.querySelector('.filename input'))
     .then(inputField => inputField.value)
 
-const startInsertAsType = (imageId, type) =>
+const startInsert = imageId =>
     getFilename(imageId)
-        .then(filename => fetch(`image/${imageId}`, { method: 'PATCH', body: JSON.stringify({ filename: filename, status: 'Inserting', type: type }) }))
+        .then(filename => fetch(`image/${imageId}`, { method: 'PATCH', body: JSON.stringify({ filename: filename, status: 'Inserting' }) }))
         .then(() => refreshElementsForImage(imageId))
 
 const getOrCreatePlaceholderElement = (imageId) => {
@@ -125,8 +125,12 @@ const getOrCreatePlaceholderElement = (imageId) => {
   placeholderElement.querySelector('button.button-refresh').addEventListener('click', () => refreshElementsForImage(getImageIdFromElement()))
   placeholderElement.querySelector('.change-width button').addEventListener('click', () => changeDimension(placeholderElement, getImageIdFromElement(), '.change-width input', 'width'))
   placeholderElement.querySelector('.change-height button').addEventListener('click', () => changeDimension(placeholderElement, getImageIdFromElement(), '.change-height input', 'height'))
-  placeholderElement.querySelector('button.button-start-png').addEventListener('click', () => startInsertAsType(getImageIdFromElement(), 'png'))
-  placeholderElement.querySelector('button.button-start-jpeg').addEventListener('click', () => startInsertAsType(getImageIdFromElement(), 'jpeg'))
+  placeholderElement.querySelector('.filename input').addEventListener('keypress', keyDownEvent => {
+      if (keyDownEvent.code === 'Enter') {
+          return startInsert(getImageIdFromElement())
+      }
+  })
+  placeholderElement.querySelector('button.button-start').addEventListener('click', () => startInsert(getImageIdFromElement()))
   placeholderElement.querySelector('button.button-remove').addEventListener('click', () =>
     fetch(`image/${getImageIdFromElement()}`, { method: 'DELETE' })
         .then(() => placeholderElement.remove())

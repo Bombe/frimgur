@@ -136,7 +136,7 @@ const getOrCreatePlaceholderElement = (imageId) => {
         .then(() => placeholderElement.remove())
   )
   placeholderElement.querySelector('.key button').addEventListener('click', () => copyKeyToClipboard(placeholderElement))
-  document.getElementById('inserted-images').appendChild(placeholderElement)
+  document.getElementById('inserted-images').prepend(placeholderElement)
   return placeholderElement
 }
 

@@ -19,6 +19,7 @@ import net.pterodactylus.frimgur.web.DefaultWebInterface
 import net.pterodactylus.frimgur.web.FreenetToadletFactory
 import net.pterodactylus.frimgur.web.ImageDataToadlet
 import net.pterodactylus.frimgur.web.ImageToadlet
+import net.pterodactylus.frimgur.web.InsertOptionsToadlet
 import net.pterodactylus.frimgur.web.ListImagesToadlet
 import net.pterodactylus.frimgur.web.MainPageProcessor
 import net.pterodactylus.frimgur.web.RedirectToadlet
@@ -46,6 +47,7 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 		@Named("ImageData") imageDataToadlet: Toadlet,
 		@Named("Upload") uploadToadlet: Toadlet,
 		@Named("Redirect") redirectToadlet: Toadlet,
+		@Named("InsertOptions") insertOptionsToadlet: Toadlet,
 	): ToadletRegistry =
 		DefaultToadletRegistry(toadletContainer, menuCategoryKey, pluginL10n).apply {
 			addToadlet(ToadletSpec(staticJavascriptToadlet))
@@ -53,6 +55,7 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 			addToadlet(ToadletSpec(listImagesToadlet))
 			addToadlet(ToadletSpec(imageDataToadlet))
 			addToadlet(ToadletSpec(uploadToadlet))
+			addToadlet(ToadletSpec(insertOptionsToadlet))
 			addToadlet(ToadletSpec(mainToadlet, "Navigation.Main.Title", "Navigation.Main.Tooltip"))
 			addToadlet(ToadletSpec(redirectToadlet))
 		}
@@ -99,5 +102,10 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 	@Named("Upload")
 	fun getUploadToadlet(imageService: ImageService, insertService: InsertService, highLevelSimpleClient: HighLevelSimpleClient): Toadlet =
 		ImageToadlet(prefix + "image/", imageService, insertService, highLevelSimpleClient)
+
+	@Provides
+	@Named("InsertOptions")
+	fun getInsertOptionsToadlet(insertOptionService: InsertOptionService, highLevelSimpleClient: HighLevelSimpleClient): Toadlet =
+		InsertOptionsToadlet(prefix + "insert-options/", insertOptionService, highLevelSimpleClient)
 
 }

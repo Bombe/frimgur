@@ -54,11 +54,11 @@ interface InsertService {
 /**
  * Default [InsertService] implementation.
  */
-class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleClient) : InsertService {
+class DefaultInsertService(private val insertOptionService: InsertOptionService, private val highLevelSimpleClient: HighLevelSimpleClient) : InsertService {
 
 	override fun insertImage(id: String, data: ByteArray, mimeType: String, filename: String) {
 		val encodedImage = encodeImage(data, mimeType)
-		val insertBlock = InsertBlock(encodedImage.toBucket(), ClientMetadata(mimeType), FreenetURI("CHK@"))
+		val insertBlock = InsertBlock(encodedImage.toBucket(), ClientMetadata(mimeType), FreenetURI(insertOptionService.defaultInsertDestination))
 		val insertContext = highLevelSimpleClient.getInsertContext(false)
 		insertStartingListeners.forEach { listener -> listener(id, filename) }
 		highLevelSimpleClient.insert(insertBlock, filename, false, insertContext, object : ClientPutCallback by getEmptyClientPutCallback(requestClient) {

@@ -87,11 +87,12 @@ class InsertServiceTest {
 	}
 
 	@Test
-	fun `insert service sets correct target URI for insert`() {
+	fun `insert service gets target URI for insert from insert option service`() {
+		insertOptionService.defaultInsertDestination = "SSK@"
 		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "image")
 		val insertBlock = argumentCaptor<InsertBlock>()
 		verify(highLevelSimpleClient).insert(insertBlock.capture(), anyOrNull(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
-		assertThat(insertBlock.firstValue.desiredURI, equalTo(EMPTY_CHK_URI))
+		assertThat(insertBlock.firstValue.desiredURI, equalTo(FreenetURI("SSK@")))
 	}
 
 	@Test
@@ -164,7 +165,8 @@ class InsertServiceTest {
 		whenever(getInsertContext(anyBoolean())).thenReturn(insertContext)
 	}
 	private val insertStartedIds = mutableListOf<String>()
-	private val insertService = DefaultInsertService(highLevelSimpleClient).apply {
+	private val insertOptionService = DefaultInsertOptionService()
+	private val insertService = DefaultInsertService(insertOptionService, highLevelSimpleClient).apply {
 		onInsertStarting { id, _ -> insertStartedIds.add(id) }
 	}
 

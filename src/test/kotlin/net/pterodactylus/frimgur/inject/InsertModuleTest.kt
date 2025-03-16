@@ -3,6 +3,7 @@ package net.pterodactylus.frimgur.inject
 import com.google.inject.Guice.createInjector
 import freenet.client.HighLevelSimpleClient
 import kotlin.test.Test
+import net.pterodactylus.frimgur.insert.InsertOptionService
 import net.pterodactylus.frimgur.insert.InsertService
 import net.pterodactylus.frimgur.test.bind
 import net.pterodactylus.frimgur.util.getInstance
@@ -29,6 +30,18 @@ class InsertModuleTest {
 	fun `insert service is provided as singleton`() {
 		val firstInstance: InsertService = injector.getInstance()
 		val secondInstance: InsertService = injector.getInstance()
+		assertThat(secondInstance, sameInstance(firstInstance))
+	}
+
+	@Test
+	fun `guice module can create insert option service`() {
+		assertThat(injector.getInstance<InsertOptionService>(), notNullValue())
+	}
+
+	@Test
+	fun `insert option service is provided as singleton`() {
+		val firstInstance: InsertOptionService = injector.getInstance()
+		val secondInstance: InsertOptionService = injector.getInstance()
 		assertThat(secondInstance, sameInstance(firstInstance))
 	}
 

@@ -11,14 +11,17 @@ import freenet.support.api.HTTPRequest
 import freenet.support.io.ArrayBucket
 import java.net.URI
 import kotlin.test.Test
+import net.pterodactylus.frimgur.image.GeneratedImageMetadata
 import net.pterodactylus.frimgur.image.ImageData
 import net.pterodactylus.frimgur.image.ImageMetadata
 import net.pterodactylus.frimgur.image.ImageService
+import net.pterodactylus.frimgur.image.ImageStatus
 import net.pterodactylus.frimgur.image.ImageStatus.Inserted
 import net.pterodactylus.frimgur.insert.InsertService
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.containsInRelativeOrder
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.greaterThanOrEqualTo
 import org.hamcrest.Matchers.lessThan
@@ -48,7 +51,7 @@ class ImageToadletTest {
 	@Test
 	fun `GET request with image ID returns data about that image`() {
 		val imageService = object : ImageService {
-			override fun getImage(id: String) = ImageMetadata("123", 12, 23, "image.tst", Inserted, "CHK@Test").takeIf { id == "123" }
+			override fun getImage(id: String) = ImageMetadata("123", 12, 23, "image.tst", Inserted, GeneratedImageMetadata("CHK@Test", "image.tst.jpg")).takeIf { id == "123" }
 		}
 		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
 		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)
@@ -66,13 +69,14 @@ class ImageToadletTest {
 							.where("status", jsonText("Inserted"))
 							.where("key", jsonText("CHK@Test"))
 							.where("filename", jsonText("image.tst"))
+							.where("insertFilename", jsonText("image.tst.jpg"))
 					)
 			)
 		)
 	}
 
 	@Test
-	fun `unset key in image metadata is rendered as JSON null`() {
+	fun `unset generated metadata in image metadata is rendered as JSON null`() {
 		val imageService = object : ImageService {
 			override fun getImage(id: String) = ImageMetadata("123", 12, 23, "image", Inserted).takeIf { id == "123" }
 		}
@@ -87,6 +91,7 @@ class ImageToadletTest {
 					.where(
 						"metadata", jsonObject()
 							.where("key", jsonNull())
+							.where("insertFilename", jsonNull())
 					)
 			)
 		)
@@ -170,47 +175,70 @@ class ImageToadletTest {
 	}
 
 	@Test
-	fun `PATCH request with status 'Inserting' and without type starts image insert as PNG`() {
-		val imageData = ByteArray(5) { i -> i.toByte() }
-		val imageService = createImageServiceDeliveringImage("124", imageData)
-		data class Arguments(val id: String, val data: ByteArray, val mimeType: String, val filename: String)
-		val receivedArguments = mutableListOf<Arguments>()
-		val insertService = createInsertServiceThatRecordsArguments(::Arguments, receivedArguments::add)
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
-		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\"}".toByteArray()))
-		toadlet.handleMethodPATCH(URI("/path/124"), httpRequest, toadletContext)
-		assertThat(receivedArguments, contains(Arguments("124", imageData, "image/png", "image")))
+	fun `PATCH request with status 'Inserting' and without type and filename without suffix starts image insert as PNG`() {
+		handlePatchWithPreviouslySetFilename("134", "image", "image/png", "image.png")
 	}
 
 	@Test
-	fun `PATCH request with status 'Inserting' and with type 'png' starts image insert as PNG`() {
-		val imageData = ByteArray(5) { i -> i.toByte() }
-		val imageService = createImageServiceDeliveringImage("125", imageData)
-		data class Arguments(val id: String, val data: ByteArray, val mimeType: String, val filename: String)
-		val receivedArguments = mutableListOf<Arguments>()
-		val insertService = createInsertServiceThatRecordsArguments(::Arguments, receivedArguments::add)
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
-		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\",\"type\":\"png\"}".toByteArray()))
-		toadlet.handleMethodPATCH(URI("/path/125"), httpRequest, toadletContext)
-		assertThat(receivedArguments, contains(Arguments("125", imageData, "image/png", "image")))
+	fun `PATCH request with status 'Inserting' and filename without suffix starts image insert as PNG`() {
+		handlePatchWithExplicitFilename("130", "file.name", "image/png", "file.name.png")
 	}
 
 	@Test
-	fun `PATCH request with status 'Inserting' and with type 'jpeg' starts image insert as JPEG`() {
+	fun `PATCH request with status 'Inserting' and previously-set filename with png suffix starts image insert as PNG`() {
+		handlePatchWithPreviouslySetFilename("133", "image.png", "image/png", "image.png")
+	}
+
+	@Test
+	fun `PATCH request with status 'Inserting' and filename with png suffix starts image insert as PNG`() {
+		handlePatchWithExplicitFilename("129", "image.png", "image/png", "image.png")
+	}
+
+	@Test
+	fun `PATCH request with status 'Inserting' and previously-set filename with jpg suffix starts image insert as JPEG`() {
+		handlePatchWithPreviouslySetFilename("132", "image.jpg", "image/jpeg", "image.jpg")
+	}
+
+	@Test
+	fun `PATCH request with status 'Inserting' and filename with jpg suffix starts image insert as JPEG`() {
+		handlePatchWithExplicitFilename("128", "image.jpg", "image/jpeg", "image.jpg")
+	}
+
+	@Test
+	fun `PATCH request with status 'Inserting' and previously-set filename with jpeg suffix starts image insert as JPEG`() {
+		handlePatchWithPreviouslySetFilename("131", "image.jpeg", "image/jpeg", "image.jpeg")
+	}
+
+	@Test
+	fun `PATCH request with status 'Inserting' and filename with jpeg suffix starts image insert as JPEG`() {
+		handlePatchWithExplicitFilename("127", "image.jpeg", "image/jpeg", "image.jpeg")
+	}
+
+	private fun handlePatchWithPreviouslySetFilename(id: String, givenFilename: String, expectedMimeType: String, expectedFilename: String) {
+		handlePatchWithFilename(id, givenFilename, null, expectedMimeType, expectedFilename)
+	}
+
+	private fun handlePatchWithExplicitFilename(id: String, givenFilename: String, expectedMimeType: String, expectedFilename: String) {
+		handlePatchWithFilename(id, null, givenFilename, expectedMimeType, expectedFilename)
+	}
+
+	private fun handlePatchWithFilename(id: String, previouslySetFilename: String?, explicitFilename: String?, expectedMimeType: String, expectedFilename: String) {
 		val imageData = ByteArray(5) { i -> i.toByte() }
-		val imageService = createImageServiceDeliveringImage("126", imageData)
+		val imageService = createImageServiceDeliveringImageAndStoringFilename(id, imageData, previouslySetFilename ?: "image")
 		data class Arguments(val id: String, val data: ByteArray, val mimeType: String, val filename: String)
 		val receivedArguments = mutableListOf<Arguments>()
 		val insertService = createInsertServiceThatRecordsArguments(::Arguments, receivedArguments::add)
 		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
-		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\",\"type\":\"jpeg\"}".toByteArray()))
-		toadlet.handleMethodPATCH(URI("/path/126"), httpRequest, toadletContext)
-		assertThat(receivedArguments, contains(Arguments("126", imageData, "image/jpeg", "image")))
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\"${explicitFilename?.let { ",\"filename\":\"$it\"" } ?: ""}}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/$id"), httpRequest, toadletContext)
+		assertThat(receivedArguments, contains(Arguments(id, imageData, expectedMimeType, expectedFilename)))
 	}
 
-	private fun createImageServiceDeliveringImage(imageId: String, data: ByteArray) = object : ImageService {
-		override fun getImage(id: String) = ImageMetadata(imageId, 12, 23, "image", Inserted).takeIf { id == imageId }
+	private fun createImageServiceDeliveringImageAndStoringFilename(imageId: String, data: ByteArray, filename: String = "image") = object : ImageService {
+		private var filename: String = filename
+		override fun getImage(id: String) = ImageMetadata(imageId, 12, 23, this.filename, Inserted).takeIf { id == imageId }
 		override fun getImageData(id: String) = if (id == imageId) ImageData(getImage(id)!!, data) else null
+		override fun setImageFilename(id: String, filename: String) = if (id == imageId) this.filename = filename else {}
 	}
 
 	private fun <A> createInsertServiceThatRecordsArguments(argumentCreator: (id: String, data: ByteArray, mimeType: String, filename: String) -> A, argumentRecorder: (argument: A) -> Unit) = object : InsertService {
@@ -244,6 +272,15 @@ class ImageToadletTest {
 	}
 
 	@Test
+	fun `PATCH request with width and filename will set the filename before cloning`() {
+		val imageService = recordOrderOfCalls(createCloningImageServiceThatRecordsArguments(125) { _, _, _, _ -> })
+		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"width\":\"500\",\"filename\":\"file.name\"}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/125"), httpRequest, toadletContext)
+		assertThat(imageService.calledMethods, containsInRelativeOrder("setImageFilename", "cloneImage"))
+	}
+
+	@Test
 	fun `PATCH request with width will respond with a success response code and the location of the new image`() {
 		val imageService = createCloningImageServiceReturningImageMetadataWidthId(126)
 		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
@@ -261,6 +298,15 @@ class ImageToadletTest {
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"height\":\"500\"}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/127"), httpRequest, toadletContext)
 		assertThat(receivedArguments.single(), equalTo(Arguments("127", null, null, 500)))
+	}
+
+	@Test
+	fun `PATCH request with height and filename will set the filename before cloning`() {
+		val imageService = recordOrderOfCalls(createCloningImageServiceThatRecordsArguments(125) { _, _, _, _ -> })
+		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"height\":\"600\",\"filename\":\"file.name\"}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/125"), httpRequest, toadletContext)
+		assertThat(imageService.calledMethods, containsInRelativeOrder("setImageFilename", "cloneImage"))
 	}
 
 	@Test
@@ -284,6 +330,15 @@ class ImageToadletTest {
 	}
 
 	@Test
+	fun `PATCH request with width and height and filename will set the filename before cloning`() {
+		val imageService = recordOrderOfCalls(createCloningImageServiceThatRecordsArguments(125) { _, _, _, _ -> })
+		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"width\":\"400\",\"height\":\"600\",\"filename\":\"file.name\"}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/125"), httpRequest, toadletContext)
+		assertThat(imageService.calledMethods, containsInRelativeOrder("setImageFilename", "cloneImage"))
+	}
+
+	@Test
 	fun `PATCH request with width and height will respond with a success response code and the location of the new image`() {
 		val imageService = createCloningImageServiceReturningImageMetadataWidthId(130)
 		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
@@ -302,6 +357,19 @@ class ImageToadletTest {
 		override fun getImage(id: String) = ImageMetadata("$imageId", 12, 23, "image", Inserted).takeIf { id == "$imageId" }
 		override fun cloneImage(id: String, mimeType: String?, width: Int?, height: Int?) =
 			ImageMetadata("${imageId}-2", 1, 1).takeIf { id == "$imageId" }
+	}
+
+	private fun recordOrderOfCalls(imageService: ImageService) = object : ImageService {
+		val calledMethods = mutableListOf<String>()
+		override fun addImage(data: ByteArray): ImageMetadata? = imageService.addImage(data).also { calledMethods.add("addImage") }
+		override fun cloneImage(id: String, mimeType: String?, width: Int?, height: Int?) = imageService.cloneImage(id, mimeType, width, height).also { calledMethods.add("cloneImage") }
+		override fun getImage(id: String): ImageMetadata? = imageService.getImage(id).also { calledMethods.add("getImage") }
+		override fun getImageData(id: String): ImageData? = imageService.getImageData(id).also { calledMethods.add("getImageData") }
+		override fun setImageStatus(id: String, status: ImageStatus) = imageService.setImageStatus(id, status).also { calledMethods.add("setImageStatus") }
+		override fun setImageFilename(id: String, filename: String) = imageService.setImageFilename(id, filename).also { calledMethods.add("setImageFilename") }
+		override fun setImageKey(id: String, key: String) = imageService.setImageKey(id, key).also { calledMethods.add("setImageKey") }
+		override fun getImageIds(): List<String> = imageService.getImageIds().also { calledMethods.add("getImageIds") }
+		override fun removeImage(id: String) = imageService.removeImage(id).also { calledMethods.add("removeImage") }
 	}
 
 	@Test

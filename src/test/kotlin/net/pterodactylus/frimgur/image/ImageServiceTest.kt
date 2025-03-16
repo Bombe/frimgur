@@ -100,16 +100,23 @@ class ImageServiceTest {
 	}
 
 	@Test
-	fun `added image does not have a generated key`() {
+	fun `added image does not have generated metadata`() {
 		val id = imageService.addImage(get1x1Png())!!.id
-		assertThat(imageService.getImage(id)!!.key, nullValue())
+		assertThat(imageService.getImage(id)!!.generatedImageMetadata, equalTo(GeneratedImageMetadata()))
 	}
 
 	@Test
 	fun `image key can be set`() {
 		val id = imageService.addImage(get1x1Png())!!.id
 		imageService.setImageKey(id, "CHK@Test")
-		assertThat(imageService.getImage(id)!!.key, equalTo("CHK@Test"))
+		assertThat(imageService.getImage(id)!!.generatedImageMetadata.key, equalTo("CHK@Test"))
+	}
+
+	@Test
+	fun `generated filename of image can be set`() {
+		val id = imageService.addImage(get1x1Png())!!.id
+		imageService.setImageInsertFilename(id, "image.sfx")
+		assertThat(imageService.getImage(id)!!.generatedImageMetadata.insertFilename, equalTo("image.sfx"))
 	}
 
 	@Test
@@ -197,11 +204,11 @@ class ImageServiceTest {
 	}
 
 	@Test
-	fun `cloning an image with a key will remove the key`() {
+	fun `cloning an image with a key will remove all generated metadata`() {
 		val imageMetadata = imageService.addImage(get1x1Png())!!
 		imageService.setImageKey(imageMetadata.id, "some-key")
 		val clonedData = imageService.cloneImage(imageMetadata.id)!!
-		assertThat(clonedData.key, nullValue())
+		assertThat(clonedData.generatedImageMetadata, equalTo(GeneratedImageMetadata()))
 	}
 
 	@Test

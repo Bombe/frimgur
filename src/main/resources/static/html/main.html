@@ -1,5 +1,6 @@
 <div id='form-password'>{{ formPassword }}</div>
 <h2>Frimgur</h2>
+<p class='hidden alert not-secure-context'>{{ i18n('i18n.frimgur', 'Webpage.Main.WindowNotSecure') | raw }}</p>
 {% if nodeRequiresConfigChange %}
 <p class='alert node-requires-config-change'>{{ i18n('i18n.frimgur', 'Webpage.Main.NodeRequiresConfigurationChange') | raw }}</p>
 {% else %}
@@ -8,8 +9,8 @@
 <div id='inserted-images'>
 </div>
 <div id='image-template' class='image-placeholder'>
-    <div class='canvas-container'>
-        <canvas class='canvas'></canvas>
+    <div class='image-container'>
+        <img class='image'/>
     </div>
     <div class='image-overlay'>
         <button type='button' class='button-refresh'>🔄</button>
@@ -35,17 +36,18 @@
             <label>
                 {{ i18n('i18n.frimgur', 'Webpage.Main.Filename.NewFilename') }}
                 <input type='text' value=''/>
+                <button type='button' class='button-start'>{{ i18n('i18n.frimgur', 'Webpage.Main.Button.Insert.Label') }}</button>
             </label>
-            <button type='button'>{{ i18n('i18n.frimgur', 'Webpage.Main.Filename.Change') }}</button>
+        </div>
+        <div class='inserting-as'>
+            <div>
+                {{ i18n('i18n.frimgur', 'Webpage.Main.InsertingAs.Filename') }}
+                <span class='filename'></span>
+            </div>
         </div>
         <div class='key'>
             <a href=""></a>
             <button type='button'>{{ i18n('i18n.frimgur', 'Webpage.Main.Button.CopyToClipboard.Label') }}</button>
-        </div>
-        <div class='status'></div>
-        <div class='start-insert'>
-            <button type='button' class='button-start-png'>{{ i18n('i18n.frimgur', 'Webpage.Main.Button.InsertAsPng.Label') }}</button>
-            <button type='button' class='button-start-jpeg'>{{ i18n('i18n.frimgur', 'Webpage.Main.Button.InsertAsJpeg.Label') }}</button>
         </div>
         <button type='button' class='button-remove'>{{ i18n('i18n.frimgur', 'Webpage.Main.Button.Remove.Label') }}</button>
     </div>

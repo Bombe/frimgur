@@ -7,7 +7,7 @@ const addClipboardListener = () => {
         file.arrayBuffer().then(arrayBuffer => {
           const imageBlob = new Blob([arrayBuffer], { type: file.type })
           let temporaryImageId = crypto.randomUUID()
-          showPlaceholder(temporaryImageId, {}, imageBlob)
+          getOrCreatePlaceholderElement(temporaryImageId)
           sendImageDataToServer(imageBlob)
               .then(response => {
                 const realImageId = response.headers.get('Location')
@@ -34,13 +34,11 @@ const updatePlaceholderElement = (imageId, imageMetadata) => {
     updateImageStatusClassName(placeholderElement, imageMetadata.metadata.status)
     placeholderElement.querySelector('.change-width input').value = imageMetadata.metadata.width
     placeholderElement.querySelector('.change-height input').value = imageMetadata.metadata.height
-    const statusNode = document.createTextNode(`${imageMetadata.metadata.status}`)
     placeholderElement.querySelector('.filename input').value = imageMetadata.metadata.filename
-    placeholderElement.querySelector('.status').replaceChildren(statusNode)
-    const keyNode = document.createTextNode(imageMetadata.metadata.key ? imageMetadata.metadata.key : '')
+    placeholderElement.querySelector('.inserting-as .filename').textContent = imageMetadata.metadata.insertFilename
     let linkToKey = placeholderElement.querySelector('.key a')
     linkToKey.setAttribute('href', `/${imageMetadata.metadata.key}`)
-    linkToKey.replaceChildren(keyNode)
+    linkToKey.textContent = imageMetadata.metadata.key ? imageMetadata.metadata.key : ''
   }
 }
 
@@ -61,11 +59,10 @@ const refreshElementsForImage = (imageId) =>
       })
       .then(response => response.json())
       .then(imageMetadata => {
-        updatePlaceholderElement(imageId, imageMetadata)
-        fetchImageDataFromServer(imageId).then(imageBlob => {
-          showPlaceholder(imageId, imageMetadata, imageBlob)
-        })
+          updatePlaceholderElement(imageId, imageMetadata)
       })
+      .then(() => getOrCreatePlaceholderElement(imageId))
+      .then(placeholderElement => placeholderElement.querySelector('.image-container .image').src = `image-data/${imageId}`)
       .catch(() => removePlaceholderElement(imageId))
 
 const replacePlaceholderId = (oldId, newId) => {
@@ -77,76 +74,42 @@ const updateImageStatusClassName = (element, newClassName) => {
   element.className = element.className.replaceAll(/\bimage-status-[^ ]*\b/g, "") + " " + ("image-status-" + newClassName.toLowerCase())
 }
 
-const setImageFilename = (placeholderElement, imageId) => {
-  const inputField = placeholderElement.querySelector('.filename input')
-  return fetch(`image/${imageId}`, { method: 'PATCH', body: JSON.stringify({ filename: inputField.value }) })
-      .then(() => inputField.blur())
-}
-
-const showPlaceholder = (imageId, imageMetadata, imageBlob) => {
-  const placeholderElement = getOrCreatePlaceholderElement(imageId)
-  if (imageMetadata.metadata != null) {
-    updatePlaceholderElement(imageId, imageMetadata)
-  }
-  const canvasElement = placeholderElement.querySelector('canvas')
-  const canvasWidth = 300
-  const canvasHeight = 150
-  canvasElement.style.width = `${canvasWidth}px`
-  canvasElement.style.height = `${canvasHeight}px`
-  drawImageToCanvas(imageBlob, canvasElement, canvasWidth, canvasHeight)
-}
-
-const drawImageToCanvas = (imageBlob, canvasElement, canvasWidth, canvasHeight) => {
-  const canvas = canvasElement.getContext('2d')
-  decodeImage(imageBlob).then(image => {
-    const pixelRatio = window.devicePixelRatio
-    canvasElement.width = Math.floor(canvasWidth * pixelRatio)
-    canvasElement.height = Math.floor(canvasHeight * pixelRatio)
-    canvas.scale(pixelRatio, pixelRatio)
-    const widthRatio = image.width / canvasWidth
-    const heightRatio = image.height / canvasHeight
-    const downscaleFactor = Math.max(widthRatio, heightRatio)
-    canvas.drawImage(image, (canvasWidth - (image.width / downscaleFactor)) / 2, (canvasHeight - (image.height / downscaleFactor)) / 2, image.width / downscaleFactor, image.height / downscaleFactor)
-  })
-}
-
-const decodeImage = (imageBlob) => {
-  const image = new Image()
-  image.src = URL.createObjectURL(imageBlob)
-  return image.decode().then(() => Promise.resolve(image))
-}
-
 const createImageElementId = (imageId) => `image-${imageId}`
 
-const changeDimension = (placeholderElement, imageId, inputSelector, dimension) => {
-  const newValue = placeholderElement.querySelector(inputSelector).value
-  return fetch(`image/${imageId}`, { method: 'PATCH', body: JSON.stringify({ [dimension]: newValue }) })
-      .then(response => {
-        if ((response.status >= 200) && (response.status < 300)) {
-          return response.headers.get('location')
-        }
-      })
-      .then(newImageId =>
-          refreshElementsForImage(imageId)
-              .then(() => newImageId)
-      )
-      .then(newImageId => [newImageId, getOrCreatePlaceholderElement(newImageId)])
-      .then(([newImageId, placeholderElement]) =>
-          refreshElementsForImage(newImageId)
-              .then(() => placeholderElement)
-      )
-      .then(placeholderElement => placeholderElement.querySelector('.filename input'))
-      .then(inputElement => {
-        inputElement.focus()
-        inputElement.select()
-      })
-}
+const changeDimension = (placeholderElement, imageId, inputSelector, dimension) =>
+    getFilename(imageId)
+        .then(filename => [filename, placeholderElement.querySelector(inputSelector).value])
+        .then(([filename, size]) => fetch(`image/${imageId}`, { method: 'PATCH', body: JSON.stringify({ filename: filename, [dimension]: size }) }))
+        .then(response => {
+          if ((response.status >= 200) && (response.status < 300)) {
+            return response.headers.get('location')
+          }
+        })
+        .then(newImageId =>
+            refreshElementsForImage(imageId)
+                .then(() => newImageId)
+        )
+        .then(newImageId => [newImageId, getOrCreatePlaceholderElement(newImageId)])
+        .then(([newImageId, placeholderElement]) =>
+            refreshElementsForImage(newImageId)
+                .then(() => placeholderElement)
+        )
+        .then(placeholderElement => placeholderElement.querySelector('.filename input'))
+        .then(inputElement => {
+          inputElement.focus()
+          inputElement.select()
+        })
 
 const copyKeyToClipboard = (placeholderElement) =>
   navigator.clipboard.writeText(placeholderElement.querySelector('.key a').textContent)
 
-const startInsertAsType = (imageId, type) =>
-    fetch(`image/${imageId}`, { method: 'PATCH', body: JSON.stringify({ status: 'Inserting', type: type }) })
+const getFilename = imageId => Promise.resolve(getOrCreatePlaceholderElement(imageId))
+    .then(placeholderElement => placeholderElement.querySelector('.filename input'))
+    .then(inputField => inputField.value)
+
+const startInsert = imageId =>
+    getFilename(imageId)
+        .then(filename => fetch(`image/${imageId}`, { method: 'PATCH', body: JSON.stringify({ filename: filename, status: 'Inserting' }) }))
         .then(() => refreshElementsForImage(imageId))
 
 const getOrCreatePlaceholderElement = (imageId) => {
@@ -158,19 +121,22 @@ const getOrCreatePlaceholderElement = (imageId) => {
   const placeholderElement = placeholderTemplateElement.cloneNode(true)
   placeholderElement.setAttribute('id', createImageElementId(imageId))
   const getImageIdFromElement = () => placeholderElement.getAttribute('id').replace(/^image-/, '')
+  placeholderElement.querySelector('.image-container .image').src = `image-data/${imageId}`
   placeholderElement.querySelector('button.button-refresh').addEventListener('click', () => refreshElementsForImage(getImageIdFromElement()))
   placeholderElement.querySelector('.change-width button').addEventListener('click', () => changeDimension(placeholderElement, getImageIdFromElement(), '.change-width input', 'width'))
   placeholderElement.querySelector('.change-height button').addEventListener('click', () => changeDimension(placeholderElement, getImageIdFromElement(), '.change-height input', 'height'))
-  placeholderElement.querySelector('.filename input').addEventListener('change', () => setImageFilename(placeholderElement, getImageIdFromElement()))
-  placeholderElement.querySelector('.filename button').addEventListener('click', () => setImageFilename(placeholderElement, getImageIdFromElement()))
-  placeholderElement.querySelector('button.button-start-png').addEventListener('click', () => startInsertAsType(getImageIdFromElement(), 'png'))
-  placeholderElement.querySelector('button.button-start-jpeg').addEventListener('click', () => startInsertAsType(getImageIdFromElement(), 'jpeg'))
+  placeholderElement.querySelector('.filename input').addEventListener('keypress', keyDownEvent => {
+      if (keyDownEvent.code === 'Enter') {
+          return startInsert(getImageIdFromElement())
+      }
+  })
+  placeholderElement.querySelector('button.button-start').addEventListener('click', () => startInsert(getImageIdFromElement()))
   placeholderElement.querySelector('button.button-remove').addEventListener('click', () =>
     fetch(`image/${getImageIdFromElement()}`, { method: 'DELETE' })
         .then(() => placeholderElement.remove())
   )
   placeholderElement.querySelector('.key button').addEventListener('click', () => copyKeyToClipboard(placeholderElement))
-  document.getElementById('inserted-images').appendChild(placeholderElement)
+  document.getElementById('inserted-images').prepend(placeholderElement)
   return placeholderElement
 }
 
@@ -181,23 +147,12 @@ const sendImageDataToServer = (imageBlob) => {
   return fetch('image/', { method: 'POST', body: formData })
 }
 
-const fetchImageDataFromServer = (imageId) =>
-  fetch(`image-data/${imageId}`)
-    .then(response => ({ data: response.arrayBuffer(), contentType: response.headers.get('Content-Type') }))
-    .then(({ data, contentType }) => data.then(arrayBuffer => ({ data: arrayBuffer, contentType })))
-    .then(({ data, contentType }) => new Blob([ data ], { type: contentType }))
-
 const populateWithExistingImages = () => {
   fetch('images/')
     .then(response => response.json())
     .then(response => {
       for (const imageMetadata of response) {
-        getOrCreatePlaceholderElement(imageMetadata.id)
-      }
-      for (const imageMetadata of response) {
-        fetchImageDataFromServer(imageMetadata.id).then(imageBlob => {
-          showPlaceholder(imageMetadata.id, imageMetadata, imageBlob)
-        })
+        updatePlaceholderElement(imageMetadata.id, imageMetadata)
       }
     })
 }
@@ -210,6 +165,9 @@ const checkIfOnMacOsAndChangeShortcut = () => {
 }
 
 window.onload = () => {
+  if (!window.isSecureContext) {
+    document.querySelector('.not-secure-context').classList.remove('hidden')
+  }
   formPassword = document.getElementById('form-password').textContent
   checkIfOnMacOsAndChangeShortcut()
   populateWithExistingImages()

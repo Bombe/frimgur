@@ -80,6 +80,14 @@ interface ImageService {
 	fun setImageKey(id: String, key: String) = Unit
 
 	/**
+	 * Sets the filename used for inserting the image.
+	 *
+	 * @param id The ID of the image to set the filename of
+	 * @param filename The insert filename of the image
+	 */
+	fun setImageInsertFilename(id: String, filename: String) = Unit
+
+	/**
 	 * Returns the IDs of all images that are currently stored in this image service.
 	 * The returned list is sorted by time of [image addition][addImage], oldest
 	 * image ID first.
@@ -140,7 +148,7 @@ class DefaultImageService : ImageService {
 			ImageIO.write(renderedImage, "png", byteArrayOutputStream)
 			byteArrayOutputStream
 		}.toByteArray()
-		ImageData(it.metadata.copy(id = newId, status = Waiting, width = renderedImage.width, height = renderedImage.height, key = null), encodedImage).also { imageData[newId] = it }.metadata
+		ImageData(it.metadata.copy(id = newId, status = Waiting, width = renderedImage.width, height = renderedImage.height, generatedImageMetadata = GeneratedImageMetadata()), encodedImage).also { imageData[newId] = it }.metadata
 	}
 
 	override fun getImage(id: String): ImageMetadata? = imageData[id]?.metadata
@@ -163,7 +171,13 @@ class DefaultImageService : ImageService {
 
 	override fun setImageKey(id: String, key: String) {
 		imageData[id]?.let { oldImageData ->
-			imageData[id] = oldImageData.copy(metadata = oldImageData.metadata.copy(key = key))
+			imageData[id] = oldImageData.copy(metadata = oldImageData.metadata.copy(generatedImageMetadata = oldImageData.metadata.generatedImageMetadata.copy(key = key)))
+		}
+	}
+
+	override fun setImageInsertFilename(id: String, filename: String) {
+		imageData[id]?.let { oldImageData ->
+			imageData[id] = oldImageData.copy(metadata = oldImageData.metadata.copy(generatedImageMetadata = oldImageData.metadata.generatedImageMetadata.copy(insertFilename = filename)))
 		}
 	}
 
@@ -201,8 +215,8 @@ data class ImageMetadata(
 	/** The status of the image. */
 	val status: ImageStatus = Inserting,
 
-	/** The generated key of the image. */
-	val key: String? = null,
+	/** Generated image metadata, i.e. filename or keys. */
+	val generatedImageMetadata: GeneratedImageMetadata = GeneratedImageMetadata(),
 
 	) : Comparable<ImageMetadata> {
 
@@ -212,6 +226,20 @@ data class ImageMetadata(
 	private val insertTime: Long = System.currentTimeMillis()
 
 }
+
+/**
+ * Generated metadata of an image. This data is only created after the
+ * image, e.g. by the insert process or other processes.
+ */
+data class GeneratedImageMetadata(
+
+	/** The key of the image. */
+	val key: String? = null,
+
+	/** The complete filename for the insert. */
+	val insertFilename: String? = null,
+
+	)
 
 /**
  * The current state of an image. Some of the states are mutually exclusive

@@ -137,15 +137,19 @@ class FrimgurTest {
 	}
 
 	@Test
-	fun `image service is called to set status when insert starts`() {
+	fun `image service is called to set status and filename when insert starts`() {
 		val clientPutCallbacks = mutableListOf<ClientPutCallback>()
 		val highLevelSimpleClient = captureClientPutCallback { clientPutCallback -> clientPutCallbacks += clientPutCallback }
 		val imageStatus = mutableListOf<Pair<String, ImageStatus>>()
-		val imageService = captureImageStatus { id, status -> imageStatus += id to status }
+		val imageInsertFilename = mutableListOf<Pair<String, String>>()
+		val imageService = object : ImageService by (captureImageStatus { id, status -> imageStatus += id to status }) {
+			override fun setImageInsertFilename(id: String, filename: String) = imageInsertFilename.plusAssign(id to filename)
+		}
 		runPlugin(bind<HighLevelSimpleClient>().toInstance(highLevelSimpleClient), bind<ImageService>().toInstance(imageService)) { injector ->
 			val insertService: InsertService = injector.getInstance()
-			insertService.insertImage("id1", byteArrayOf(), "image/test", "image")
+			insertService.insertImage("id1", byteArrayOf(), "image/jpeg", "image")
 			assertThat(imageStatus, hasItem(equalTo("id1" to Inserting)))
+			assertThat(imageInsertFilename, hasItem(equalTo("id1" to "image")))
 		}
 	}
 

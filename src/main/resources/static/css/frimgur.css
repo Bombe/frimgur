@@ -12,6 +12,10 @@
     font-size: large;
 }
 
+#insert-options input[type=radio] {
+    margin: 0 0 0 1em;
+}
+
 .image-placeholder {
     display: grid;
     grid-template: 1fr / minmax(auto, 25em) 1fr;

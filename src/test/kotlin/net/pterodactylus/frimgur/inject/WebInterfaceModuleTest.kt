@@ -9,6 +9,7 @@ import java.util.Locale
 import java.util.Locale.ENGLISH
 import kotlin.test.Test
 import net.pterodactylus.frimgur.image.ImageService
+import net.pterodactylus.frimgur.insert.InsertOptionService
 import net.pterodactylus.frimgur.insert.InsertService
 import net.pterodactylus.frimgur.test.bind
 import net.pterodactylus.frimgur.web.FreenetToadletFactory
@@ -45,6 +46,7 @@ class WebInterfaceModuleTest {
 		bind<HighLevelSimpleClient>().toMock(),
 		bind<ImageService>().toMock(),
 		bind<InsertService>().toMock(),
+		bind<InsertOptionService>().toMock(),
 		bind<String>().toNamedInstance("FormPassword", "secret"),
 		bind<Locale>().toProvider { ENGLISH },
 		bind<Boolean>().toNamedProvider("NodeRequiresConfigChange") { false }

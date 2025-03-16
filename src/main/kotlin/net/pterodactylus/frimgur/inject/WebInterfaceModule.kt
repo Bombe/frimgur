@@ -11,6 +11,7 @@ import java.util.Locale
 import javax.inject.Named
 import javax.inject.Provider
 import net.pterodactylus.frimgur.image.ImageService
+import net.pterodactylus.frimgur.insert.InsertOptionService
 import net.pterodactylus.frimgur.insert.InsertService
 import net.pterodactylus.frimgur.web.ClasspathFileToadlet
 import net.pterodactylus.frimgur.web.DefaultToadletRegistry
@@ -62,8 +63,8 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 
 	@Provides
 	@Named("Main")
-	fun getMainToadlet(freenetToadletFactory: FreenetToadletFactory, @Named("FormPassword") formPassword: String, localeProvider: Provider<Locale>, @Named("NodeRequiresConfigChange") nodeRequiresConfigChange: Provider<Boolean>): Toadlet =
-		freenetToadletFactory.createFreenetToadlet(MainPageProcessor(formPassword, localeProvider::get, nodeRequiresConfigChange::get))
+	fun getMainToadlet(freenetToadletFactory: FreenetToadletFactory, insertOptionService: InsertOptionService, @Named("FormPassword") formPassword: String, localeProvider: Provider<Locale>, @Named("NodeRequiresConfigChange") nodeRequiresConfigChange: Provider<Boolean>): Toadlet =
+		freenetToadletFactory.createFreenetToadlet(MainPageProcessor(insertOptionService, formPassword, localeProvider::get, nodeRequiresConfigChange::get))
 
 	@Provides
 	@Named("StaticJavascript")

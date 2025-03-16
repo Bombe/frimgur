@@ -1,0 +1,62 @@
+package net.pterodactylus.frimgur.web
+
+import com.fasterxml.jackson.databind.JsonNode
+import com.spotify.hamcrest.jackson.JsonMatchers.isJsonStringMatching
+import com.spotify.hamcrest.jackson.JsonMatchers.jsonObject
+import com.spotify.hamcrest.jackson.JsonMatchers.jsonText
+import freenet.clients.http.ToadletContext
+import java.net.URI
+import kotlin.test.Test
+import net.pterodactylus.frimgur.insert.DefaultInsertOptionService
+import org.hamcrest.Matcher
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.equalTo
+import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyLong
+import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
+import org.mockito.kotlin.verify
+
+class InsertOptionsToadletTest {
+
+	@Test
+	fun `given path is returned`() {
+		assertThat(insertOptionsToadlet.path(), equalTo("/test/path"))
+	}
+
+	@Test
+	fun `GET request returns correct value if default destination is CHK`() {
+		insertOptionService.defaultInsertDestination = "CHK@"
+		verifyJsonResponse {
+			verifySingleAttribute("defaultDestination", jsonText("CHK@"))
+		}
+	}
+
+	@Test
+	fun `GET request returns correct value if default destination is SSK`() {
+		insertOptionService.defaultInsertDestination = "SSK@"
+		verifyJsonResponse {
+			verifySingleAttribute("defaultDestination", jsonText("SSK@"))
+		}
+	}
+
+	private fun verifyJsonResponse(verifier: String.() -> Unit) {
+		insertOptionsToadlet.handleMethodGET(URI(""), mock(), toadletContext)
+		verify(toadletContext).sendReplyHeaders(eq(200), any(), isNull(), eq("application/json"), anyLong(), anyBoolean())
+		val data = argumentCaptor<ByteArray>()
+		verify(toadletContext).writeData(data.capture(), anyInt(), anyInt())
+		verifier(data.firstValue.decodeToString())
+	}
+
+	private fun String.verifySingleAttribute(attribute: String, matcher: Matcher<in JsonNode>) =
+		assertThat(this, isJsonStringMatching(jsonObject().where(attribute, matcher)))
+
+	private val insertOptionService = DefaultInsertOptionService()
+	private val insertOptionsToadlet = InsertOptionsToadlet("/test/path", insertOptionService, mock())
+	private val toadletContext = mock<ToadletContext>()
+
+}

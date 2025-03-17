@@ -31,9 +31,10 @@ class InsertOptionsToadlet(private val path: String, private val insertOptionSer
 	override fun path() = path
 
 	private fun createInsertOptions() = InsertOptions(
-		insertOptionService.defaultInsertDestination
+		insertOptionService.defaultInsertDestination,
+		insertOptionService.defaultImageFormat,
 	)
 
-	private data class InsertOptions(val defaultDestination: String)
+	private data class InsertOptions(val defaultDestination: String, val defaultImageFormat: String)
 
 }

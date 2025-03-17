@@ -14,8 +14,11 @@ import net.pterodactylus.frimgur.image.get1x1Bmp
 import net.pterodactylus.frimgur.image.get1x1Jpeg
 import net.pterodactylus.frimgur.image.get1x1Png
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.endsWith
 import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.startsWith
 import org.mockito.AdditionalMatchers.or
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyShort
@@ -87,12 +90,21 @@ class InsertServiceTest {
 	}
 
 	@Test
-	fun `insert service gets target URI for insert from insert option service`() {
+	fun `insert service changes keys and filename hint correctly when destination is CHK@`() {
+		insertOptionService.defaultInsertDestination = "CHK@"
+		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "image")
+		val insertBlock = argumentCaptor<InsertBlock>()
+		verify(highLevelSimpleClient).insert(insertBlock.capture(), eq("image"), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
+		assertThat(insertBlock.firstValue.desiredURI.toString(), equalTo("CHK@"))
+	}
+
+	@Test
+	fun `insert service changes keys and filename hint correctly when destination is SSK@`() {
 		insertOptionService.defaultInsertDestination = "SSK@"
 		insertService.insertImage("id1", byteArrayOf(0, 1, 2, 3), "image/test", "image")
 		val insertBlock = argumentCaptor<InsertBlock>()
-		verify(highLevelSimpleClient).insert(insertBlock.capture(), anyOrNull(), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
-		assertThat(insertBlock.firstValue.desiredURI, equalTo(FreenetURI("SSK@")))
+		verify(highLevelSimpleClient).insert(insertBlock.capture(), eq(null), anyBoolean(), anyOrNull(), anyOrNull(), anyShort())
+		assertThat(insertBlock.firstValue.desiredURI.toString(), allOf(startsWith("SSK@"), endsWith(",AQECAAE/image")))
 	}
 
 	@Test

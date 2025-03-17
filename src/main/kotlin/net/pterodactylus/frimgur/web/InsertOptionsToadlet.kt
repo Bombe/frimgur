@@ -16,6 +16,7 @@ class InsertOptionsToadlet(private val path: String, private val insertOptionSer
 	override fun handleMethodGET(uri: URI, request: HTTPRequest, toadletContext: ToadletContext) =
 		writeReply(toadletContext, 200, "application/json", "OK", objectMapper.writeValueAsString(createInsertOptions()))
 
+	@Suppress("UNUSED_PARAMETER")
 	fun handleMethodPATCH(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
 		val changes = httpRequest.rawData.inputStream.use(objectMapper::readTree)
 		if (changes.has("defaultDestination")) {

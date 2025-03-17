@@ -20,6 +20,17 @@
             {{ i18n('i18n.frimgur', 'Webpage.Main.InsertOptions.DefaultDestination.SSK')}}
         </label>
     </div>
+    <div>
+        {{ i18n('i18n.frimgur', 'Webpage.Main.InsertOptions.DefaultImageFormat')}}
+        <label>
+            <input type='radio' name='default-image-format' value='insert-as-png'{% if insertOptions.insertAsPng %} checked{% endif %}>
+            {{ i18n('i18n.frimgur', 'Webpage.Main.InsertOptions.DefaultImageFormat.PNG')}}
+        </label>
+        <label>
+            <input type='radio' name='default-image-format' value='insert-as-jpeg'{% if insertOptions.insertAsJpeg %} checked{% endif %}>
+            {{ i18n('i18n.frimgur', 'Webpage.Main.InsertOptions.DefaultImageFormat.JPEG')}}
+        </label>
+    </div>
 </div>
 <div id='inserted-images'>
 </div>

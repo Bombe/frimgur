@@ -167,9 +167,15 @@ const checkIfOnMacOsAndChangeShortcut = () => {
 const setDefaultDestination = changeEvent =>
     fetch("insert-options/", { method: 'PATCH', body: JSON.stringify({ defaultDestination: (changeEvent.target.value === 'insert-to-ssk' ? "SSK@" : "CHK@") }) })
 
-const addListenersForDefaultInsertOptions = () =>
+const setDefaultImageFormat = changeEvent =>
+    fetch("insert-options/", { method: 'PATCH', body: JSON.stringify({ defaultImageFormat: (changeEvent.target.value === 'insert-as-jpeg' ? "jpeg" : "png") }) })
+
+const addListenersForDefaultInsertOptions = () => {
     document.querySelectorAll('#insert-options input[type="radio"][name="default-destination"]')
         .forEach(radioButton => radioButton.addEventListener('change', setDefaultDestination))
+    document.querySelectorAll('#insert-options input[type="radio"][name="default-image-format"]')
+        .forEach(radioButton => radioButton.addEventListener('change', setDefaultImageFormat))
+}
 
 window.onload = () => {
   if (!window.isSecureContext) {

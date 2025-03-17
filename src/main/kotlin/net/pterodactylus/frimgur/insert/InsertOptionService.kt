@@ -12,6 +12,11 @@ interface InsertOptionService {
 	 */
 	var defaultInsertDestination: String
 
+	/**
+	 * The default image format. Possible values are `"png"` and `"jpeg"`.
+	 */
+	var defaultImageFormat: String
+
 }
 
 open class DefaultInsertOptionService : InsertOptionService {
@@ -21,6 +26,13 @@ open class DefaultInsertOptionService : InsertOptionService {
 		get() = _defaultInsertDestination
 		set(value) {
 			_defaultInsertDestination = value
+		}
+
+	private var _defaultImageFormat: String = "png"
+	override var defaultImageFormat: String
+		get() = _defaultImageFormat
+		set(value) {
+			_defaultImageFormat = value
 		}
 
 }

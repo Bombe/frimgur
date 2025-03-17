@@ -22,15 +22,19 @@ class InsertOptionsToadlet(private val path: String, private val insertOptionSer
 		if (changes.has("defaultDestination")) {
 			insertOptionService.defaultInsertDestination = changes.get("defaultDestination").asText()
 		}
+		if (changes.has("defaultImageFormat")) {
+			insertOptionService.defaultImageFormat = changes.get("defaultImageFormat").asText()
+		}
 		toadletContext.sendReplyHeaders(200, "OK", null, null, 0)
 	}
 
 	override fun path() = path
 
 	private fun createInsertOptions() = InsertOptions(
-		insertOptionService.defaultInsertDestination
+		insertOptionService.defaultInsertDestination,
+		insertOptionService.defaultImageFormat,
 	)
 
-	private data class InsertOptions(val defaultDestination: String)
+	private data class InsertOptions(val defaultDestination: String, val defaultImageFormat: String)
 
 }

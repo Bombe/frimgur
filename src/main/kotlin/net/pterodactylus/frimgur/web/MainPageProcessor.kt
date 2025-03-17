@@ -18,8 +18,11 @@ class MainPageProcessor(private val insertOptionService: InsertOptionService, fo
 		"insertOptions" to createInsertOptions()
 	)
 
-	private fun createInsertOptions() = InsertOptions(insertOptionService.defaultInsertDestination == "CHK@", insertOptionService.defaultInsertDestination == "SSK@")
+	private fun createInsertOptions() = InsertOptions(
+		insertOptionService.defaultInsertDestination == "CHK@", insertOptionService.defaultInsertDestination == "SSK@",
+		insertOptionService.defaultImageFormat == "png", insertOptionService.defaultImageFormat == "jpeg",
+	)
 
 }
 
-private data class InsertOptions(val insertToChk: Boolean, val insertToSsk: Boolean)
+private data class InsertOptions(val insertToChk: Boolean, val insertToSsk: Boolean, val insertAsPng: Boolean, val insertAsJpeg: Boolean)

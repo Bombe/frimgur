@@ -54,6 +54,18 @@ class MainPageProcessorTest {
 		assertThat(mainPageProcessor.processPage(PageRequest()).content, containsString("value='insert-to-ssk' checked"))
 	}
 
+	@Test
+	fun `processor include insert options in context if default image format is PNG`() {
+		insertOptionService.defaultImageFormat = "png"
+		assertThat(mainPageProcessor.processPage(PageRequest()).content, containsString("value='insert-as-png' checked"))
+	}
+
+	@Test
+	fun `processor include insert options in context if default image format is JPEG`() {
+		insertOptionService.defaultImageFormat = "jpeg"
+		assertThat(mainPageProcessor.processPage(PageRequest()).content, containsString("value='insert-as-jpeg' checked"))
+	}
+
 	private var nodeRequiresConfigChange = false
 	private var insertOptionService = DefaultInsertOptionService()
 	private val mainPageProcessor = MainPageProcessor(insertOptionService, "", { ENGLISH }, { nodeRequiresConfigChange })

@@ -49,6 +49,22 @@ class InsertOptionsToadletTest {
 	}
 
 	@Test
+	fun `GET request returns correct value if default image format is PNG`() {
+		insertOptionService.defaultImageFormat = "png"
+		verifyJsonResponse {
+			verifySingleAttribute("defaultImageFormat", jsonText("png"))
+		}
+	}
+
+	@Test
+	fun `GET request returns correct value if default image format is JPEG`() {
+		insertOptionService.defaultImageFormat = "jpeg"
+		verifyJsonResponse {
+			verifySingleAttribute("defaultImageFormat", jsonText("jpeg"))
+		}
+	}
+
+	@Test
 	fun `PATCH request with empty object sends HTTP 200`() {
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{}".toByteArray()))
 		insertOptionsToadlet.handleMethodPATCH(URI(""), httpRequest, toadletContext)
@@ -67,6 +83,20 @@ class InsertOptionsToadletTest {
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"defaultDestination\":\"USK@\"}".toByteArray()))
 		insertOptionsToadlet.handleMethodPATCH(URI(""), httpRequest, toadletContext)
 		assertThat(insertOptionService.defaultInsertDestination, equalTo("USK@"))
+	}
+
+	@Test
+	fun `PATCH request with new default image format returns HTTP 200`() {
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"defaultImageFormat\":\"jpeg\"}".toByteArray()))
+		insertOptionsToadlet.handleMethodPATCH(URI(""), httpRequest, toadletContext)
+		verify(toadletContext).sendReplyHeaders(eq(200), anyOrNull(), anyOrNull(), anyOrNull(), anyLong())
+	}
+
+	@Test
+	fun `PATCH request with new default image format sets value on insert option service`() {
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"defaultImageFormat\":\"jpeg\"}".toByteArray()))
+		insertOptionsToadlet.handleMethodPATCH(URI(""), httpRequest, toadletContext)
+		assertThat(insertOptionService.defaultImageFormat, equalTo("jpeg"))
 	}
 
 	private fun verifyJsonResponse(verifier: String.() -> Unit) {

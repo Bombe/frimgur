@@ -100,8 +100,8 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 
 	@Provides
 	@Named("Upload")
-	fun getUploadToadlet(imageService: ImageService, insertService: InsertService, highLevelSimpleClient: HighLevelSimpleClient): Toadlet =
-		ImageToadlet(prefix + "image/", imageService, insertService, highLevelSimpleClient)
+	fun getUploadToadlet(imageService: ImageService, insertService: InsertService, insertOptionService: InsertOptionService, highLevelSimpleClient: HighLevelSimpleClient): Toadlet =
+		ImageToadlet(prefix + "image/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 
 	@Provides
 	@Named("InsertOptions")

@@ -17,6 +17,8 @@ import net.pterodactylus.frimgur.image.ImageMetadata
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus
 import net.pterodactylus.frimgur.image.ImageStatus.Inserted
+import net.pterodactylus.frimgur.insert.DefaultInsertOptionService
+import net.pterodactylus.frimgur.insert.InsertOptionService
 import net.pterodactylus.frimgur.insert.InsertService
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.allOf
@@ -53,7 +55,7 @@ class ImageToadletTest {
 		val imageService = object : ImageService {
 			override fun getImage(id: String) = ImageMetadata("123", 12, 23, "image.tst", Inserted, GeneratedImageMetadata("CHK@Test", "image.tst.jpg")).takeIf { id == "123" }
 		}
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(200), any(), isNull(), any(), anyLong(), anyBoolean())
 		val body = argumentCaptor<ByteArray>()
@@ -80,7 +82,7 @@ class ImageToadletTest {
 		val imageService = object : ImageService {
 			override fun getImage(id: String) = ImageMetadata("123", 12, 23, "image", Inserted).takeIf { id == "123" }
 		}
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(200), any(), isNull(), any(), anyLong(), anyBoolean())
 		val body = argumentCaptor<ByteArray>()
@@ -102,7 +104,7 @@ class ImageToadletTest {
 		val imageService = object : ImageService {
 			override fun getImage(id: String) = ImageMetadata("123", 12, 23).takeIf { id == "123" }
 		}
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		toadlet.handleMethodGET(URI("/path/123"), httpRequest, toadletContext)
 		verify(toadletContext).sendReplyHeaders(any(), any(), isNull(), eq("application/json"), anyLong(), anyBoolean())
 	}
@@ -156,7 +158,7 @@ class ImageToadletTest {
 		val imageService = object : ImageService {
 			override fun getImage(id: String) = ImageMetadata("123", 12, 23, "image", Inserted).takeIf { id == "123" }
 		}
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/123"), httpRequest, toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(204), any(), isNull(), isNull(), anyLong())
@@ -168,15 +170,22 @@ class ImageToadletTest {
 			override fun getImage(id: String) = ImageMetadata("123", 12, 23, "image", Inserted).takeIf { id == "123" }
 			override fun getImageData(id: String) = if (id == "123") ImageData(getImage(id)!!, ByteArray(5) { i -> i.toByte() }) else null
 		}
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\"}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/123"), httpRequest, toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(200), any(), isNull(), isNull(), anyLong())
 	}
 
 	@Test
-	fun `PATCH request with status 'Inserting' and without type and filename without suffix starts image insert as PNG`() {
+	fun `PATCH request with status 'Inserting' and without type and filename without suffix starts image insert as PNG if default image format is PNG`() {
+		insertOptionService.defaultImageFormat = "png"
 		handlePatchWithPreviouslySetFilename("134", "image", "image/png", "image.png")
+	}
+
+	@Test
+	fun `PATCH request with status 'Inserting' and without type and filename without suffix starts image insert as JPEG if default image format is JPEG`() {
+		insertOptionService.defaultImageFormat = "jpeg"
+		handlePatchWithPreviouslySetFilename("134", "image", "image/jpeg", "image.jpg")
 	}
 
 	@Test
@@ -228,7 +237,7 @@ class ImageToadletTest {
 		data class Arguments(val id: String, val data: ByteArray, val mimeType: String, val filename: String)
 		val receivedArguments = mutableListOf<Arguments>()
 		val insertService = createInsertServiceThatRecordsArguments(::Arguments, receivedArguments::add)
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"status\":\"Inserting\"${explicitFilename?.let { ",\"filename\":\"$it\"" } ?: ""}}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/$id"), httpRequest, toadletContext)
 		assertThat(receivedArguments, contains(Arguments(id, imageData, expectedMimeType, expectedFilename)))
@@ -254,7 +263,7 @@ class ImageToadletTest {
 			override fun getImage(id: String) = ImageMetadata("123", 12, 23, "image", Inserted).takeIf { id == "123" }
 			override fun setImageFilename(id: String, filename: String) = imageFilenames.add(Arguments(id, filename)).let { }
 		}
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"filename\":\"new-filename.png\"}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/123"), httpRequest, toadletContext)
 		assertThat(imageFilenames.single(), equalTo(Arguments("123", "new-filename.png")))
@@ -265,7 +274,7 @@ class ImageToadletTest {
 		data class Arguments(val id: String, val mimeType: String?, val width: Int?, val height: Int?)
 		val receivedArguments = mutableListOf<Arguments>()
 		val imageService = createCloningImageServiceThatRecordsArguments(125) { id, mimeType, width, height -> receivedArguments.add(Arguments(id, mimeType, width, height)) }
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"width\":\"500\"}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/125"), httpRequest, toadletContext)
 		assertThat(receivedArguments.single(), equalTo(Arguments("125", null, 500, null)))
@@ -274,7 +283,7 @@ class ImageToadletTest {
 	@Test
 	fun `PATCH request with width and filename will set the filename before cloning`() {
 		val imageService = recordOrderOfCalls(createCloningImageServiceThatRecordsArguments(125) { _, _, _, _ -> })
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"width\":\"500\",\"filename\":\"file.name\"}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/125"), httpRequest, toadletContext)
 		assertThat(imageService.calledMethods, containsInRelativeOrder("setImageFilename", "cloneImage"))
@@ -283,7 +292,7 @@ class ImageToadletTest {
 	@Test
 	fun `PATCH request with width will respond with a success response code and the location of the new image`() {
 		val imageService = createCloningImageServiceReturningImageMetadataWidthId(126)
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"width\":\"500\"}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/126"), httpRequest, toadletContext)
 		verify(toadletContext).sendReplyHeaders(intThat(allOf(greaterThanOrEqualTo(200), lessThan(300))), any(), argThat(containsHeader("location", "126-2")), isNull(), anyLong())
@@ -294,7 +303,7 @@ class ImageToadletTest {
 		data class Arguments(val id: String, val mimeType: String?, val width: Int?, val height: Int?)
 		val receivedArguments = mutableListOf<Arguments>()
 		val imageService = createCloningImageServiceThatRecordsArguments(127) { id, mimeType, width, height -> receivedArguments.add(Arguments(id, mimeType, width, height)) }
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"height\":\"500\"}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/127"), httpRequest, toadletContext)
 		assertThat(receivedArguments.single(), equalTo(Arguments("127", null, null, 500)))
@@ -303,7 +312,7 @@ class ImageToadletTest {
 	@Test
 	fun `PATCH request with height and filename will set the filename before cloning`() {
 		val imageService = recordOrderOfCalls(createCloningImageServiceThatRecordsArguments(125) { _, _, _, _ -> })
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"height\":\"600\",\"filename\":\"file.name\"}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/125"), httpRequest, toadletContext)
 		assertThat(imageService.calledMethods, containsInRelativeOrder("setImageFilename", "cloneImage"))
@@ -312,7 +321,7 @@ class ImageToadletTest {
 	@Test
 	fun `PATCH request with height will respond with a success response code and the location of the new image`() {
 		val imageService = createCloningImageServiceReturningImageMetadataWidthId(128)
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"height\":\"500\"}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/128"), httpRequest, toadletContext)
 		verify(toadletContext).sendReplyHeaders(intThat(allOf(greaterThanOrEqualTo(200), lessThan(300))), any(), argThat(containsHeader("location", "128-2")), isNull(), anyLong())
@@ -323,7 +332,7 @@ class ImageToadletTest {
 		data class Arguments(val id: String, val mimeType: String?, val width: Int?, val height: Int?)
 		val receivedArguments = mutableListOf<Arguments>()
 		val imageService = createCloningImageServiceThatRecordsArguments(129) { id, mimeType, width, height -> receivedArguments.add(Arguments(id, mimeType, width, height)) }
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"width\":\"400\",\"height\":\"600\"}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/129"), httpRequest, toadletContext)
 		assertThat(receivedArguments.single(), equalTo(Arguments("129", null, 400, 600)))
@@ -332,7 +341,7 @@ class ImageToadletTest {
 	@Test
 	fun `PATCH request with width and height and filename will set the filename before cloning`() {
 		val imageService = recordOrderOfCalls(createCloningImageServiceThatRecordsArguments(125) { _, _, _, _ -> })
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"width\":\"400\",\"height\":\"600\",\"filename\":\"file.name\"}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/125"), httpRequest, toadletContext)
 		assertThat(imageService.calledMethods, containsInRelativeOrder("setImageFilename", "cloneImage"))
@@ -341,7 +350,7 @@ class ImageToadletTest {
 	@Test
 	fun `PATCH request with width and height will respond with a success response code and the location of the new image`() {
 		val imageService = createCloningImageServiceReturningImageMetadataWidthId(130)
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"width\":\"400\",\"height\":\"600\"}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/130"), httpRequest, toadletContext)
 		verify(toadletContext).sendReplyHeaders(intThat(allOf(greaterThanOrEqualTo(200), lessThan(300))), any(), argThat(containsHeader("location", "130-2")), isNull(), anyLong())
@@ -378,7 +387,7 @@ class ImageToadletTest {
 		val imageService = object : ImageService {
 			override fun removeImage(id: String) = removedImages.add(id).let {}
 		}
-		val toadlet = ImageToadlet("/path/", imageService, insertService, highLevelSimpleClient)
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
 		toadlet.handleMethodDELETE(URI("/path/124"), httpRequest, toadletContext)
 		assertThat(removedImages.single(), equalTo("124"))
 	}
@@ -397,7 +406,8 @@ class ImageToadletTest {
 				.takeIf { data.contentEquals(byteArrayOf(0, 1, 2, 3)) }
 	}
 	private val insertService = object : InsertService {}
+	private val insertOptionService = DefaultInsertOptionService()
 	private val highLevelSimpleClient = mock<HighLevelSimpleClient>()
-	private val toadlet = ImageToadlet("/test/upload", imageService, insertService, highLevelSimpleClient)
+	private val toadlet = ImageToadlet("/test/upload", imageService, insertService, insertOptionService, highLevelSimpleClient)
 
 }

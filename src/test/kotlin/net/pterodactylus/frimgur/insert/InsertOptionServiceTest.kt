@@ -17,6 +17,17 @@ class InsertOptionServiceTest {
 		assertThat(insertOptionService.defaultInsertDestination, equalTo("SSK@"))
 	}
 
+	@Test
+	fun `default image format is PNG`() {
+		assertThat(insertOptionService.defaultImageFormat, equalTo("png"))
+	}
+
+	@Test
+	fun `default image format can be changed`() {
+		insertOptionService.defaultImageFormat = "jpeg"
+		assertThat(insertOptionService.defaultImageFormat, equalTo("jpeg"))
+	}
+
 	private val insertOptionService = DefaultInsertOptionService()
 
 }

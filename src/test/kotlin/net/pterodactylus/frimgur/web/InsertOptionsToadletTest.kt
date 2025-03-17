@@ -5,6 +5,8 @@ import com.spotify.hamcrest.jackson.JsonMatchers.isJsonStringMatching
 import com.spotify.hamcrest.jackson.JsonMatchers.jsonObject
 import com.spotify.hamcrest.jackson.JsonMatchers.jsonText
 import freenet.clients.http.ToadletContext
+import freenet.support.api.HTTPRequest
+import freenet.support.io.ArrayBucket
 import java.net.URI
 import kotlin.test.Test
 import net.pterodactylus.frimgur.insert.DefaultInsertOptionService
@@ -16,10 +18,12 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 class InsertOptionsToadletTest {
 
@@ -44,6 +48,27 @@ class InsertOptionsToadletTest {
 		}
 	}
 
+	@Test
+	fun `PATCH request with empty object sends HTTP 200`() {
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{}".toByteArray()))
+		insertOptionsToadlet.handleMethodPATCH(URI(""), httpRequest, toadletContext)
+		verify(toadletContext).sendReplyHeaders(eq(200), anyOrNull(), anyOrNull(), anyOrNull(), anyLong())
+	}
+
+	@Test
+	fun `PATCH request with new default destination returns HTTP 200`() {
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"defaultDestination\":\"USK@\"}".toByteArray()))
+		insertOptionsToadlet.handleMethodPATCH(URI(""), httpRequest, toadletContext)
+		verify(toadletContext).sendReplyHeaders(eq(200), anyOrNull(), anyOrNull(), anyOrNull(), anyLong())
+	}
+
+	@Test
+	fun `PATCH request with new default destination sets value on insert option service`() {
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"defaultDestination\":\"USK@\"}".toByteArray()))
+		insertOptionsToadlet.handleMethodPATCH(URI(""), httpRequest, toadletContext)
+		assertThat(insertOptionService.defaultInsertDestination, equalTo("USK@"))
+	}
+
 	private fun verifyJsonResponse(verifier: String.() -> Unit) {
 		insertOptionsToadlet.handleMethodGET(URI(""), mock(), toadletContext)
 		verify(toadletContext).sendReplyHeaders(eq(200), any(), isNull(), eq("application/json"), anyLong(), anyBoolean())
@@ -58,5 +83,6 @@ class InsertOptionsToadletTest {
 	private val insertOptionService = DefaultInsertOptionService()
 	private val insertOptionsToadlet = InsertOptionsToadlet("/test/path", insertOptionService, mock())
 	private val toadletContext = mock<ToadletContext>()
+	private val httpRequest = mock<HTTPRequest>()
 
 }

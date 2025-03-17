@@ -6,11 +6,8 @@ import org.hamcrest.Matchers.equalTo
 
 class InsertOptionServiceTest {
 
-	private val insertOptionService = DefaultInsertOptionService()
-
 	@Test
 	fun `default insert destination is CHK@`() {
-		val insertOptionService = insertOptionService
 		assertThat(insertOptionService.defaultInsertDestination, equalTo("CHK@"))
 	}
 
@@ -19,5 +16,7 @@ class InsertOptionServiceTest {
 		insertOptionService.defaultInsertDestination = "SSK@"
 		assertThat(insertOptionService.defaultInsertDestination, equalTo("SSK@"))
 	}
+
+	private val insertOptionService = DefaultInsertOptionService()
 
 }

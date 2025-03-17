@@ -2,6 +2,7 @@ package net.pterodactylus.frimgur.web
 
 import java.util.Locale.ENGLISH
 import kotlin.test.Test
+import net.pterodactylus.frimgur.insert.DefaultInsertOptionService
 import net.pterodactylus.frimgur.web.annotations.toadletName
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
@@ -41,7 +42,20 @@ class MainPageProcessorTest {
 		assertThat(mainPageProcessor.processPage(PageRequest()).content, containsString("node-requires-config-change"))
 	}
 
+	@Test
+	fun `processor include insert options in context if default destination is CHK@`() {
+		insertOptionService.defaultInsertDestination = "CHK@"
+		assertThat(mainPageProcessor.processPage(PageRequest()).content, containsString("value='insert-to-chk' checked"))
+	}
+
+	@Test
+	fun `processor include insert options in context if default destination is SSK@`() {
+		insertOptionService.defaultInsertDestination = "SSK@"
+		assertThat(mainPageProcessor.processPage(PageRequest()).content, containsString("value='insert-to-ssk' checked"))
+	}
+
 	private var nodeRequiresConfigChange = false
-	private val mainPageProcessor = MainPageProcessor("", { ENGLISH }, { nodeRequiresConfigChange })
+	private var insertOptionService = DefaultInsertOptionService()
+	private val mainPageProcessor = MainPageProcessor(insertOptionService, "", { ENGLISH }, { nodeRequiresConfigChange })
 
 }

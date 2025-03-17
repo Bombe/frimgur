@@ -6,6 +6,21 @@
 {% else %}
 <div id='usage'>{{ i18n('i18n.frimgur', 'Webpage.Main.ShortInstruction') | raw }}</div>
 {% endif %}
+<div id='insert-options'>
+    <h3>{{ i18n('i18n.frimgur', 'Webpage.Main.InsertOptions.Title')}}</h3>
+    <p>{{ i18n('i18n.frimgur', 'Webpage.Main.InsertOptions.Details')}}</p>
+    <div>
+        {{ i18n('i18n.frimgur', 'Webpage.Main.InsertOptions.DefaultDestination')}}
+        <label>
+            <input type='radio' name='default-destination' value='insert-to-chk'{% if insertOptions.insertToChk %} checked{% endif %}>
+            {{ i18n('i18n.frimgur', 'Webpage.Main.InsertOptions.DefaultDestination.CHK')}}
+        </label>
+        <label>
+            <input type='radio' name='default-destination' value='insert-to-ssk'{% if insertOptions.insertToSsk %} checked{% endif %}>
+            {{ i18n('i18n.frimgur', 'Webpage.Main.InsertOptions.DefaultDestination.SSK')}}
+        </label>
+    </div>
+</div>
 <div id='inserted-images'>
 </div>
 <div id='image-template' class='image-placeholder'>

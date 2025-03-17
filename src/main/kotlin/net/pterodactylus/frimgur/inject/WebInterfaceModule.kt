@@ -11,6 +11,7 @@ import java.util.Locale
 import javax.inject.Named
 import javax.inject.Provider
 import net.pterodactylus.frimgur.image.ImageService
+import net.pterodactylus.frimgur.insert.InsertOptionService
 import net.pterodactylus.frimgur.insert.InsertService
 import net.pterodactylus.frimgur.web.ClasspathFileToadlet
 import net.pterodactylus.frimgur.web.DefaultToadletRegistry
@@ -18,6 +19,7 @@ import net.pterodactylus.frimgur.web.DefaultWebInterface
 import net.pterodactylus.frimgur.web.FreenetToadletFactory
 import net.pterodactylus.frimgur.web.ImageDataToadlet
 import net.pterodactylus.frimgur.web.ImageToadlet
+import net.pterodactylus.frimgur.web.InsertOptionsToadlet
 import net.pterodactylus.frimgur.web.ListImagesToadlet
 import net.pterodactylus.frimgur.web.MainPageProcessor
 import net.pterodactylus.frimgur.web.RedirectToadlet
@@ -45,6 +47,7 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 		@Named("ImageData") imageDataToadlet: Toadlet,
 		@Named("Upload") uploadToadlet: Toadlet,
 		@Named("Redirect") redirectToadlet: Toadlet,
+		@Named("InsertOptions") insertOptionsToadlet: Toadlet,
 	): ToadletRegistry =
 		DefaultToadletRegistry(toadletContainer, menuCategoryKey, pluginL10n).apply {
 			addToadlet(ToadletSpec(staticJavascriptToadlet))
@@ -52,6 +55,7 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 			addToadlet(ToadletSpec(listImagesToadlet))
 			addToadlet(ToadletSpec(imageDataToadlet))
 			addToadlet(ToadletSpec(uploadToadlet))
+			addToadlet(ToadletSpec(insertOptionsToadlet))
 			addToadlet(ToadletSpec(mainToadlet, "Navigation.Main.Title", "Navigation.Main.Tooltip"))
 			addToadlet(ToadletSpec(redirectToadlet))
 		}
@@ -62,8 +66,8 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 
 	@Provides
 	@Named("Main")
-	fun getMainToadlet(freenetToadletFactory: FreenetToadletFactory, @Named("FormPassword") formPassword: String, localeProvider: Provider<Locale>, @Named("NodeRequiresConfigChange") nodeRequiresConfigChange: Provider<Boolean>): Toadlet =
-		freenetToadletFactory.createFreenetToadlet(MainPageProcessor(formPassword, localeProvider::get, nodeRequiresConfigChange::get))
+	fun getMainToadlet(freenetToadletFactory: FreenetToadletFactory, insertOptionService: InsertOptionService, @Named("FormPassword") formPassword: String, localeProvider: Provider<Locale>, @Named("NodeRequiresConfigChange") nodeRequiresConfigChange: Provider<Boolean>): Toadlet =
+		freenetToadletFactory.createFreenetToadlet(MainPageProcessor(insertOptionService, formPassword, localeProvider::get, nodeRequiresConfigChange::get))
 
 	@Provides
 	@Named("StaticJavascript")
@@ -98,5 +102,10 @@ class WebInterfaceModule(private val prefix: String, private val menuCategoryKey
 	@Named("Upload")
 	fun getUploadToadlet(imageService: ImageService, insertService: InsertService, highLevelSimpleClient: HighLevelSimpleClient): Toadlet =
 		ImageToadlet(prefix + "image/", imageService, insertService, highLevelSimpleClient)
+
+	@Provides
+	@Named("InsertOptions")
+	fun getInsertOptionsToadlet(insertOptionService: InsertOptionService, highLevelSimpleClient: HighLevelSimpleClient): Toadlet =
+		InsertOptionsToadlet(prefix + "insert-options/", insertOptionService, highLevelSimpleClient)
 
 }

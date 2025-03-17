@@ -104,4 +104,17 @@ fun isHtmlNode(name: Matcher<String>, attributes: Matcher<Iterable<Pair<String, 
 
 }
 
+inline fun <reified T> matches(crossinline predicate: (T) -> Boolean): Matcher<in T> = object : TypeSafeDiagnosingMatcher<T>() {
+
+	override fun matchesSafely(item: T, mismatchDescription: Description) = predicate(item).also { result ->
+		if (!result) {
+			mismatchDescription.appendValue(item).appendText(" did not match predicate")
+		}
+	}
+
+	override fun describeTo(description: Description) =
+		description.appendText("matches predicate").let {}
+
+}
+
 inline fun <reified T> any(): Matcher<T> = any(T::class.java)

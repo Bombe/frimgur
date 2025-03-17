@@ -4,7 +4,9 @@ import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import freenet.client.HighLevelSimpleClient
 import javax.inject.Singleton
+import net.pterodactylus.frimgur.insert.DefaultInsertOptionService
 import net.pterodactylus.frimgur.insert.DefaultInsertService
+import net.pterodactylus.frimgur.insert.InsertOptionService
 import net.pterodactylus.frimgur.insert.InsertService
 
 /**
@@ -14,7 +16,12 @@ class InsertModule : AbstractModule() {
 
 	@Provides
 	@Singleton
-	fun getInsertService(highLevelSimpleClient: HighLevelSimpleClient): InsertService =
-		DefaultInsertService(highLevelSimpleClient)
+	fun getInsertService(insertOptionService: InsertOptionService, highLevelSimpleClient: HighLevelSimpleClient): InsertService =
+		DefaultInsertService(insertOptionService, highLevelSimpleClient)
+
+	@Provides
+	@Singleton
+	fun getInsertOptionService(): InsertOptionService =
+		DefaultInsertOptionService()
 
 }

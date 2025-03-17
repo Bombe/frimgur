@@ -164,12 +164,20 @@ const checkIfOnMacOsAndChangeShortcut = () => {
   }
 }
 
+const setDefaultDestination = changeEvent =>
+    fetch("insert-options/", { method: 'PATCH', body: JSON.stringify({ defaultDestination: (changeEvent.target.value === 'insert-to-ssk' ? "SSK@" : "CHK@") }) })
+
+const addListenersForDefaultInsertOptions = () =>
+    document.querySelectorAll('#insert-options input[type="radio"][name="default-destination"]')
+        .forEach(radioButton => radioButton.addEventListener('change', setDefaultDestination))
+
 window.onload = () => {
   if (!window.isSecureContext) {
     document.querySelector('.not-secure-context').classList.remove('hidden')
   }
   formPassword = document.getElementById('form-password').textContent
   checkIfOnMacOsAndChangeShortcut()
+  addListenersForDefaultInsertOptions()
   populateWithExistingImages()
   addClipboardListener()
 }

@@ -147,14 +147,21 @@ const sendImageDataToServer = (imageBlob) => {
   return fetch('image/', { method: 'POST', body: formData })
 }
 
+const anInputElementHasFocus = () => {
+    const activeElement = document.activeElement
+    return (activeElement.nodeName === 'INPUT') && (activeElement.getAttribute('type') === 'text')
+}
+
 const populateWithExistingImages = () => {
-  fetch('images/')
-    .then(response => response.json())
-    .then(response => {
-      for (const imageMetadata of response) {
-        updatePlaceholderElement(imageMetadata.id, imageMetadata)
-      }
-    })
+    if (!anInputElementHasFocus()) {
+        fetch('images/')
+            .then(response => response.json())
+            .then(response => {
+                for (const imageMetadata of response) {
+                    updatePlaceholderElement(imageMetadata.id, imageMetadata)
+                }
+            })
+    }
 }
 
 const checkIfOnMacOsAndChangeShortcut = () => {
@@ -186,4 +193,5 @@ window.onload = () => {
   addListenersForDefaultInsertOptions()
   populateWithExistingImages()
   addClipboardListener()
+  setInterval(populateWithExistingImages, 20000)
 }

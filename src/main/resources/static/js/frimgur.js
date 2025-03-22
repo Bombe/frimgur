@@ -147,14 +147,21 @@ const sendImageDataToServer = (imageBlob) => {
   return fetch('image/', { method: 'POST', body: formData })
 }
 
+const anInputElementHasFocus = () => {
+    const activeElement = document.activeElement
+    return (activeElement.nodeName === 'INPUT') && (activeElement.getAttribute('type') === 'text')
+}
+
 const populateWithExistingImages = () => {
-  fetch('images/')
-    .then(response => response.json())
-    .then(response => {
-      for (const imageMetadata of response) {
-        updatePlaceholderElement(imageMetadata.id, imageMetadata)
-      }
-    })
+    if (!anInputElementHasFocus()) {
+        fetch('images/')
+            .then(response => response.json())
+            .then(response => {
+                for (const imageMetadata of response) {
+                    updatePlaceholderElement(imageMetadata.id, imageMetadata)
+                }
+            })
+    }
 }
 
 const checkIfOnMacOsAndChangeShortcut = () => {
@@ -164,12 +171,27 @@ const checkIfOnMacOsAndChangeShortcut = () => {
   }
 }
 
+const setDefaultDestination = changeEvent =>
+    fetch("insert-options/", { method: 'PATCH', body: JSON.stringify({ defaultDestination: (changeEvent.target.value === 'insert-to-ssk' ? "SSK@" : "CHK@") }) })
+
+const setDefaultImageFormat = changeEvent =>
+    fetch("insert-options/", { method: 'PATCH', body: JSON.stringify({ defaultImageFormat: (changeEvent.target.value === 'insert-as-jpeg' ? "jpeg" : "png") }) })
+
+const addListenersForDefaultInsertOptions = () => {
+    document.querySelectorAll('#insert-options input[type="radio"][name="default-destination"]')
+        .forEach(radioButton => radioButton.addEventListener('change', setDefaultDestination))
+    document.querySelectorAll('#insert-options input[type="radio"][name="default-image-format"]')
+        .forEach(radioButton => radioButton.addEventListener('change', setDefaultImageFormat))
+}
+
 window.onload = () => {
   if (!window.isSecureContext) {
     document.querySelector('.not-secure-context').classList.remove('hidden')
   }
   formPassword = document.getElementById('form-password').textContent
   checkIfOnMacOsAndChangeShortcut()
+  addListenersForDefaultInsertOptions()
   populateWithExistingImages()
   addClipboardListener()
+  setInterval(populateWithExistingImages, 20000)
 }

@@ -9,12 +9,13 @@ import java.net.URI
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus
 import net.pterodactylus.frimgur.image.ImageStatus.Inserting
+import net.pterodactylus.frimgur.insert.InsertOptionService
 import net.pterodactylus.frimgur.insert.InsertService
 
 /**
  * [Toadlet] that takes an encoded image and stores it together with some metadata.
  */
-class ImageToadlet(private val path: String, private val imageService: ImageService, private val insertService: InsertService, highLevelSimpleClient: HighLevelSimpleClient) : Toadlet(highLevelSimpleClient) {
+class ImageToadlet(private val path: String, private val imageService: ImageService, private val insertService: InsertService, private val insertOptionService: InsertOptionService, highLevelSimpleClient: HighLevelSimpleClient) : Toadlet(highLevelSimpleClient) {
 
 	override fun handleMethodGET(uri: URI, httpRequest: HTTPRequest, toadletContext: ToadletContext) {
 		val imageId = uri.path.removePrefix(path)
@@ -79,16 +80,16 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 		toadletContext.sendReplyHeaders(204, "No Content", null, null, 0)
 	}
 
+	private fun detectTypeFromFilename(filename: String) = when (filename.split(Regex("\\.")).last().lowercase()) {
+		"jpg", "jpeg" -> TypeAndFilename("jpeg", filename)
+		"png" -> TypeAndFilename("png", filename)
+		else -> TypeAndFilename(insertOptionService.defaultImageFormat, "$filename.${insertOptionService.defaultImageFormat.replace("jpeg", "jpg")}")
+	}
+
 	override fun path() = path
 
 }
 
 private fun Int.millions() = this * 1_000_000
-
-private fun detectTypeFromFilename(filename: String) = when (filename.split(Regex("\\.")).last().lowercase()) {
-	"jpg", "jpeg" -> TypeAndFilename("jpeg", filename)
-	"png" -> TypeAndFilename("png", filename)
-	else -> TypeAndFilename("png", "$filename.png")
-}
 
 typealias TypeAndFilename = Pair<String, String>

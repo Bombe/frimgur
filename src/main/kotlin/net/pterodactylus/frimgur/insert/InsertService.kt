@@ -7,7 +7,9 @@ import freenet.client.InsertException
 import freenet.client.async.BaseClientPutter
 import freenet.client.async.ClientContext
 import freenet.client.async.ClientPutCallback
+import freenet.crypt.DummyRandomSource
 import freenet.keys.FreenetURI
+import freenet.keys.InsertableClientSSK
 import freenet.node.RequestClient
 import freenet.node.RequestClientBuilder
 import freenet.node.RequestStarter.MAXIMUM_PRIORITY_CLASS
@@ -54,14 +56,15 @@ interface InsertService {
 /**
  * Default [InsertService] implementation.
  */
-class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleClient) : InsertService {
+class DefaultInsertService(private val insertOptionService: InsertOptionService, private val highLevelSimpleClient: HighLevelSimpleClient) : InsertService {
 
 	override fun insertImage(id: String, data: ByteArray, mimeType: String, filename: String) {
 		val encodedImage = encodeImage(data, mimeType)
-		val insertBlock = InsertBlock(encodedImage.toBucket(), ClientMetadata(mimeType), FreenetURI("CHK@"))
+		val (insertKey, insertFilename) = createInsertKeyAndFilename(filename)
+		val insertBlock = InsertBlock(encodedImage.toBucket(), ClientMetadata(mimeType), insertKey)
 		val insertContext = highLevelSimpleClient.getInsertContext(false)
 		insertStartingListeners.forEach { listener -> listener(id, filename) }
-		highLevelSimpleClient.insert(insertBlock, filename, false, insertContext, object : ClientPutCallback by getEmptyClientPutCallback(requestClient) {
+		highLevelSimpleClient.insert(insertBlock, insertFilename, false, insertContext, object : ClientPutCallback by getEmptyClientPutCallback(requestClient) {
 			override fun onGeneratedURI(freenetURI: FreenetURI, p1: BaseClientPutter) {
 				insertGeneratingUriListeners.forEach { listener -> listener(id, freenetURI.toString()) }
 			}
@@ -74,6 +77,11 @@ class DefaultInsertService(private val highLevelSimpleClient: HighLevelSimpleCli
 				insertFailedListeners.forEach { listener -> listener(id) }
 			}
 		}, MAXIMUM_PRIORITY_CLASS)
+	}
+
+	private fun createInsertKeyAndFilename(filename: String) = when (insertOptionService.defaultInsertDestination) {
+		"SSK@" -> Pair(InsertableClientSSK.createRandom(DummyRandomSource(), filename).insertURI, null)
+		else -> Pair(FreenetURI("CHK@"), filename)
 	}
 
 	private fun encodeImage(data: ByteArray, mimeType: String) = data.imageFormat?.let { originalImageType ->

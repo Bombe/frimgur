@@ -24,7 +24,7 @@ dependencies {
 	testImplementation(platform("org.junit:junit-bom:5.14.1"))
 	testRuntimeOnly(group = "org.junit.platform", name = "junit-platform-launcher")
 	testImplementation(group = "org.jetbrains.kotlin", name = "kotlin-test")
-	testImplementation(group = "org.hamcrest", name = "hamcrest", version = "2.2")
+	testImplementation(group = "org.hamcrest", name = "hamcrest", version = "3.0")
 	testImplementation(group = "org.mockito", name = "mockito-inline", version = "4.11.0")
 	testImplementation(group = "org.mockito.kotlin", name = "mockito-kotlin", version = "4.1.0")
 	testImplementation(group = "com.spotify", name = "hamcrest-jackson", version = "1.3.1")

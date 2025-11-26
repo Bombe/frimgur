@@ -292,6 +292,17 @@ class ImageToadletTest {
 	}
 
 	@Test
+	fun `PATCH request with width in percent will call image service with new width only`() {
+		data class Arguments(val id: String, val mimeType: String?, val width: Int?, val height: Int?)
+		val receivedArguments = mutableListOf<Arguments>()
+		val imageService = createCloningImageServiceThatRecordsArguments(131) { id, mimeType, width, height -> receivedArguments.add(Arguments(id, mimeType, width, height)) }
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"width\":\"50%\"}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/131"), httpRequest, toadletContext)
+		assertThat(receivedArguments.single(), equalTo(Arguments("131", null, 6, null)))
+	}
+
+	@Test
 	fun `PATCH request with width and filename will set the filename before cloning`() {
 		val imageService = recordOrderOfCalls(createCloningImageServiceThatRecordsArguments(125) { _, _, _, _ -> })
 		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
@@ -329,6 +340,17 @@ class ImageToadletTest {
 		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"width\":\"-234\"}".toByteArray()))
 		toadlet.handleMethodPATCH(URI("/path/134"), httpRequest, toadletContext)
 		assertThat(receivedArguments.single(), equalTo(Arguments("134", null, null, null)))
+	}
+
+	@Test
+	fun `PATCH request with height in percent will call image service with new height only`() {
+		data class Arguments(val id: String, val mimeType: String?, val width: Int?, val height: Int?)
+		val receivedArguments = mutableListOf<Arguments>()
+		val imageService = createCloningImageServiceThatRecordsArguments(132) { id, mimeType, width, height -> receivedArguments.add(Arguments(id, mimeType, width, height)) }
+		val toadlet = ImageToadlet("/path/", imageService, insertService, insertOptionService, highLevelSimpleClient)
+		whenever(httpRequest.rawData).thenReturn(ArrayBucket("{\"height\":\"200%\"}".toByteArray()))
+		toadlet.handleMethodPATCH(URI("/path/132"), httpRequest, toadletContext)
+		assertThat(receivedArguments.single(), equalTo(Arguments("132", null, null, 46)))
 	}
 
 	@Test

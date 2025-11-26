@@ -1,11 +1,13 @@
 package net.pterodactylus.frimgur.web
 
+import com.fasterxml.jackson.databind.JsonNode
 import freenet.client.HighLevelSimpleClient
 import freenet.clients.http.Toadlet
 import freenet.clients.http.ToadletContext
 import freenet.support.MultiValueTable
 import freenet.support.api.HTTPRequest
 import java.net.URI
+import javax.swing.Spring.height
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus
 import net.pterodactylus.frimgur.image.ImageStatus.Inserting
@@ -65,8 +67,8 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 			}
 		}
 		if (changes.has("width") || changes.has("height")) {
-			val width = changes.get("width")?.asInt(-1)?.let { if (it <= 0) null else it }
-			val height = changes.get("height")?.asInt(-1)?.let { if (it <= 0) null else it }
+			val width = changes.getNewDimension("width", imageMetadata.width)?.let { if (it <= 0) null else it }
+			val height = changes.getNewDimension("height", imageMetadata.height)?.let { if (it <= 0) null else it }
 			val clonedMetadata = imageService.cloneImage(imageId, null, width, height)
 			toadletContext.sendReplyHeaders(201, "Created", MultiValueTable<String, String>().apply { put("Location", clonedMetadata?.id) }, null, 0)
 			return
@@ -93,3 +95,12 @@ class ImageToadlet(private val path: String, private val imageService: ImageServ
 private fun Int.millions() = this * 1_000_000
 
 typealias TypeAndFilename = Pair<String, String>
+
+private fun JsonNode?.getNewDimension(field: String, oldSize: Int) =
+	this?.get(field)?.asText()?.let { dimension ->
+		if (dimension.endsWith("%")) {
+			(dimension.removeSuffix("%").toDouble() / 100.0 * oldSize).toInt()
+		} else {
+			dimension.toInt()
+		}
+	}

@@ -2,7 +2,7 @@ package net.pterodactylus.frimgur.inject
 
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
-import javax.inject.Singleton
+import jakarta.inject.Singleton
 import net.pterodactylus.frimgur.image.DefaultImageService
 import net.pterodactylus.frimgur.image.ImageService
 

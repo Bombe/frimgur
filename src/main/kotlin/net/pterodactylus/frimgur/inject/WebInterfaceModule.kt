@@ -7,9 +7,9 @@ import freenet.clients.http.PageMaker
 import freenet.clients.http.Toadlet
 import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
+import jakarta.inject.Named
+import jakarta.inject.Provider
 import java.util.Locale
-import javax.inject.Named
-import javax.inject.Provider
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.insert.InsertOptionService
 import net.pterodactylus.frimgur.insert.InsertService

@@ -7,7 +7,7 @@ import freenet.clients.http.PageMaker
 import freenet.clients.http.ToadletContainer
 import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.PluginRespirator
-import javax.inject.Named
+import jakarta.inject.Named
 import net.pterodactylus.frimgur.plugin.Frimgur
 
 /**

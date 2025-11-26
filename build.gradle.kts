@@ -1,5 +1,5 @@
 plugins {
-	id("org.jetbrains.kotlin.jvm") version "1.7.22"
+	id("org.jetbrains.kotlin.jvm") version "2.2.21"
 
 	// 0.13.0 is the latest version still working with Java 8
 	id("com.palantir.git-version") version "0.13.0"

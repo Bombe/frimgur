@@ -14,13 +14,13 @@ repositories {
 }
 
 dependencies {
-	compileOnly(group = "org.freenetproject", name = "fred", version = "0.7.5.1501")
+	compileOnly(group = "org.freenetproject", name = "fred", version = "0.7.5.1503")
 	implementation(kotlin("reflect"))
 	implementation(group = "com.google.inject", name = "guice", version = "5.1.0")
 	implementation(group = "io.pebbletemplates", name = "pebble", version = "3.1.6")
 	implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version = "2.14.1")
 
-	testImplementation(group = "org.freenetproject", name = "fred", version = "0.7.5.1501")
+	testImplementation(group = "org.freenetproject", name = "fred", version = "0.7.5.1503")
 	testImplementation(platform("org.junit:junit-bom:5.12.0"))
 	testRuntimeOnly(group = "org.junit.platform", name = "junit-platform-launcher", version = "1.12.0")
 	testImplementation(group = "org.jetbrains.kotlin", name = "kotlin-test")

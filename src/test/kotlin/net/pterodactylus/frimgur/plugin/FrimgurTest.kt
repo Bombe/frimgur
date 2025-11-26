@@ -16,10 +16,10 @@ import freenet.pluginmanager.FredPluginL10n
 import freenet.pluginmanager.FredPluginThreadless
 import freenet.pluginmanager.FredPluginVersioned
 import freenet.pluginmanager.PluginRespirator
+import jakarta.inject.Named
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
-import javax.inject.Named
 import kotlin.test.Test
 import net.pterodactylus.frimgur.image.ImageService
 import net.pterodactylus.frimgur.image.ImageStatus

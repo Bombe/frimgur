@@ -123,10 +123,19 @@ const getOrCreatePlaceholderElement = (imageId) => {
   const getImageIdFromElement = () => placeholderElement.getAttribute('id').replace(/^image-/, '')
   placeholderElement.querySelector('.image-container .image').src = `image-data/${imageId}`
   placeholderElement.querySelector('button.button-refresh').addEventListener('click', () => refreshElementsForImage(getImageIdFromElement()))
+  placeholderElement.querySelector('.change-width input').addEventListener('change', event => {
+      event.currentTarget.blur()
+      return changeDimension(placeholderElement, getImageIdFromElement(), '.change-width input', 'width')
+  })
   placeholderElement.querySelector('.change-width button').addEventListener('click', () => changeDimension(placeholderElement, getImageIdFromElement(), '.change-width input', 'width'))
+  placeholderElement.querySelector('.change-height input').addEventListener('change', event => {
+      event.currentTarget.blur()
+      return changeDimension(placeholderElement, getImageIdFromElement(), '.change-height input', 'height')
+  })
   placeholderElement.querySelector('.change-height button').addEventListener('click', () => changeDimension(placeholderElement, getImageIdFromElement(), '.change-height input', 'height'))
   placeholderElement.querySelector('.filename input').addEventListener('keypress', keyDownEvent => {
       if (keyDownEvent.code === 'Enter') {
+          keyDownEvent.currentTarget.blur()
           return startInsert(getImageIdFromElement())
       }
   })

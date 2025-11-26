@@ -1,7 +1,7 @@
 package net.pterodactylus.frimgur.test
 
 import com.google.inject.Module
-import javax.inject.Named
+import jakarta.inject.Named
 import org.mockito.Mockito.mock
 
 class Binding<T>(private val c: Class<T>) {

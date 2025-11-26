@@ -18,7 +18,7 @@ dependencies {
 	implementation(kotlin("reflect"))
 	implementation(group = "com.google.inject", name = "guice", version = "7.0.0")
 	implementation(group = "io.pebbletemplates", name = "pebble", version = "3.1.6")
-	implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version = "2.14.1")
+	implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version = "2.20.1")
 
 	testImplementation(group = "org.freenetproject", name = "fred", version = "0.7.5.1503")
 	testImplementation(platform("org.junit:junit-bom:5.14.1"))

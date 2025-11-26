@@ -1,8 +1,7 @@
+import kotlin.text.Charsets.UTF_8
+
 plugins {
 	id("org.jetbrains.kotlin.jvm") version "2.2.21"
-
-	// 0.13.0 is the latest version still working with Java 8
-	id("com.palantir.git-version") version "0.13.0"
 	id("jacoco")
 }
 
@@ -34,16 +33,15 @@ tasks.named<Test>("test") {
 	useJUnitPlatform()
 }
 
-val gitVersion: groovy.lang.Closure<String> by extra
-val versionDetails: groovy.lang.Closure<com.palantir.gradle.gitversion.VersionDetails> by extra
-
 val createVersionProperties by tasks.registering {
 	val versionFile = file("$buildDir/resources/generated-resources/version.properties")
 	outputs.file(versionFile)
 	doLast {
 		versionFile.delete()
-		versionFile.appendText("version: ${gitVersion()}\n")
-		versionFile.appendText("hash: ${versionDetails().gitHashFull}\n")
+		val gitVersion = Runtime.getRuntime().exec(arrayOf("git", "describe", "--tags", "--dirty")).inputStream.readBytes().toString(UTF_8).trim()
+		val gitFullHash = Runtime.getRuntime().exec(arrayOf("git", "rev-parse", "HEAD")).inputStream.readBytes().toString(UTF_8).trim()
+		versionFile.appendText("version: ${gitVersion}\n")
+		versionFile.appendText("hash: ${gitFullHash}\n")
 	}
 }
 

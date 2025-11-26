@@ -27,7 +27,7 @@ dependencies {
 	testImplementation(group = "org.hamcrest", name = "hamcrest", version = "3.0")
 	testImplementation(group = "org.mockito", name = "mockito-inline", version = "4.11.0")
 	testImplementation(group = "org.mockito.kotlin", name = "mockito-kotlin", version = "4.1.0")
-	testImplementation(group = "com.spotify", name = "hamcrest-jackson", version = "1.3.1")
+	testImplementation(group = "com.spotify", name = "hamcrest-jackson", version = "1.3.2")
 }
 
 tasks.named<Test>("test") {

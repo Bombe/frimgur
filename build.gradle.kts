@@ -21,8 +21,8 @@ dependencies {
 	implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version = "2.14.1")
 
 	testImplementation(group = "org.freenetproject", name = "fred", version = "0.7.5.1503")
-	testImplementation(platform("org.junit:junit-bom:5.12.0"))
-	testRuntimeOnly(group = "org.junit.platform", name = "junit-platform-launcher", version = "1.12.0")
+	testImplementation(platform("org.junit:junit-bom:5.14.1"))
+	testRuntimeOnly(group = "org.junit.platform", name = "junit-platform-launcher")
 	testImplementation(group = "org.jetbrains.kotlin", name = "kotlin-test")
 	testImplementation(group = "org.hamcrest", name = "hamcrest", version = "2.2")
 	testImplementation(group = "org.mockito", name = "mockito-inline", version = "4.11.0")
